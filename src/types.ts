@@ -1,4 +1,6 @@
-import { IRouterContext } from "koa-router";
+import { RouterContext } from "koa-router";
+
+import OperationProcessor from "./operation-processor";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -9,13 +11,10 @@ export enum HttpStatusCode {
   InternalServerError = 500
 }
 
-export enum ControllerMethod {
-  GetById,
-  GetAll,
-  Post
+export enum ResourceOperations {
+  Get,
+  Add
 }
-
-export type UserSession = APIResourceAttributes & { id: string };
 
 export type AuthenticatedRequest = {
   headers: {
@@ -23,67 +22,77 @@ export type AuthenticatedRequest = {
   };
 };
 
+export type AuthenticatedContext = RouterContext & { user?: Resource };
+
+export type OperationDecorator = (
+  operationProcessor: OperationProcessor,
+  operationCallback: Function,
+  ...middlewareArguments: any[]
+) => ((...args: any[]) => any);
+
 export type Middleware = (
-  ctx: IRouterContext,
+  ctx: RouterContext,
   next: () => Promise<void>
 ) => Promise<void>;
 
 export type MiddlewareCollection = Middleware[];
 
-export type APIRequestBodyContainer<T = APIResourceAttributes> = {
-  body: APIRequest<T>;
-};
-
 export type StatusCodeMapping = Map<ErrorCode | "default", HttpStatusCode>;
 
 export enum ErrorCode {
-  UnhandledError = "unhandled_error"
+  UnhandledError = "unhandled_error",
+  AccessDenied = "access_denied"
 }
 
 // Generic types for JSONAPI document structure.
 
-export type APIResourceRelationships = {
-  [key in APIResourceType]?: APIDataContainer
+export type ResourceTypeRelationships = {
+  [key: string]: ResourceRelationships;
 };
 
-export type APIResource<T = APIResourceAttributes> = {
-  type: APIResourceType;
+export type ResourceRelationships = {
+  data: ResourceRelationship | ResourceRelationship[];
+};
+
+export type ResourceRelationship = {
+  type: string;
+  id: string;
+};
+
+export type Resource = {
+  type: string;
   id?: string;
-  attributes: T;
-  relationships?: APIResourceRelationships;
+  attributes: {};
+  relationships?: ResourceTypeRelationships;
 };
 
-export type APIResourceCollection<T = APIResourceAttributes> = APIResource<T>[];
-
-export type APIMetadata = {
-  [key: string]: string | number | boolean | APIMetadata;
+export type Metadata = {
+  [key: string]: string | number | boolean | Metadata;
 };
 
-export type APIDataContainer<T = APIResourceAttributes> = {
-  data: APIResource<T> | APIResourceCollection<T>;
+export type JsonApiDocument<
+  ResourceT = Resource,
+  RelatedResourcesT = Resource
+> = {
+  data: ResourceT | ResourceT[];
+  errors?: JsonApiError[];
+  meta?: Metadata;
+  included?: RelatedResourcesT[];
 };
 
-export type APIResponse<T = APIResourceAttributes> = APIDataContainer<T> & {
-  errors?: APIError[];
-  meta?: APIMetadata;
-  included?: APIResourceCollection;
+export type JsonApiErrorDocument<ErrorCodeT = ErrorCode> = {
+  errors?: JsonApiError<ErrorCodeT>[];
+  meta?: Metadata;
 };
 
-export type APIRequest<T = APIResourceAttributes> = {
-  data?: APIResource<T> | APIResourceCollection<T>;
-  meta?: APIMetadata;
+export type JsonApiRequest = {
+  data?: Resource;
+  meta?: Metadata;
 };
 
-export type APIError = {
+export type JsonApiError<ErrorCodeT = ErrorCode> = {
   status: HttpStatusCode;
-  code: ErrorCode;
+  code: ErrorCodeT;
   title: string;
   detail: string;
-};
-
-// Exposed models.
-export type APIResourceType = "resource";
-
-export type APIResourceAttributes = {
-  [key: string]: string | number | boolean | undefined;
 };
