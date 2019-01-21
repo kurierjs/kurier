@@ -1,6 +1,15 @@
-import Controller from "./controller";
-import Router from "./router";
+import Authorize from "./decorators/authorize";
+import decorateWith from "./decorators/decorator";
+import OperationProcessor from "./operation-processor";
+import ResourceRegistry from "./resource-registry";
 
-export { Controller, Router };
+export {
+  // Core objects
+  OperationProcessor,
+  ResourceRegistry,
+  // Decorators API
+  decorateWith,
+  Authorize
+};
 
 export * from "./types";

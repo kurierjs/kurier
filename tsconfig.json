@@ -3,6 +3,8 @@
     "target": "esnext",
     "module": "commonjs",
     "outDir": "dist",
-    "allowSyntheticDefaultImports": true
+    "declarationDir": "dist",
+    "allowSyntheticDefaultImports": true,
+    "declaration": true
   }
 }
