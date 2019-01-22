@@ -105,7 +105,7 @@ export type Meta = {};
 
 export type Operation = {
   op: string;
-  data: Resource | Resource[];
+  data: Resource;
   included: Resource[];
   ref: {
     type: string;

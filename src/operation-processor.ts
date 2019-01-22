@@ -19,13 +19,9 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
 
   protected async get?(type: string, filters: {}): Promise<Resource[]>;
 
-  protected async remove?(data: Resource | Resource[]): Promise<boolean>;
+  protected async remove?(data: Resource): Promise<boolean>;
 
-  protected async update?(
-    data: Resource | Resource[]
-  ): Promise<Resource | Resource[]>;
+  protected async update?(data: Resource): Promise<Resource>;
 
-  protected async add?(
-    data: Resource | Resource[]
-  ): Promise<Resource | Resource[]>;
+  protected async add?(data: Resource): Promise<Resource>;
 }
