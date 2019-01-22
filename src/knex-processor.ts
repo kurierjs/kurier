@@ -27,15 +27,15 @@ export default class KnexProcessor<
       .select();
   }
 
-  async remove(filters = {}, ctx: RouterContext) {
+  async remove(id: string | undefined, ctx: RouterContext) {
     return await this.knex(this.tableName)
-      .where(this.filtersToKnex(filters))
+      .where({ id })
       .del();
   }
 
-  async update(filters = {}, data: ResourceT, ctx: RouterContext) {
+  async update(id: string | undefined, data: ResourceT, ctx: RouterContext) {
     return await this.knex(this.tableName)
-      .where(this.filtersToKnex(filters))
+      .where({ id })
       .update(data.attributes);
   }
 
