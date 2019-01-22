@@ -28,7 +28,7 @@ export type OperationDecorator = (
   operationProcessor: OperationProcessor,
   operationCallback: Function,
   ...middlewareArguments: any[]
-) => ((...args: any[]) => any);
+) => (...args: any[]) => any;
 
 export type Middleware = (
   ctx: RouterContext,
@@ -95,4 +95,31 @@ export type JsonApiError<ErrorCodeT = ErrorCode> = {
   code: ErrorCodeT;
   title: string;
   detail: string;
+};
+
+export type Application = {};
+
+export type Links = {};
+
+export type Meta = {};
+
+export type Operation = {
+  op: string;
+  data: Resource | Resource[];
+  included: Resource[];
+  ref: {
+    type: string;
+    id: string;
+    lid: string;
+    relationship: string;
+  };
+  params: {
+    include: string[];
+    sort: {};
+    filter: { [key: string]: string };
+    page: {};
+    fields: { [key: string]: string[] };
+  };
+  links: Links;
+  meta: Meta;
 };
