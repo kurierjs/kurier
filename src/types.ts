@@ -1,6 +1,7 @@
 import { RouterContext } from "koa-router";
 
 import OperationProcessor from "./operation-processor";
+import Resource from "./resource";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -59,13 +60,6 @@ export type ResourceRelationship = {
   id: string;
 };
 
-export type Resource = {
-  type: string;
-  id?: string;
-  attributes: {};
-  relationships?: ResourceTypeRelationships;
-};
-
 export type Metadata = {
   [key: string]: string | number | boolean | Metadata;
 };
@@ -120,4 +114,8 @@ export type Operation = {
   };
   links: Links;
   meta: Meta;
+};
+
+export type OperationResponse = {
+  data: Resource | Resource[] | null;
 };

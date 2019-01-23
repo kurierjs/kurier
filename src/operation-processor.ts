@@ -1,13 +1,14 @@
-import { Operation, Resource } from "./types";
+import Resource from "./resource";
+import { Operation } from "./types";
 
 export default abstract class OperationProcessor<ResourceT = Resource> {
   execute(op: Operation) {
-    const type: string = op.ref.type;
+    const type: string = op.op;
 
     if (type === "get") {
       return this.get(
         op.ref.type,
-        op.ref.id ? { id: op.ref.id } : op.params.filter
+        op.ref.id ? { id: op.ref.id } : (op.params && op.params.filter) || {}
       );
     }
 
@@ -26,7 +27,7 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
 
   protected async get?(type: string, filters: {}): Promise<Resource[]>;
 
-  protected async remove?(data: Resource): Promise<boolean>;
+  protected async remove?(data: Resource): Promise<null>;
 
   protected async update?(data: Resource): Promise<Resource>;
 

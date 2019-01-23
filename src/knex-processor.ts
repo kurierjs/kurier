@@ -1,7 +1,7 @@
 import * as Knex from "knex";
 
 import OperationProcessor from "./operation-processor";
-import { Resource } from "./types";
+import Resource from "./resource";
 
 export default class KnexProcessor<
   ResourceT extends Resource
@@ -22,7 +22,7 @@ export default class KnexProcessor<
       .select();
   }
 
-  async remove(data: Resource): Promise<boolean> {
+  async remove(data: Resource): Promise<null> {
     const tableName = this.typeToTableName(data.type);
 
     return await this.knex(tableName)

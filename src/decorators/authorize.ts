@@ -1,5 +1,5 @@
 import OperationProcessor from "../operation-processor";
-import { AuthenticatedContext, ErrorCode, Resource } from "../types";
+import { AuthenticatedContext, ErrorCode } from "../types";
 
 import decorateWith, { getArgument } from "./decorator";
 
