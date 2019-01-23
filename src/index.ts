@@ -1,3 +1,4 @@
+import Application from "./application";
 import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
 import KnexProcessor from "./knex-processor";
@@ -6,9 +7,10 @@ import ResourceRegistry from "./resource-registry";
 
 export {
   // Core objects
-  OperationProcessor,
+  Application,
   KnexProcessor,
   ResourceRegistry,
+  OperationProcessor,
   // Decorators API
   decorateWith,
   Authorize

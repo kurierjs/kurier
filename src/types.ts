@@ -97,8 +97,6 @@ export type JsonApiError<ErrorCodeT = ErrorCode> = {
   detail: string;
 };
 
-export type Application = {};
-
 export type Links = {};
 
 export type Meta = {};
