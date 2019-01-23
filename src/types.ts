@@ -119,3 +119,15 @@ export type Operation = {
 export type OperationResponse = {
   data: Resource | Resource[] | null;
 };
+
+export type ResourceConstructor = {
+  new ({
+    id,
+    attributes,
+    relationships
+  }: {
+    id?: string;
+    attributes?: {};
+    relationships?: ResourceTypeRelationships;
+  }): Resource;
+};

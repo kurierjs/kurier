@@ -1,20 +1,23 @@
 import OperationProcessor from "./operation-processor";
 import Resource from "./resource";
-import { Operation, OperationResponse } from "./types";
+import { Operation, OperationResponse, ResourceConstructor } from "./types";
 
 export default class Application {
-  public types: Function[];
+  public types: ResourceConstructor[];
   public processors: OperationProcessor[];
   public defaultProcessor: OperationProcessor;
 
   constructor(settings: {
-    types?: Function[];
+    types?: ResourceConstructor[];
     processors?: OperationProcessor[];
     defaultProcessor: OperationProcessor;
   }) {
     this.types = settings.types || [];
     this.processors = settings.processors || [];
     this.defaultProcessor = settings.defaultProcessor;
+
+    this.defaultProcessor.app = this;
+    this.processors.forEach(processor => (processor.app = this));
   }
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {

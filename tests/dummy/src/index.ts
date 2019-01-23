@@ -10,7 +10,7 @@ const app = new Application({
   defaultProcessor: new KnexProcessor({
     client: "sqlite3",
     connection: {
-      file: ":memory:"
+      filename: "./tests/dummy/db/dev.sqlite3"
     },
     useNullAsDefault: true
   })
