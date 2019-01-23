@@ -1,4 +1,3 @@
-import Application from "./application";
 import { Operation, Resource } from "./types";
 
 export default abstract class OperationProcessor<ResourceT = Resource> {
@@ -6,13 +5,22 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
     const type: string = op.ref.type;
 
     if (type === "get") {
-      this.get(op.ref.type, op.ref.id ? { id: op.ref.id } : op.params.filter);
-    } else if (type === "remove") {
-      this.remove(op.data);
-    } else if (type === "update") {
-      this.update(op.data);
-    } else if (type === "add") {
-      this.add(op.data);
+      return this.get(
+        op.ref.type,
+        op.ref.id ? { id: op.ref.id } : op.params.filter
+      );
+    }
+
+    if (type === "remove") {
+      return this.remove(op.data);
+    }
+
+    if (type === "update") {
+      return this.update(op.data);
+    }
+
+    if (type === "add") {
+      return this.add(op.data);
     }
   }
 

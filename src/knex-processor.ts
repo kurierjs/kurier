@@ -1,6 +1,5 @@
 import * as Knex from "knex";
 
-import Application from "./application";
 import OperationProcessor from "./operation-processor";
 import { Resource } from "./types";
 

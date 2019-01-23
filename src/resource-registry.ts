@@ -17,7 +17,7 @@ export default class ResourceRegistry {
     resourceName: string,
     operationProcessorConstructor: OperationProcessorConstructor
   ) {
-    new operationProcessorConstructor(this.router, resourceName);
+    new operationProcessorConstructor();
     return this;
   }
 
