@@ -24,9 +24,9 @@ export default function jsonApiKoa(app: Application) {
 }
 
 function convertHttpRequestToOperations(ctx: Context) {
-  if (ctx.method === "GET") {
-    const [, type, id] = ctx.url.split("/");
+  const [, type, id] = ctx.url.split("/");
 
+  if (ctx.method === "GET") {
     return [
       {
         op: "get",
@@ -37,13 +37,53 @@ function convertHttpRequestToOperations(ctx: Context) {
       } as Operation
     ];
   }
+
+  if (ctx.method === "POST") {
+    return [
+      {
+        op: "add",
+        ref: {
+          id,
+          type
+        },
+        data: ctx.request.body.data
+      } as Operation
+    ];
+  }
+
+  if (ctx.method === "DELETE") {
+    return [
+      {
+        op: "remove",
+        ref: {
+          id,
+          type
+        }
+      } as Operation
+    ];
+  }
+
+  if (ctx.method === "PATCH" || ctx.method === "PUT") {
+    return [
+      {
+        op: "update",
+        ref: {
+          id,
+          type
+        },
+        data: ctx.request.body.data
+      } as Operation
+    ];
+  }
 }
 
 function convertOperationsResponsesToHttpResponse(
   ctx: Context,
   operations: OperationResponse[]
 ) {
-  if (ctx.method === "GET") {
+  const responseMethods = ["GET", "POST", "PATCH", "PUT"];
+
+  if (responseMethods.includes(ctx.method)) {
     const { data } = operations[0];
     return { data } as JsonApiDocument;
   }

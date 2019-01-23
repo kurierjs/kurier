@@ -4,7 +4,7 @@ import User from "../tests/dummy/src/resources/user/resource";
 
 import OperationProcessor from "./operation-processor";
 import Resource from "./resource";
-import { ResourceConstructor } from "./types";
+import { Operation, ResourceConstructor } from "./types";
 
 export default class KnexProcessor<
   ResourceT extends ResourceConstructor
@@ -17,7 +17,7 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
-  private convertToResources(type, records: []) {
+  private convertToResources(type: string, records: any[]) {
     return records.map(record => {
       const id = record["id"];
       delete record["id"];
@@ -38,28 +38,38 @@ export default class KnexProcessor<
     return this.convertToResources(type, records);
   }
 
-  async remove(data: Resource): Promise<null> {
-    const tableName = this.typeToTableName(data.type);
+  async remove(op: Operation): Promise<null> {
+    const tableName = this.typeToTableName(op.ref.type);
 
-    const a = await this.knex(tableName)
-      .where({ id: data.id })
-      .del();
-
-    return a;
+    return this.knex(tableName)
+      .where({ id: op.ref.id })
+      .del()
+      .then(() => null);
   }
 
   async update(data: Resource): Promise<Resource> {
     const tableName = this.typeToTableName(data.type);
 
-    return await this.knex(tableName)
+    await this.knex(tableName)
       .where({ id: data.id })
       .update(data.attributes);
+
+    const records = await this.knex(tableName)
+      .where({ id: data.id })
+      .select();
+
+    return this.convertToResources(data.type, records)[0];
   }
 
   async add(data: Resource): Promise<Resource> {
     const tableName = this.typeToTableName(data.type);
 
-    return await this.knex(tableName).insert(data.attributes);
+    const [id] = await this.knex(tableName).insert(data.attributes);
+    const records = await this.knex(tableName)
+      .where({ id })
+      .select();
+
+    return this.convertToResources(data.type, records)[0];
   }
 
   private typeToTableName(type: string): string {

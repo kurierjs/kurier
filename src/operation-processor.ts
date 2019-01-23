@@ -20,7 +20,7 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
     }
 
     if (action === "remove") {
-      return this.remove(op.data);
+      return this.remove(op);
     }
 
     if (action === "update") {
@@ -40,7 +40,7 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
 
   protected async get?(type: string, filters: {}): Promise<Resource[]>;
 
-  protected async remove?(data: Resource): Promise<null>;
+  protected async remove?(op: Operation): Promise<null>;
 
   protected async update?(data: Resource): Promise<Resource>;
 
