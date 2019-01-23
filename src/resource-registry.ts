@@ -3,7 +3,7 @@ import KoaRouter from "koa-router";
 import OperationProcessor from "./operation-processor";
 
 type OperationProcessorConstructor = {
-  new (router: KoaRouter, resourceName: string): OperationProcessor;
+  new (): OperationProcessor;
 };
 
 export default class ResourceRegistry {

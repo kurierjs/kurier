@@ -1,15 +1,16 @@
 import * as Knex from "knex";
 
+import Application from "./application";
 import OperationProcessor from "./operation-processor";
-import { Application, Resource } from "./types";
+import { Resource } from "./types";
 
 export default class KnexProcessor<
   ResourceT extends Resource
 > extends OperationProcessor<ResourceT> {
   private knex: any;
 
-  constructor(public app: Application, public knexOptions = {}) {
-    super(app);
+  constructor(public knexOptions = {}) {
+    super();
 
     this.knex = Knex(knexOptions);
   }

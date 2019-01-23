@@ -1,8 +1,7 @@
-import { Application, Operation, Resource } from "./types";
+import Application from "./application";
+import { Operation, Resource } from "./types";
 
 export default abstract class OperationProcessor<ResourceT = Resource> {
-  constructor(public app: Application) {}
-
   execute(op: Operation) {
     const type: string = op.ref.type;
 
