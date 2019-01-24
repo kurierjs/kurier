@@ -1,6 +1,8 @@
+import * as camelize from "camelize";
 import { Context } from "koa";
 import * as koaBodyParser from "koa-bodyparser";
 import * as compose from "koa-compose";
+import * as pluralize from "pluralize";
 
 import Application from "./application";
 import { JsonApiDocument, Operation, OperationResponse } from "./types";
@@ -28,7 +30,9 @@ export default function jsonApiKoa(app: Application) {
 }
 
 function convertHttpRequestToOperations(ctx: Context) {
-  const [, type, id] = ctx.url.split("/");
+  const parts = ctx.url.split("/");
+  const type = pluralize.singular(camelize(parts[1].toLowerCase()));
+  const id = parts[2];
 
   if (ctx.method === "GET") {
     return [

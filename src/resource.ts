@@ -1,3 +1,5 @@
+import * as camelize from "camelize";
+
 import { ResourceTypeRelationships } from "./types";
 
 export default abstract class Resource {
@@ -15,7 +17,7 @@ export default abstract class Resource {
     attributes?: {};
     relationships?: ResourceTypeRelationships;
   }) {
-    this.type = this.constructor.name;
+    this.type = camelize(this.constructor.name.toLowerCase());
 
     this.id = id;
     this.attributes = attributes || {};
