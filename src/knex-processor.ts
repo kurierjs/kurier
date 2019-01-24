@@ -1,10 +1,8 @@
 import * as Knex from "knex";
 
-import User from "../tests/dummy/src/resources/user/resource";
-
 import OperationProcessor from "./operation-processor";
 import Resource from "./resource";
-import { Operation, ResourceConstructor } from "./types";
+import { KnexRecord, Operation, ResourceConstructor } from "./types";
 
 export default class KnexProcessor<
   ResourceT extends ResourceConstructor
@@ -17,7 +15,7 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
-  private convertToResources(type: string, records: any[]) {
+  private convertToResources(type: string, records: KnexRecord[]) {
     return records.map(record => {
       const id = record["id"];
       delete record["id"];
@@ -31,7 +29,7 @@ export default class KnexProcessor<
   async get(type: string, filters = {}): Promise<Resource[]> {
     const tableName = this.typeToTableName(type);
 
-    const records = await this.knex(tableName)
+    const records: KnexRecord[] = await this.knex(tableName)
       .where(this.filtersToKnex(filters))
       .select();
 
@@ -54,7 +52,7 @@ export default class KnexProcessor<
       .where({ id: data.id })
       .update(data.attributes);
 
-    const records = await this.knex(tableName)
+    const records: KnexRecord[] = await this.knex(tableName)
       .where({ id: data.id })
       .select();
 
@@ -65,7 +63,7 @@ export default class KnexProcessor<
     const tableName = this.typeToTableName(data.type);
 
     const [id] = await this.knex(tableName).insert(data.attributes);
-    const records = await this.knex(tableName)
+    const records: KnexRecord[] = await this.knex(tableName)
       .where({ id })
       .select();
 

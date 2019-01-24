@@ -131,3 +131,7 @@ export type ResourceConstructor = {
     relationships?: ResourceTypeRelationships;
   }): Resource;
 };
+
+export type KnexRecord = {
+  id: string;
+};
