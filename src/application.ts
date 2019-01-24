@@ -39,10 +39,10 @@ export default class Application {
   }
 
   private buildOperationResponse(
-    data: Resource | Resource[]
+    data: Resource | Resource[] | void
   ): OperationResponse {
     return {
-      data
+      data: data || null
     };
   }
 }

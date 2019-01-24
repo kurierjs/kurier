@@ -40,7 +40,7 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
 
   protected async get?(type: string, filters: {}): Promise<Resource[]>;
 
-  protected async remove?(op: Operation): Promise<null>;
+  protected async remove?(op: Operation): Promise<void>;
 
   protected async update?(data: Resource): Promise<Resource>;
 

@@ -36,13 +36,13 @@ export default class KnexProcessor<
     return this.convertToResources(type, records);
   }
 
-  async remove(op: Operation): Promise<null> {
+  async remove(op: Operation): Promise<void> {
     const tableName = this.typeToTableName(op.ref.type);
 
-    return this.knex(tableName)
+    return await this.knex(tableName)
       .where({ id: op.ref.id })
       .del()
-      .then(() => null);
+      .then(() => undefined);
   }
 
   async update(data: Resource): Promise<Resource> {
