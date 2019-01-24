@@ -1,5 +1,4 @@
 import * as Koa from "koa";
-import * as koaBodyParser from "koa-bodyparser";
 
 import { Application, jsonApiKoa, KnexProcessor } from "./jsonapi-ts";
 import User from "./resources/user/resource";
@@ -18,7 +17,6 @@ const app = new Application({
 
 const koa = new Koa();
 
-koa.use(koaBodyParser());
 koa.use(jsonApiKoa(app));
 koa.listen(3000);
 

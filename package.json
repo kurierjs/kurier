@@ -28,6 +28,7 @@
     "knex": "~0.16.3",
     "koa": "^2.6.2",
     "koa-bodyparser": "^4.2.1",
+    "koa-compose": "^4.1.0",
     "koa-router": "^7.4.0",
     "logepi": "^1.0.5",
     "pluralize": "^7.0.0",

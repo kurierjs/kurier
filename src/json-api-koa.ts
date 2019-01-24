@@ -1,4 +1,6 @@
 import { Context } from "koa";
+import * as koaBodyParser from "koa-bodyparser";
+import * as compose from "koa-compose";
 
 import Application from "./application";
 import { JsonApiDocument, Operation, OperationResponse } from "./types";
@@ -6,7 +8,7 @@ import { JsonApiDocument, Operation, OperationResponse } from "./types";
 export default function jsonApiKoa(app: Application) {
   const URL_REGEX = new RegExp(app.types.map(t => t.name).join("|"), "i");
 
-  return async (ctx: Context, next: Function) => {
+  const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     if (ctx.url.match(URL_REGEX) && app.types.length) {
       const ops: Operation[] = convertHttpRequestToOperations(ctx);
       const result: OperationResponse[] = await app.executeOperations(ops);
@@ -21,6 +23,8 @@ export default function jsonApiKoa(app: Application) {
 
     await next();
   };
+
+  return compose([koaBodyParser(), jsonApiKoa]);
 }
 
 function convertHttpRequestToOperations(ctx: Context) {
