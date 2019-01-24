@@ -91,6 +91,14 @@ export type JsonApiError<ErrorCodeT = ErrorCode> = {
   detail: string;
 };
 
+export type JsonApiParams = {
+  include?: string[];
+  sort?: string[];
+  filter?: { [key: string]: string };
+  page?: { [key: string]: string[] };
+  fields?: { [key: string]: string[] };
+};
+
 export type Links = {};
 
 export type Meta = {};
@@ -105,13 +113,7 @@ export type Operation = {
     lid: string;
     relationship: string;
   };
-  params: {
-    include: string[];
-    sort: {};
-    filter: { [key: string]: string };
-    page: {};
-    fields: { [key: string]: string[] };
-  };
+  params: JsonApiParams;
   links: Links;
   meta: Meta;
 };

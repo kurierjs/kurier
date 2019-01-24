@@ -6,6 +6,7 @@ import * as pluralize from "pluralize";
 
 import Application from "./application";
 import { JsonApiDocument, Operation, OperationResponse } from "./types";
+import { parse } from "./utils/json-api-params";
 
 export default function jsonApiKoa(app: Application) {
   const URL_REGEX = new RegExp(app.types.map(t => t.name).join("|"), "i");
@@ -42,12 +43,10 @@ function convertHttpRequestToOperation(ctx: Context): Operation {
     DELETE: "remove"
   };
 
-  const op = opMap[ctx.method];
-
   return {
-    op,
+    op: opMap[ctx.method],
+    params: parse(ctx.href),
     ref: { id, type },
-    params: ctx.query,
     data: ctx.request.body.data
   } as Operation;
 }
