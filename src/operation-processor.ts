@@ -9,27 +9,9 @@ import { Operation, ResourceConstructor } from "./types";
 export default abstract class OperationProcessor<ResourceT = Resource> {
   public app: Application;
 
-  execute(op: Operation) {
+  execute(op: Operation): Promise<Resource | Resource[] | void> {
     const action: string = op.op;
-
-    if (action === "get") {
-      return this.get(
-        op.ref.type,
-        op.ref.id ? { id: op.ref.id } : (op.params && op.params.filter) || {}
-      );
-    }
-
-    if (action === "remove") {
-      return this.remove(op);
-    }
-
-    if (action === "update") {
-      return this.update(op.data);
-    }
-
-    if (action === "add") {
-      return this.add(op.data);
-    }
+    return this[op.op](op);
   }
 
   protected resourceFor(type: string = ""): ResourceConstructor {
@@ -38,11 +20,11 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
     });
   }
 
-  protected async get?(type: string, filters: {}): Promise<Resource[]>;
+  protected async get?(op: Operation): Promise<Resource[]>;
 
   protected async remove?(op: Operation): Promise<void>;
 
-  protected async update?(data: Resource): Promise<Resource>;
+  protected async update?(op: Operation): Promise<Resource>;
 
-  protected async add?(data: Resource): Promise<Resource>;
+  protected async add?(op: Operation): Promise<Resource>;
 }

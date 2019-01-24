@@ -1,4 +1,5 @@
 import * as Knex from "knex";
+import * as pluralize from "pluralize";
 
 import OperationProcessor from "./operation-processor";
 import Resource from "./resource";
@@ -26,8 +27,10 @@ export default class KnexProcessor<
     });
   }
 
-  async get(type: string, filters = {}): Promise<Resource[]> {
+  async get(op: Operation): Promise<Resource[]> {
+    const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
+    const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(this.filtersToKnex(filters))
@@ -45,36 +48,42 @@ export default class KnexProcessor<
       .then(() => undefined);
   }
 
-  async update(data: Resource): Promise<Resource> {
-    const tableName = this.typeToTableName(data.type);
+  async update(op: Operation): Promise<Resource> {
+    const { id, type } = op.ref;
+    const tableName = this.typeToTableName(type);
 
     await this.knex(tableName)
-      .where({ id: data.id })
-      .update(data.attributes);
+      .where({ id })
+      .update(op.data.attributes);
 
-    const records: KnexRecord[] = await this.knex(tableName)
-      .where({ id: data.id })
-      .select();
-
-    return this.convertToResources(data.type, records)[0];
-  }
-
-  async add(data: Resource): Promise<Resource> {
-    const tableName = this.typeToTableName(data.type);
-
-    const [id] = await this.knex(tableName).insert(data.attributes);
     const records: KnexRecord[] = await this.knex(tableName)
       .where({ id })
       .select();
 
-    return this.convertToResources(data.type, records)[0];
+    return this.convertToResources(type, records)[0];
+  }
+
+  async add(op: Operation): Promise<Resource> {
+    const { type } = op.ref;
+    const tableName = this.typeToTableName(type);
+
+    const [id] = await this.knex(tableName).insert(op.data.attributes);
+    const records: KnexRecord[] = await this.knex(tableName)
+      .where({ id })
+      .select();
+
+    return this.convertToResources(type, records)[0];
   }
 
   private typeToTableName(type: string): string {
-    return type;
+    return pluralize(type);
   }
 
   private filtersToKnex(filters: {}): {} {
+    Object.keys(filters).forEach(
+      key => filters[key] === undefined && delete filters[key]
+    );
+
     return filters;
   }
 }
