@@ -11,10 +11,10 @@ export default function jsonApiKoa(app: Application) {
   const URL_REGEX = new RegExp(app.types.map(t => t.name).join("|"), "i");
 
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
-    if (ctx.url.match(URL_REGEX) && app.types.length) {
-      const ops: Operation[] = convertHttpRequestToOperations(ctx);
-      const result: OperationResponse[] = await app.executeOperations(ops);
-      ctx.body = convertOperationsResponsesToHttpResponse(ctx, result);
+    if (ctx.path.match(URL_REGEX) && app.types.length) {
+      const op: Operation = convertHttpRequestToOperation(ctx);
+      const results: OperationResponse[] = await app.executeOperations([op]);
+      ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
     } else if (ctx.url.match("/bulk")) {
       return {
         operations: await app.executeOperations(
@@ -29,70 +29,36 @@ export default function jsonApiKoa(app: Application) {
   return compose([koaBodyParser(), jsonApiKoa]);
 }
 
-function convertHttpRequestToOperations(ctx: Context) {
-  const parts = ctx.url.split("/");
+function convertHttpRequestToOperation(ctx: Context): Operation {
+  const parts = ctx.path.split("/");
   const type = pluralize.singular(camelize(parts[1].toLowerCase()));
-  const id = parts[2];
+  const id = parts[2] || undefined;
 
-  if (ctx.method === "GET") {
-    return [
-      {
-        op: "get",
-        ref: {
-          id,
-          type
-        }
-      } as Operation
-    ];
-  }
+  const opMap = {
+    GET: "get",
+    POST: "add",
+    PATCH: "update",
+    PUT: "update",
+    DELETE: "remove"
+  };
 
-  if (ctx.method === "POST") {
-    return [
-      {
-        op: "add",
-        ref: {
-          id,
-          type
-        },
-        data: ctx.request.body.data
-      } as Operation
-    ];
-  }
+  const op = opMap[ctx.method];
 
-  if (ctx.method === "DELETE") {
-    return [
-      {
-        op: "remove",
-        ref: {
-          id,
-          type
-        }
-      } as Operation
-    ];
-  }
-
-  if (ctx.method === "PATCH" || ctx.method === "PUT") {
-    return [
-      {
-        op: "update",
-        ref: {
-          id,
-          type
-        },
-        data: ctx.request.body.data
-      } as Operation
-    ];
-  }
+  return {
+    op,
+    ref: { id, type },
+    params: ctx.query,
+    data: ctx.request.body.data
+  } as Operation;
 }
 
-function convertOperationsResponsesToHttpResponse(
+function convertOperationResponseToHttpResponse(
   ctx: Context,
-  operations: OperationResponse[]
+  operation: OperationResponse
 ) {
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(ctx.method)) {
-    const { data } = operations[0];
-    return { data } as JsonApiDocument;
+    return { data: operation.data } as JsonApiDocument;
   }
 }
