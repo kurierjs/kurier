@@ -21,7 +21,7 @@ export default class Application {
   }
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
-    return await Promise.all(
+    return await this.createTransaction(
       ops.map(async op => {
         const processor = this.processorFor(op);
         const result = await processor.execute(op);
@@ -30,13 +30,19 @@ export default class Application {
     );
   }
 
+  private async createTransaction(ops: Promise<OperationResponse>[]) {
+    return await Promise.all(ops);
+  }
+
   private processorFor(op: Operation): OperationProcessor {
     return this.defaultProcessor;
   }
 
-  private buildOperationResponse(data: Resource | Resource[]) {
+  private buildOperationResponse(
+    data: Resource | Resource[]
+  ): OperationResponse {
     return {
       data
-    } as OperationResponse;
+    };
   }
 }
