@@ -1,17 +1,25 @@
 import * as camelize from "camelize";
+import { decode } from "jsonwebtoken";
 import { Context } from "koa";
 import * as koaBodyParser from "koa-bodyparser";
 import * as compose from "koa-compose";
 import * as pluralize from "pluralize";
 
 import Application from "./application";
-import { JsonApiDocument, Operation, OperationResponse } from "./types";
+import {
+  AuthenticatedRequest,
+  JsonApiDocument,
+  Operation,
+  OperationResponse
+} from "./types";
 import { parse } from "./utils/json-api-params";
 
 export default function jsonApiKoa(app: Application) {
   const URL_REGEX = new RegExp(app.types.map(t => t.name).join("|"), "i");
 
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
+    await authenticate(app, ctx);
+
     if (ctx.path.match(URL_REGEX) && app.types.length) {
       const op: Operation = convertHttpRequestToOperation(ctx);
       const results: OperationResponse[] = await app.executeOperations([op]);
@@ -28,6 +36,31 @@ export default function jsonApiKoa(app: Application) {
   };
 
   return compose([koaBodyParser(), jsonApiKoa]);
+}
+
+async function authenticate(app: Application, ctx: Context) {
+  const authRequest = ctx.request as AuthenticatedRequest;
+  const authHeader = authRequest.headers.authorization;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const [, token] = authHeader.split(" ");
+    const tokenPayload = decode(token);
+    const userId = tokenPayload["id"];
+
+    if (!userId) return;
+
+    const [user] = await app.executeOperations([
+      {
+        op: "get",
+        ref: {
+          type: "user",
+          id: userId
+        }
+      } as Operation
+    ]);
+
+    app.user = user.data[0];
+  }
 }
 
 function convertHttpRequestToOperation(ctx: Context): Operation {

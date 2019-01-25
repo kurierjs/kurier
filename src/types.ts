@@ -47,6 +47,10 @@ export enum ErrorCode {
 
 // Generic types for JSONAPI document structure.
 
+export type ResourceTypeAttributes = {
+  [key: string]: string | number | boolean;
+};
+
 export type ResourceTypeRelationships = {
   [key: string]: ResourceRelationships;
 };

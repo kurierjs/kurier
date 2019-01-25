@@ -5,6 +5,9 @@
     "outDir": "dist",
     "declarationDir": "dist",
     "allowSyntheticDefaultImports": true,
-    "declaration": true
-  }
+    "declaration": true,
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

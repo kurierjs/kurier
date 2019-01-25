@@ -6,15 +6,17 @@ export default class Application {
   public types: ResourceConstructor[];
   public processors: OperationProcessor[];
   public defaultProcessor: OperationProcessor;
+  public user: Resource;
 
   constructor(settings: {
     types?: ResourceConstructor[];
     processors?: OperationProcessor[];
-    defaultProcessor: OperationProcessor;
+    defaultProcessor?: OperationProcessor;
   }) {
     this.types = settings.types || [];
     this.processors = settings.processors || [];
-    this.defaultProcessor = settings.defaultProcessor;
+    this.defaultProcessor =
+      settings.defaultProcessor || new OperationProcessor();
 
     this.defaultProcessor.app = this;
     this.processors.forEach(processor => (processor.app = this));

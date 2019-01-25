@@ -6,16 +6,17 @@ import Application from "./application";
 import Resource from "./resource";
 import { Operation, ResourceConstructor } from "./types";
 
-export default abstract class OperationProcessor<ResourceT = Resource> {
+export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
+  public resourceClass: ResourceConstructor;
 
   shouldHandle(op: Operation) {
-    return !!op.ref.type;
+    return op.ref.type === this.resourceClass.name.toLowerCase();
   }
 
   execute(op: Operation): Promise<Resource | Resource[] | void> {
     const action: string = op.op;
-    return this[op.op](op);
+    return this[action] && this[action].call(this, op);
   }
 
   protected resourceFor(type: string = ""): ResourceConstructor {
@@ -24,11 +25,19 @@ export default abstract class OperationProcessor<ResourceT = Resource> {
     });
   }
 
-  protected async get?(op: Operation): Promise<Resource[]>;
+  protected async get(op: Operation): Promise<Resource[]> {
+    return [];
+  }
 
-  protected async remove?(op: Operation): Promise<void>;
+  protected async remove(op: Operation): Promise<void> {
+    return Promise.reject();
+  }
 
-  protected async update?(op: Operation): Promise<Resource>;
+  protected async update(op: Operation): Promise<Resource> {
+    return Promise.reject();
+  }
 
-  protected async add?(op: Operation): Promise<Resource>;
+  protected async add(op: Operation): Promise<Resource> {
+    return Promise.reject();
+  }
 }
