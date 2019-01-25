@@ -35,7 +35,10 @@ export default class Application {
   }
 
   private processorFor(op: Operation): OperationProcessor {
-    return this.defaultProcessor;
+    return (
+      this.processors.find(processor => processor.shouldHandle(op)) ||
+      this.defaultProcessor
+    );
   }
 
   private buildOperationResponse(

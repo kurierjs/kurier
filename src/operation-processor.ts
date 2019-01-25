@@ -9,6 +9,10 @@ import { Operation, ResourceConstructor } from "./types";
 export default abstract class OperationProcessor<ResourceT = Resource> {
   public app: Application;
 
+  shouldHandle(op: Operation) {
+    return !!op.ref.type;
+  }
+
   execute(op: Operation): Promise<Resource | Resource[] | void> {
     const action: string = op.op;
     return this[op.op](op);
