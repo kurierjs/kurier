@@ -16,18 +16,7 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
-  private convertToResources(type: string, records: KnexRecord[]) {
-    return records.map(record => {
-      const id = record["id"];
-      delete record["id"];
-      const attributes = record;
-      const resourceClass: ResourceConstructor = this.resourceFor(type);
-
-      return new resourceClass({ id, attributes });
-    });
-  }
-
-  async get(op: Operation): Promise<Resource[]> {
+  protected async get(op: Operation): Promise<Resource[]> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
@@ -39,7 +28,7 @@ export default class KnexProcessor<
     return this.convertToResources(type, records);
   }
 
-  async remove(op: Operation): Promise<void> {
+  protected async remove(op: Operation): Promise<void> {
     const tableName = this.typeToTableName(op.ref.type);
 
     return await this.knex(tableName)
@@ -48,7 +37,7 @@ export default class KnexProcessor<
       .then(() => undefined);
   }
 
-  async update(op: Operation): Promise<Resource> {
+  protected async update(op: Operation): Promise<Resource> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
 
@@ -63,7 +52,7 @@ export default class KnexProcessor<
     return this.convertToResources(type, records)[0];
   }
 
-  async add(op: Operation): Promise<Resource> {
+  protected async add(op: Operation): Promise<Resource> {
     const { type } = op.ref;
     const tableName = this.typeToTableName(type);
 
@@ -73,6 +62,17 @@ export default class KnexProcessor<
       .select();
 
     return this.convertToResources(type, records)[0];
+  }
+
+  private convertToResources(type: string, records: KnexRecord[]) {
+    return records.map(record => {
+      const id = record.id;
+      delete record.id;
+      const attributes = record;
+      const resourceClass: ResourceConstructor = this.resourceFor(type);
+
+      return new resourceClass({ id, attributes });
+    });
   }
 
   private typeToTableName(type: string): string {

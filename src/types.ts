@@ -82,11 +82,6 @@ export type JsonApiErrorDocument<ErrorCodeT = ErrorCode> = {
   meta?: Metadata;
 };
 
-export type JsonApiRequest = {
-  data?: Resource;
-  meta?: Metadata;
-};
-
 export type JsonApiError<ErrorCodeT = ErrorCode> = {
   status: HttpStatusCode;
   code: ErrorCodeT;
@@ -112,7 +107,7 @@ export type Operation = {
   included: Resource[];
   ref: {
     type: string;
-    id: string;
+    id: string | undefined;
     lid: string;
     relationship: string;
   };
@@ -139,4 +134,5 @@ export type ResourceConstructor = {
 
 export type KnexRecord = {
   id: string;
+  [key: string]: any;
 };
