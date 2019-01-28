@@ -3,7 +3,7 @@ import { OperationDecorator } from "../types";
 
 // TODO: should this filter be decorator-based to prevent name constraints?
 function isOperation(name: string) {
-  return ["get", "add"].includes(name);
+  return ["get", "add", "update", "remove"].includes(name);
 }
 
 export function getArgument<T>(argsList: any[], match: (arg: any) => boolean) {

@@ -8,10 +8,13 @@ import { Operation, ResourceConstructor } from "./types";
 
 export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
-  public resourceClass: ResourceConstructor;
+  public resourceClass?: ResourceConstructor;
 
   shouldHandle(op: Operation) {
-    return op.ref.type === this.resourceClass.name.toLowerCase();
+    return (
+      this.resourceClass &&
+      op.ref.type === this.resourceClass.name.toLowerCase()
+    );
   }
 
   execute(op: Operation): Promise<Resource | Resource[] | void> {
