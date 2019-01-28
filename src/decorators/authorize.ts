@@ -1,22 +1,15 @@
 import OperationProcessor from "../operation-processor";
-import { AuthenticatedContext, ErrorCode } from "../types";
+import { ErrorCode } from "../types";
 
-import decorateWith, { getArgument } from "./decorator";
+import decorateWith from "./decorator";
 
-function authorizeMiddleware(
-  operationProcessor: OperationProcessor,
-  operation: Function
-) {
-  return (...args) => {
-    const ctx = getArgument<AuthenticatedContext>(
-      args,
-      arg => arg.request !== undefined
-    );
-    if (!ctx.user) {
+function authorizeMiddleware(operation: Function) {
+  return function() {
+    if (!this.app.user) {
       throw ErrorCode.AccessDenied;
     }
 
-    return operation.call(operationProcessor, ...args);
+    return operation.call(this, ...arguments);
   };
 }
 

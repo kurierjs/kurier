@@ -26,7 +26,6 @@ export type AuthenticatedRequest = {
 export type AuthenticatedContext = RouterContext & { user?: Resource };
 
 export type OperationDecorator = (
-  operationProcessor: OperationProcessor,
   operationCallback: Function,
   ...middlewareArguments: any[]
 ) => (...args: any[]) => any;
