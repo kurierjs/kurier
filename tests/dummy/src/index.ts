@@ -4,7 +4,7 @@ import { Application, jsonApiKoa, KnexProcessor } from "./jsonapi-ts";
 import User from "./resources/user/resource";
 
 const app = new Application({
-  namespace: "api/v1",
+  namespace: "api",
   types: [User],
   processors: [],
   defaultProcessor: new KnexProcessor({

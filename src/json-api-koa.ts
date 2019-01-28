@@ -1,4 +1,4 @@
-import * as camelize from "camelize";
+import * as escapeStringRegexp from "escape-string-regexp";
 import { decode } from "jsonwebtoken";
 import { Context } from "koa";
 import * as koaBodyParser from "koa-bodyparser";
@@ -15,21 +15,24 @@ import {
 import { parse } from "./utils/json-api-params";
 
 export default function jsonApiKoa(app: Application) {
-  const URL_REGEX = new RegExp(app.types.map(t => t.name).join("|"), "i");
-
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     await authenticate(app, ctx);
 
-    if (ctx.path.match(URL_REGEX) && app.types.length) {
-      const op: Operation = convertHttpRequestToOperation(ctx);
-      const results: OperationResponse[] = await app.executeOperations([op]);
-      ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
-    } else if (ctx.url.match("/bulk")) {
-      return {
-        operations: await app.executeOperations(
-          ctx.request.body.operations || []
-        )
-      };
+    const data = urlData(app, ctx);
+
+    if (ctx.method === "PATCH" && data.resource === "bulk") {
+      await handleBulkEndpoint(app, ctx);
+      return await next();
+    }
+
+    const registeredResources = app.types.map(t =>
+      pluralize(t.name.toLowerCase())
+    );
+
+    if (registeredResources.includes(data.resource)) {
+      ctx.urlData = data;
+      await handleJsonApiEndpoints(app, ctx);
+      return await next();
     }
 
     await next();
@@ -63,10 +66,33 @@ async function authenticate(app: Application, ctx: Context) {
   }
 }
 
+function urlData(app: Application, ctx: Context) {
+  const urlRegexp = new RegExp(
+    `^\/?(?<namespace>${escapeStringRegexp(
+      app.namespace
+    )})(\/?(?<resource>[\\w|-]+))?(\/(?<id>\\S+))?`
+  );
+
+  return (ctx.path.match(urlRegexp) || {})["groups"] || {};
+}
+
+async function handleBulkEndpoint(app: Application, ctx: Context) {
+  const operations = await app.executeOperations(
+    ctx.request.body.operations || []
+  );
+
+  ctx.body = { operations };
+}
+
+async function handleJsonApiEndpoints(app: Application, ctx: Context) {
+  const op: Operation = convertHttpRequestToOperation(ctx);
+  const results: OperationResponse[] = await app.executeOperations([op]);
+  ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
+}
+
 function convertHttpRequestToOperation(ctx: Context): Operation {
-  const parts = ctx.path.split("/");
-  const type = pluralize.singular(camelize(parts[1].toLowerCase()));
-  const id = parts[2] || undefined;
+  const { id, resource } = ctx.urlData;
+  const type = pluralize.singular(resource);
 
   const opMap = {
     GET: "get",

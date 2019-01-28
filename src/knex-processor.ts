@@ -10,7 +10,7 @@ export default class KnexProcessor<
 > extends OperationProcessor<ResourceT> {
   private knex: Knex;
 
-  constructor(public knexOptions = {}) {
+  constructor(public knexOptions: Knex.Config = {}) {
     super();
 
     this.knex = Knex(knexOptions);

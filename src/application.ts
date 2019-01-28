@@ -3,16 +3,19 @@ import Resource from "./resource";
 import { Operation, OperationResponse, ResourceConstructor } from "./types";
 
 export default class Application {
+  public namespace?: string;
   public types: ResourceConstructor[];
   public processors: OperationProcessor[];
   public defaultProcessor: OperationProcessor;
   public user: Resource;
 
   constructor(settings: {
+    namespace?: string;
     types?: ResourceConstructor[];
     processors?: OperationProcessor[];
     defaultProcessor?: OperationProcessor;
   }) {
+    this.namespace = settings.namespace || "";
     this.types = settings.types || [];
     this.processors = settings.processors || [];
     this.defaultProcessor =
