@@ -1,9 +1,10 @@
 import * as Knex from "knex";
 import * as pluralize from "pluralize";
 
+import Resource from "../resource";
+import { KnexRecord, Operation, ResourceConstructor } from "../types";
+
 import OperationProcessor from "./operation-processor";
-import Resource from "./resource";
-import { KnexRecord, Operation, ResourceConstructor } from "./types";
 
 export default class KnexProcessor<
   ResourceT extends ResourceConstructor

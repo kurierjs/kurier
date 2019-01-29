@@ -1,4 +1,4 @@
-import OperationProcessor from "../operation-processor";
+import OperationProcessor from "../processors/operation-processor";
 import { OperationDecorator } from "../types";
 
 // TODO: should this filter be decorator-based to prevent name constraints?

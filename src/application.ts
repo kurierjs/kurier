@@ -1,4 +1,4 @@
-import OperationProcessor from "./operation-processor";
+import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import { Operation, OperationResponse, ResourceConstructor } from "./types";
 

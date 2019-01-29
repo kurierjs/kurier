@@ -5,16 +5,16 @@ import * as koaBodyParser from "koa-bodyparser";
 import * as compose from "koa-compose";
 import * as pluralize from "pluralize";
 
-import Application from "./application";
-import JsonApiErrors from "./json-api-errors";
+import Application from "../application";
+import JsonApiErrors from "../json-api-errors";
 import {
   JsonApiDocument,
   JsonApiError,
   JsonApiErrorsDocument,
   Operation,
   OperationResponse
-} from "./types";
-import { parse } from "./utils/json-api-params";
+} from "../types";
+import { parse } from "../utils/json-api-params";
 
 export default function jsonApiKoa(app: Application) {
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
