@@ -6,9 +6,12 @@ import * as compose from "koa-compose";
 import * as pluralize from "pluralize";
 
 import Application from "./application";
+import JsonApiErrors from "./json-api-errors";
 import {
   AuthenticatedRequest,
   JsonApiDocument,
+  JsonApiError,
+  JsonApiErrorsDocument,
   Operation,
   OperationResponse
 } from "./types";
@@ -86,8 +89,19 @@ async function handleBulkEndpoint(app: Application, ctx: Context) {
 
 async function handleJsonApiEndpoints(app: Application, ctx: Context) {
   const op: Operation = convertHttpRequestToOperation(ctx);
-  const results: OperationResponse[] = await app.executeOperations([op]);
-  ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
+
+  try {
+    const results: OperationResponse[] = await app.executeOperations([op]);
+    ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
+  } catch (e) {
+    if (e.code) {
+      ctx.body = convertJsonApiErrorToHttpResponse(e);
+    } else {
+      ctx.body = convertJsonApiErrorToHttpResponse(
+        JsonApiErrors.UnhandledError()
+      );
+    }
+  }
 }
 
 function convertHttpRequestToOperation(ctx: Context): Operation {
@@ -113,10 +127,16 @@ function convertHttpRequestToOperation(ctx: Context): Operation {
 function convertOperationResponseToHttpResponse(
   ctx: Context,
   operation: OperationResponse
-) {
+): JsonApiDocument {
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(ctx.method)) {
-    return { data: operation.data } as JsonApiDocument;
+    return { data: operation.data };
   }
+}
+
+function convertJsonApiErrorToHttpResponse(
+  error: JsonApiError
+): JsonApiErrorsDocument {
+  return { errors: [error] };
 }

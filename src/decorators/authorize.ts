@@ -1,12 +1,11 @@
-import OperationProcessor from "../operation-processor";
-import { ErrorCode } from "../types";
+import JsonApiErrors from "../json-api-errors";
 
 import decorateWith from "./decorator";
 
 function authorizeMiddleware(operation: Function) {
   return function() {
     if (!this.app.user) {
-      throw ErrorCode.AccessDenied;
+      throw JsonApiErrors.AccessDenied();
     }
 
     return operation.call(this, ...arguments);

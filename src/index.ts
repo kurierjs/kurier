@@ -1,6 +1,7 @@
 import Application from "./application";
 import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
+import JsonApiErrors from "./json-api-errors";
 import jsonApiKoa from "./json-api-koa";
 import KnexProcessor from "./knex-processor";
 import OperationProcessor from "./operation-processor";
@@ -12,6 +13,7 @@ export {
   jsonApiKoa,
   Application,
   KnexProcessor,
+  JsonApiErrors,
   OperationProcessor,
   // Decorators API
   decorateWith,
