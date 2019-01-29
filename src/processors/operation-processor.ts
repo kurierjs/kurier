@@ -1,5 +1,6 @@
 import * as camelize from "camelize";
 import * as capitalize from "capitalize";
+import * as dasherize from "dasherize";
 import * as pluralize from "pluralize";
 
 import Application from "../application";
@@ -13,7 +14,7 @@ export default class OperationProcessor<ResourceT = Resource> {
   shouldHandle(op: Operation) {
     return (
       this.resourceClass &&
-      op.ref.type === this.resourceClass.name.toLowerCase()
+      op.ref.type === camelize(dasherize(this.resourceClass.name))
     );
   }
 

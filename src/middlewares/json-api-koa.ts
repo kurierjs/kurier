@@ -1,3 +1,5 @@
+import * as camelize from "camelize";
+import * as dasherize from "dasherize";
 import * as escapeStringRegexp from "escape-string-regexp";
 import { decode } from "jsonwebtoken";
 import { Context } from "koa";
@@ -28,13 +30,12 @@ export default function jsonApiKoa(app: Application) {
     }
 
     const registeredResources = app.types.map(t =>
-      pluralize(t.name.toLowerCase())
+      pluralize(dasherize(t.name))
     );
 
     if (registeredResources.includes(data.resource)) {
       ctx.urlData = data;
-      await handleJsonApiEndpoints(app, ctx);
-      return await next();
+      return await handleJsonApiEndpoints(app, ctx).then(() => next());
     }
 
     await next();
@@ -92,15 +93,19 @@ async function handleJsonApiEndpoints(app: Application, ctx: Context) {
     const results: OperationResponse[] = await app.executeOperations([op]);
     ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
   } catch (e) {
-    ctx.body = convertJsonApiErrorToHttpResponse(
-      e.code ? e : JsonApiErrors.UnhandledError()
-    );
+    const isJsonApiError = e && e.code;
+    if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
+
+    const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
+
+    ctx.body = convertJsonApiErrorToHttpResponse(jsonApiError);
+    ctx.status = jsonApiError.status;
   }
 }
 
 function convertHttpRequestToOperation(ctx: Context): Operation {
   const { id, resource } = ctx.urlData;
-  const type = pluralize.singular(resource);
+  const type = camelize(dasherize(pluralize.singular(resource)));
 
   const opMap = {
     GET: "get",
