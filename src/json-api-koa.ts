@@ -8,7 +8,6 @@ import * as pluralize from "pluralize";
 import Application from "./application";
 import JsonApiErrors from "./json-api-errors";
 import {
-  AuthenticatedRequest,
   JsonApiDocument,
   JsonApiError,
   JsonApiErrorsDocument,
@@ -45,8 +44,7 @@ export default function jsonApiKoa(app: Application) {
 }
 
 async function authenticate(app: Application, ctx: Context) {
-  const authRequest = ctx.request as AuthenticatedRequest;
-  const authHeader = authRequest.headers.authorization;
+  const authHeader = ctx.request.headers.authorization;
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const [, token] = authHeader.split(" ");
@@ -94,13 +92,9 @@ async function handleJsonApiEndpoints(app: Application, ctx: Context) {
     const results: OperationResponse[] = await app.executeOperations([op]);
     ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
   } catch (e) {
-    if (e.code) {
-      ctx.body = convertJsonApiErrorToHttpResponse(e);
-    } else {
-      ctx.body = convertJsonApiErrorToHttpResponse(
-        JsonApiErrors.UnhandledError()
-      );
-    }
+    ctx.body = convertJsonApiErrorToHttpResponse(
+      e.code ? e : JsonApiErrors.UnhandledError()
+    );
   }
 }
 
