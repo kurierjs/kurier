@@ -1,22 +1,14 @@
-import OperationProcessor from "../operation-processor";
-import { AuthenticatedContext, ErrorCode, Resource } from "../types";
+import JsonApiErrors from "../json-api-errors";
 
-import decorateWith, { getArgument } from "./decorator";
+import decorateWith from "./decorator";
 
-function authorizeMiddleware(
-  operationProcessor: OperationProcessor,
-  operation: Function
-) {
-  return (...args) => {
-    const ctx = getArgument<AuthenticatedContext>(
-      args,
-      arg => arg.request !== undefined
-    );
-    if (!ctx.user) {
-      throw ErrorCode.AccessDenied;
+function authorizeMiddleware(operation: Function) {
+  return function() {
+    if (!this.app.user) {
+      throw JsonApiErrors.AccessDenied();
     }
 
-    return operation.call(operationProcessor, ...args);
+    return operation.call(this, ...arguments);
   };
 }
 

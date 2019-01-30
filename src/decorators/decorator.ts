@@ -1,9 +1,9 @@
-import OperationProcessor from "../operation-processor";
+import OperationProcessor from "../processors/operation-processor";
 import { OperationDecorator } from "../types";
 
 // TODO: should this filter be decorator-based to prevent name constraints?
 function isOperation(name: string) {
-  return ["get", "add"].includes(name);
+  return ["get", "add", "update", "remove"].includes(name);
 }
 
 export function getArgument<T>(argsList: any[], match: (arg: any) => boolean) {
@@ -21,14 +21,9 @@ export default function decorateWith(
   ): any => {
     if (propertyKey && descriptor) {
       // Behave as a method decorator. Only apply where requested.
-      const controller = target as OperationProcessor;
       const originalFunction = descriptor.value;
 
-      descriptor.value = decorator(
-        controller,
-        originalFunction,
-        ...decoratorArgs
-      );
+      descriptor.value = decorator(originalFunction, ...decoratorArgs);
     } else {
       // Behave as a class decorator. Apply to all.
       const controller = target as Function;
@@ -50,11 +45,7 @@ export default function decorateWith(
           controllerMethod.methodName,
           {
             ...controllerMethod.descriptor,
-            value: decorator(
-              controller.prototype as OperationProcessor,
-              originalFunction,
-              ...decoratorArgs
-            )
+            value: decorator(originalFunction, ...decoratorArgs)
           }
         );
       });
