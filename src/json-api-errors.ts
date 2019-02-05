@@ -13,6 +13,11 @@ const jsonApiErrors: {
   AccessDenied: (): JsonApiError => ({
     status: HttpStatusCode.Forbidden,
     code: "access_denied"
+  }),
+
+  Unauthorized: (): JsonApiError => ({
+    status: HttpStatusCode.Unauthorized,
+    code: "unauthorized"
   })
 };
 
