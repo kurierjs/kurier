@@ -18,6 +18,14 @@ import {
 } from "../types";
 import { parse } from "../utils/json-api-params";
 
+const STATUS_MAPPING = {
+  GET: 200,
+  POST: 201,
+  PATCH: 200,
+  PUT: 200,
+  DELETE: 204
+};
+
 export default function jsonApiKoa(app: Application) {
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     await authenticate(app, ctx);
@@ -93,10 +101,12 @@ async function handleJsonApiEndpoints(app: Application, ctx: Context) {
   const op: Operation = convertHttpRequestToOperation(ctx);
 
   try {
-    const results: OperationResponse[] = await app.executeOperations([op]);
-    ctx.body = convertOperationResponseToHttpResponse(ctx, results[0]);
+    const [result]: OperationResponse[] = await app.executeOperations([op]);
+
+    ctx.body = convertOperationResponseToHttpResponse(ctx, result);
+    ctx.status = STATUS_MAPPING[ctx.method];
   } catch (e) {
-    const isJsonApiError = e && e.code;
+    const isJsonApiError = e && e.status;
     if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
 
     const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
