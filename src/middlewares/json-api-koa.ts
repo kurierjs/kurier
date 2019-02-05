@@ -1,11 +1,8 @@
-import * as camelize from "camelize";
-import * as dasherize from "dasherize";
 import * as escapeStringRegexp from "escape-string-regexp";
 import { decode } from "jsonwebtoken";
 import { Context } from "koa";
 import * as koaBodyParser from "koa-bodyparser";
 import * as compose from "koa-compose";
-import * as pluralize from "pluralize";
 
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
@@ -17,6 +14,7 @@ import {
   OperationResponse
 } from "../types";
 import { parse } from "../utils/json-api-params";
+import { classify, singularize } from "../utils/string";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -37,11 +35,9 @@ export default function jsonApiKoa(app: Application) {
       return await next();
     }
 
-    const registeredResources = app.types.map(t =>
-      pluralize(dasherize(t.name))
-    );
+    const typeNames = app.types.map(t => t.name);
 
-    if (registeredResources.includes(data.resource)) {
+    if (typeNames.includes(classify(singularize(data.resource)))) {
       ctx.urlData = data;
       return await handleJsonApiEndpoints(app, ctx).then(() => next());
     }
@@ -118,7 +114,7 @@ async function handleJsonApiEndpoints(app: Application, ctx: Context) {
 
 function convertHttpRequestToOperation(ctx: Context): Operation {
   const { id, resource } = ctx.urlData;
-  const type = camelize(dasherize(pluralize.singular(resource)));
+  const type = classify(singularize(resource));
 
   const opMap = {
     GET: "get",
