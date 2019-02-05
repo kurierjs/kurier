@@ -1,19 +1,16 @@
 import { JsonApiParams } from "../types";
 
+const JSON_API_ARRAY_KEYS = ["include", "sort", "fields"];
+
 export function parse(url: string): JsonApiParams {
   const params = {};
 
   const nestedParamRegexp = new RegExp(/(\w+)\[(.*?)\]?$/);
-  const arrayParamRegexp = new RegExp(/\w+,(\w+,?)*/);
 
   for (const param of new URL(url).searchParams) {
     const [paramKey, paramValue] = param;
-    const nestedParam = nestedParamRegexp.exec(paramKey);
-    let value: string | string[] = paramValue;
 
-    if (arrayParamRegexp.test(paramValue)) {
-      value = value.split(",");
-    }
+    const nestedParam = nestedParamRegexp.exec(paramKey);
 
     if (nestedParam) {
       const [, key, nestedKey] = nestedParam;
@@ -22,15 +19,23 @@ export function parse(url: string): JsonApiParams {
         params[key] = {};
       }
 
-      if (value !== "") {
-        params[key][nestedKey] = value;
+      if (paramValue !== "") {
+        params[key][nestedKey] = parseValueForKey(paramKey, paramValue);
       }
     } else {
-      if (value !== "") {
-        params[paramKey] = value;
+      if (paramValue !== "") {
+        params[paramKey] = parseValueForKey(paramKey, paramValue);
       }
     }
   }
 
   return params;
+}
+
+function parseValueForKey(key: string, value = "") {
+  if (JSON_API_ARRAY_KEYS.includes(key)) {
+    return value.split(",");
+  }
+
+  return value;
 }
