@@ -49,14 +49,14 @@ export type JsonApiDocument<
 };
 
 export type JsonApiErrorsDocument = {
-  errors?: JsonApiError[];
+  errors: JsonApiError[];
   meta?: Meta;
 };
 
 export type JsonApiError = {
   id?: string;
-  status?: HttpStatusCode;
-  code?: string;
+  status: HttpStatusCode;
+  code: string;
   title?: string;
   detail?: string;
   source?: {
