@@ -46,6 +46,7 @@ export default function jsonApiKoa(app: Application) {
 
 async function authenticate(app: Application, ctx: Context) {
   const authHeader = ctx.request.headers.authorization;
+  let currentUser = null;
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const [, token] = authHeader.split(" ");
@@ -64,8 +65,10 @@ async function authenticate(app: Application, ctx: Context) {
       } as Operation
     ]);
 
-    app.user = user.data[0];
+    currentUser = user.data[0];
   }
+
+  app.user = currentUser;
 }
 
 function urlData(app: Application, ctx: Context) {
