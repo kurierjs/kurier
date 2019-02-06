@@ -3,7 +3,7 @@ import * as dasherize from "dasherize";
 import * as escapeStringRegexp from "escape-string-regexp";
 import { decode } from "jsonwebtoken";
 import { Context } from "koa";
-import koaBodyParser from "koa-bodyparser";
+import koaBody from "koa-body";
 import compose from "koa-compose";
 import pluralize from "pluralize";
 
@@ -49,7 +49,7 @@ export default function jsonApiKoa(app: Application) {
     await next();
   };
 
-  return compose([koaBodyParser(), jsonApiKoa]);
+  return compose([koaBody(), jsonApiKoa]);
 }
 
 async function authenticate(app: Application, ctx: Context) {

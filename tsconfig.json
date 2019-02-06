@@ -6,8 +6,7 @@
     "declarationDir": "dist",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "skipLibCheck": true,
-    "typeRoots": ["node_modules/koa-body", "node_modules/@types"]
+    "skipLibCheck": true
   },
   "include": ["src/**/*"]
 }
