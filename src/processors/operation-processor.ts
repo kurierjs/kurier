@@ -23,7 +23,7 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this[action] && this[action].call(this, op);
   }
 
-  protected resourceFor(type: string = ""): ResourceConstructor {
+  resourceFor(type: string = ""): ResourceConstructor {
     return this.app.types.find(({ name }: { name: string }) => {
       return name === capitalize(pluralize.singular(camelize(type)));
     });
