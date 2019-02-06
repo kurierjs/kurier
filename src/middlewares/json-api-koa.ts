@@ -3,9 +3,9 @@ import * as dasherize from "dasherize";
 import * as escapeStringRegexp from "escape-string-regexp";
 import { decode } from "jsonwebtoken";
 import { Context } from "koa";
-import * as koaBodyParser from "koa-bodyparser";
-import * as compose from "koa-compose";
-import * as pluralize from "pluralize";
+import koaBodyParser from "koa-bodyparser";
+import compose from "koa-compose";
+import pluralize from "pluralize";
 
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
