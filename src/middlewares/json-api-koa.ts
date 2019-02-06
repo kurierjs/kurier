@@ -49,7 +49,7 @@ export default function jsonApiKoa(app: Application) {
     await next();
   };
 
-  return compose([koaBody(), jsonApiKoa]);
+  return compose([koaBody({ json: true }), jsonApiKoa]);
 }
 
 async function authenticate(app: Application, ctx: Context) {
