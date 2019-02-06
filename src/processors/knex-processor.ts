@@ -7,7 +7,7 @@ import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import OperationProcessor from "./operation-processor";
 
 export default class KnexProcessor<
-  ResourceT extends ResourceConstructor
+  ResourceT extends ResourceConstructor<Resource>
 > extends OperationProcessor<ResourceT> {
   private knex: Knex;
 
@@ -17,7 +17,7 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
-  protected async get(op: Operation): Promise<Resource[]> {
+  protected async get(op: Operation): Promise<ResourceT[]> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
@@ -38,7 +38,7 @@ export default class KnexProcessor<
       .then(() => undefined);
   }
 
-  protected async update(op: Operation): Promise<Resource> {
+  protected async update(op: Operation): Promise<ResourceT> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
 
@@ -53,7 +53,7 @@ export default class KnexProcessor<
     return this.convertToResources(type, records)[0];
   }
 
-  protected async add(op: Operation): Promise<Resource> {
+  protected async add(op: Operation): Promise<ResourceT> {
     const { type } = op.ref;
     const tableName = this.typeToTableName(type);
 
@@ -70,7 +70,9 @@ export default class KnexProcessor<
       const id = record.id;
       delete record.id;
       const attributes = record;
-      const resourceClass: ResourceConstructor = this.resourceFor(type);
+      const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
+        type
+      ) as unknown) as ResourceConstructor<ResourceT>;
 
       return new resourceClass({ id, attributes });
     });
