@@ -5,7 +5,7 @@ import { decode } from "jsonwebtoken";
 import { Context } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
-import pluralize from "pluralize";
+import * as pluralize from "pluralize";
 
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
