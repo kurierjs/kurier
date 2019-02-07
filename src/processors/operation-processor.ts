@@ -23,25 +23,25 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this[action] && this[action].call(this, op);
   }
 
-  protected resourceFor(type: string = ""): ResourceConstructor {
+  resourceFor(type: string = ""): ResourceConstructor {
     return this.app.types.find(({ name }: { name: string }) => {
       return name === capitalize(pluralize.singular(camelize(type)));
     });
   }
 
-  protected async get(op: Operation): Promise<ResourceT[]> {
+  async get(op: Operation): Promise<ResourceT[]> {
     return [];
   }
 
-  protected async remove(op: Operation): Promise<void> {
+  async remove(op: Operation): Promise<void> {
     return Promise.reject();
   }
 
-  protected async update(op: Operation): Promise<ResourceT> {
+  async update(op: Operation): Promise<ResourceT> {
     return Promise.reject();
   }
 
-  protected async add(op: Operation): Promise<ResourceT> {
+  async add(op: Operation): Promise<ResourceT> {
     return Promise.reject();
   }
 }

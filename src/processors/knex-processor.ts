@@ -17,7 +17,7 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
-  protected async get(op: Operation): Promise<ResourceT[]> {
+  async get(op: Operation): Promise<ResourceT[]> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
@@ -29,7 +29,7 @@ export default class KnexProcessor<
     return this.convertToResources(type, records);
   }
 
-  protected async remove(op: Operation): Promise<void> {
+  async remove(op: Operation): Promise<void> {
     const tableName = this.typeToTableName(op.ref.type);
 
     return await this.knex(tableName)
@@ -38,7 +38,7 @@ export default class KnexProcessor<
       .then(() => undefined);
   }
 
-  protected async update(op: Operation): Promise<ResourceT> {
+  async update(op: Operation): Promise<ResourceT> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
 
@@ -53,7 +53,7 @@ export default class KnexProcessor<
     return this.convertToResources(type, records)[0];
   }
 
-  protected async add(op: Operation): Promise<ResourceT> {
+  async add(op: Operation): Promise<ResourceT> {
     const { type } = op.ref;
     const tableName = this.typeToTableName(type);
 
