@@ -6,7 +6,8 @@
     "declarationDir": "dist",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": true
   },
   "include": ["src/**/*"]
 }
