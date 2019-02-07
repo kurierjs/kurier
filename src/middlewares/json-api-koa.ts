@@ -2,7 +2,7 @@ import * as camelize from "camelize";
 import * as dasherize from "dasherize";
 import * as escapeStringRegexp from "escape-string-regexp";
 import { decode } from "jsonwebtoken";
-import { Context } from "koa";
+import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
 import * as pluralize from "pluralize";
@@ -26,7 +26,10 @@ const STATUS_MAPPING = {
   DELETE: 204
 };
 
-export default function jsonApiKoa(app: Application) {
+export default function jsonApiKoa(
+  app: Application,
+  ...middlewares: Middleware[]
+) {
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     await authenticate(app, ctx);
 
@@ -49,7 +52,7 @@ export default function jsonApiKoa(app: Application) {
     await next();
   };
 
-  return compose([koaBody({ json: true }), jsonApiKoa]);
+  return compose([koaBody({ json: true }), ...middlewares, jsonApiKoa]);
 }
 
 async function authenticate(app: Application, ctx: Context) {
