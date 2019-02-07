@@ -65,7 +65,7 @@ export default class KnexProcessor<
     return this.convertToResources(type, records)[0];
   }
 
-  private convertToResources(type: string, records: KnexRecord[]) {
+  convertToResources(type: string, records: KnexRecord[]) {
     return records.map(record => {
       const id = record.id;
       delete record.id;
@@ -78,11 +78,11 @@ export default class KnexProcessor<
     });
   }
 
-  private typeToTableName(type: string): string {
+  typeToTableName(type: string): string {
     return pluralize(type);
   }
 
-  private filtersToKnex(filters: {}): {} {
+  filtersToKnex(filters: {}): {} {
     Object.keys(filters).forEach(
       key => filters[key] === undefined && delete filters[key]
     );
