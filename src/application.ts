@@ -35,7 +35,7 @@ export default class Application {
     );
   }
 
-  private async createTransaction(ops: Promise<OperationResponse>[]) {
+  async createTransaction(ops: Promise<OperationResponse>[]) {
     return await Promise.all(ops);
   }
 
