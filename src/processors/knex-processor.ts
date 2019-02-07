@@ -1,8 +1,9 @@
 import * as Knex from "knex";
-import * as pluralize from "pluralize";
+import { userInfo } from "os";
 
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
+import { classify, pluralize, singularize, underscore } from "../utils/string";
 
 import OperationProcessor from "./operation-processor";
 
@@ -26,7 +27,90 @@ export default class KnexProcessor<
       .where(this.filtersToKnex(filters))
       .select();
 
-    return this.convertToResources(type, records);
+    const resources = this.convertToResources(type, records);
+    const include = op.params.include;
+
+    if (include) {
+      this.preloadRelationships(resources, include);
+    }
+
+    return resources;
+  }
+
+  async preloadRelationships(resources: Resource[], relationNames: string[]) {
+    const resourceClass: ResourceConstructor =
+      resources[0] && (resources[0].constructor as ResourceConstructor);
+
+    if (resourceClass) {
+      relationNames.forEach(async relationName => {
+        const relationshipType = this.resourceRelationshipType(
+          resourceClass,
+          relationName
+        );
+
+        const relationKey = this.relationKeyFor(resourceClass, relationName);
+        const reflectionKey = this.reflectionKeyFor(
+          resourceClass,
+          relationName
+        );
+
+        const relationType = this.detectRelationType(
+          resourceClass,
+          relationName
+        );
+
+        if (relationType === "belongsTo") {
+          const ids = resources.map(r => r[reflectionKey]);
+          const relationshipsRecords = await this.knex(
+            this.typeToTableName(relationshipType)
+          ).where({ [relationKey]: ids });
+
+          resources.forEach((resource) => {
+            resource[relationName] = relationshipsRecords.filter(r => r[reflectionKey] === ???)
+          })
+        } else if (relationType === "hasMany") {
+          const ids = resources.map(r => r[relationKey]);
+          const relationshipsRecords = await this.knex(
+            this.typeToTableName(relationshipType)
+          ).where({ [reflectionKey]: ids });
+        } else if (relationType === "hasOne") {
+          const ids = resources.map(r => r[relationKey]);
+          const relationshipsRecords = await this.knex(
+            this.typeToTableName(relationshipType)
+          ).where({ [reflectionKey]: ids });
+
+          relationshipRecord;
+        }
+      });
+    }
+  }
+
+  relationKeyFor(
+    resourceClass: ResourceConstructor,
+    relationName: string
+  ): string {
+    return "id";
+  }
+
+  reflectionKeyFor(
+    resourceClass: ResourceConstructor,
+    relationName: string
+  ): string {
+    return "user_id";
+  }
+
+  resourceRelationshipType(
+    resourceClass: ResourceConstructor,
+    relationName: string
+  ): string {
+    return classify(singularize(relationName));
+  }
+
+  detectRelationType(
+    resourceClass: ResourceConstructor,
+    relationName: string
+  ): string {
+    return "hasMany";
   }
 
   protected async remove(op: Operation): Promise<void> {
@@ -77,7 +161,7 @@ export default class KnexProcessor<
   }
 
   private typeToTableName(type: string): string {
-    return pluralize(type);
+    return underscore(pluralize(type));
   }
 
   private filtersToKnex(filters: {}): {} {
