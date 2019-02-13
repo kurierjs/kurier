@@ -7,7 +7,7 @@ import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import OperationProcessor from "./operation-processor";
 
 export default class KnexProcessor<
-  ResourceT extends ResourceConstructor<Resource>
+  ResourceT = Resource
 > extends OperationProcessor<ResourceT> {
   private knex: Knex;
 
