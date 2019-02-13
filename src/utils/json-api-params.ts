@@ -1,3 +1,5 @@
+import { URL } from "url";
+
 import { JsonApiParams } from "../types";
 
 export function parse(url: string): JsonApiParams {
