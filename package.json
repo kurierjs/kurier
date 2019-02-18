@@ -22,7 +22,6 @@
   "dependencies": {
     "@koa/cors": "^2.2.3",
     "camelize": "^1.0.0",
-    "capitalize": "^2.0.0",
     "dasherize": "^2.0.0",
     "escape-string-regexp": "^1.0.5",
     "jsonwebtoken": "^8.4.0",

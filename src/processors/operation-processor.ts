@@ -1,11 +1,11 @@
 import * as camelize from "camelize";
-import * as capitalize from "capitalize";
 import * as dasherize from "dasherize";
 import * as pluralize from "pluralize";
 
 import Application from "../application";
 import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
+import capitalize from "../utils/capitalize";
 
 export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
