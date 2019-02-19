@@ -11,6 +11,8 @@ export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
   public resourceClass?: ResourceConstructor;
 
+  protected includedResources: Resource[] = [];
+
   shouldHandle(op: Operation) {
     return (
       this.resourceClass &&
@@ -27,6 +29,16 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this.app.types.find(({ name }: { name: string }) => {
       return name === capitalize(pluralize.singular(camelize(type)));
     });
+  }
+
+  include(resources: Resource[]) {
+    this.includedResources = [...this.includedResources, ...resources];
+  }
+
+  flushIncludes() {
+    const included = [...this.includedResources];
+    this.includedResources = [];
+    return included;
   }
 
   async get(op: Operation): Promise<ResourceT[]> {

@@ -30,7 +30,7 @@ export default class Application {
       ops.map(async op => {
         const processor = this.processorFor(op);
         const result = await processor.execute(op);
-        return this.buildOperationResponse(result);
+        return this.buildOperationResponse(result, processor.flushIncludes());
       })
     );
   }
@@ -47,10 +47,12 @@ export default class Application {
   }
 
   buildOperationResponse(
-    data: Resource | Resource[] | void
+    data: Resource | Resource[] | void,
+    included: Resource[] | void
   ): OperationResponse {
     return {
-      data: data || null
+      data: data || null,
+      included: included || null
     };
   }
 }

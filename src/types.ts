@@ -95,6 +95,7 @@ export type Operation = {
 
 export type OperationResponse = {
   data: Resource | Resource[] | null;
+  included?: Resource[];
 };
 
 export type ResourceConstructor<ResourceT = Resource> = {
