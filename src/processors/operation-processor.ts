@@ -32,9 +32,13 @@ export default class OperationProcessor<ResourceT = Resource> {
   }
 
   include(resources: Resource[]) {
-    this.includedResources = [
-      ...new Set([...this.includedResources, ...resources])
-    ];
+    resources.forEach(resource => {
+      if (
+        !this.includedResources.find(included => included.id === resource.id)
+      ) {
+        this.includedResources.push(resource);
+      }
+    });
   }
 
   flushIncludes() {
