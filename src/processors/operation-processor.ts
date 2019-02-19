@@ -32,7 +32,9 @@ export default class OperationProcessor<ResourceT = Resource> {
   }
 
   include(resources: Resource[]) {
-    this.includedResources = [...this.includedResources, ...resources];
+    this.includedResources = [
+      ...new Set([...this.includedResources, ...resources])
+    ];
   }
 
   flushIncludes() {
