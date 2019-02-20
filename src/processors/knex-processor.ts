@@ -1,5 +1,6 @@
 import * as Knex from "knex";
 import * as pluralize from "pluralize";
+import { camelize } from 'ember-cli-string-utils';
 
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
@@ -122,7 +123,7 @@ export default class KnexProcessor<
       processedFilters.push({
         value,
         operator,
-        column: key,
+        column: camelize(key),
       });
     });
 

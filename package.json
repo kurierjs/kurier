@@ -23,6 +23,7 @@
     "@koa/cors": "^2.2.3",
     "camelize": "^1.0.0",
     "dasherize": "^2.0.0",
+    "ember-cli-string-utils": "^1.1.0",
     "escape-string-regexp": "^1.0.5",
     "jsonwebtoken": "^8.4.0",
     "knex": "~0.16.3",
