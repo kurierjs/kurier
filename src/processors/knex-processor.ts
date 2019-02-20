@@ -118,7 +118,7 @@ export default class KnexProcessor<
     });
 
     return processedFilters.forEach((filter) => {
-      return builder.andWhere(filter.column, filter.operator, 0);
+      return builder.andWhere(filter.column, filter.operator, filter.value ? filter.value : 0);
     });
   }
 }
