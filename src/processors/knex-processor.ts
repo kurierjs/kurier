@@ -106,13 +106,18 @@ export default class KnexProcessor<
     Object.keys(filters).forEach((key) => {
 
       let value = filters[key];
-      if (value.substring(value.indexOf(':') + 1)) {
-        value = value.substring(value.indexOf(':') + 1)
-        value = value ? value : 0;
+      let operator = getOperator(filters[key]);
+
+      if (!operator) {
+        operator = '=';
       }
 
-      let operator = getOperator(filters[key]);
-      operator = operator ? operator : '=';
+      if (value.substring(value.indexOf(':') + 1)) {
+        value = value.substring(value.indexOf(':') + 1)
+      }
+
+      value = value ? value : 0;
+
 
       processedFilters.push({
         value,
