@@ -6,6 +6,20 @@ import { KnexRecord, Operation, ResourceConstructor } from "../types";
 
 import OperationProcessor from "./operation-processor";
 
+const operators = {
+  eq: '=',
+  ne: '!=',
+  lt: '<',
+  gt: '>',
+  le: '<=',
+  ge: '>=',
+  like: 'like',
+  in: 'in',
+};
+
+const getOperator = (paramValue: any) =>
+  operators[Object.keys(operators).find(operator => paramValue.indexOf(`${operator}:`) === 0)];
+
 export default class KnexProcessor<
   ResourceT = Resource
 > extends OperationProcessor<ResourceT> {
@@ -23,7 +37,7 @@ export default class KnexProcessor<
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
 
     const records: KnexRecord[] = await this.knex(tableName)
-      .where(this.filtersToKnex(filters))
+      .where(builder => this.filtersToKnex(builder, filters))
       .select();
 
     return this.convertToResources(type, records);
@@ -82,11 +96,29 @@ export default class KnexProcessor<
     return pluralize(type);
   }
 
-  filtersToKnex(filters: {}): {} {
+  filtersToKnex(builder, filters: {}) {
+    const processedFilters = [];
+
     Object.keys(filters).forEach(
-      key => filters[key] === undefined && delete filters[key]
+      key => filters[key] === undefined && delete filters[key],
     );
 
-    return filters;
+    Object.keys(filters).forEach((key) => {
+      console.log(filters[key]);
+
+      let value = filters[key];
+      value = value.substring(value.indexOf(':') + 1);
+      const operator = getOperator(filters[key]);
+
+      processedFilters.push({
+        value,
+        operator,
+        column: key,
+      });
+    });
+
+    return processedFilters.forEach((filter) => {
+      return builder.andWhere(filter.column, filter.operator, 0);
+    });
   }
 }
