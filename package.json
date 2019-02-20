@@ -5,9 +5,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -b",
+    "build": "rm -rf dist/ && tsc -b",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "tsc -b"
+    "prepublish": "rm -rf dist/ && tsc -b"
   },
   "repository": {
     "type": "git",
