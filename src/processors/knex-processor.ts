@@ -116,7 +116,7 @@ export default class KnexProcessor<
         value = value.substring(value.indexOf(':') + 1)
       }
 
-      value = value ? value : 0;
+      value = value !== 'null' ? value : 0;
 
 
       processedFilters.push({
