@@ -1,10 +1,26 @@
 import * as Knex from "knex";
 import * as pluralize from "pluralize";
+import { camelize } from 'ember-cli-string-utils';
 
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
 
 import OperationProcessor from "./operation-processor";
+
+const operators = {
+  eq: '=',
+  ne: '!=',
+  lt: '<',
+  gt: '>',
+  le: '<=',
+  ge: '>=',
+  like: 'like',
+  in: 'in',
+  nin: 'not in'
+};
+
+const getOperator = (paramValue: any) =>
+  operators[Object.keys(operators).find(operator => paramValue.indexOf(`${operator}:`) === 0)];
 
 export default class KnexProcessor<
   ResourceT = Resource
@@ -23,7 +39,7 @@ export default class KnexProcessor<
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
 
     const records: KnexRecord[] = await this.knex(tableName)
-      .where(this.filtersToKnex(filters))
+      .where(builder => this.filtersToKnex(builder, filters))
       .select();
 
     return this.convertToResources(type, records);
@@ -82,11 +98,38 @@ export default class KnexProcessor<
     return pluralize(type);
   }
 
-  filtersToKnex(filters: {}): {} {
+  filtersToKnex(builder, filters: {}) {
+    const processedFilters = [];
+
     Object.keys(filters).forEach(
-      key => filters[key] === undefined && delete filters[key]
+      key => filters[key] === undefined && delete filters[key],
     );
 
-    return filters;
+    Object.keys(filters).forEach((key) => {
+
+      let value = filters[key];
+      let operator = getOperator(filters[key]);
+
+      if (!operator) {
+        operator = '=';
+      }
+
+      if (value.substring(value.indexOf(':') + 1)) {
+        value = value.substring(value.indexOf(':') + 1)
+      }
+
+      value = value !== 'null' ? value : 0;
+
+
+      processedFilters.push({
+        value,
+        operator,
+        column: camelize(key),
+      });
+    });
+
+    return processedFilters.forEach((filter) => {
+      return builder.andWhere(filter.column, filter.operator, filter.value);
+    });
   }
 }
