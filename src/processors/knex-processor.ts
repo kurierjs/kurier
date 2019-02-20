@@ -16,6 +16,7 @@ const operators = {
   ge: '>=',
   like: 'like',
   in: 'in',
+  nin: 'not in'
 };
 
 const getOperator = (paramValue: any) =>
