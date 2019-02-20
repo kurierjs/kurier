@@ -104,11 +104,15 @@ export default class KnexProcessor<
     );
 
     Object.keys(filters).forEach((key) => {
-      console.log(filters[key]);
 
       let value = filters[key];
-      value = value.substring(value.indexOf(':') + 1);
-      const operator = getOperator(filters[key]);
+      if (value.substring(value.indexOf(':') + 1)) {
+        value = value.substring(value.indexOf(':') + 1)
+        value = value ? value : 0;
+      }
+
+      let operator = getOperator(filters[key]);
+      operator = operator ? operator : '=';
 
       processedFilters.push({
         value,
@@ -118,7 +122,7 @@ export default class KnexProcessor<
     });
 
     return processedFilters.forEach((filter) => {
-      return builder.andWhere(filter.column, filter.operator, filter.value ? filter.value : 0);
+      return builder.andWhere(filter.column, filter.operator, filter.value);
     });
   }
 }
