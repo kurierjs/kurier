@@ -19,7 +19,7 @@ const operators = {
   nin: 'not in'
 };
 
-const getOperator = (paramValue: any) =>
+const getOperator = (paramValue: string) =>
   operators[Object.keys(operators).find(operator => paramValue.indexOf(`${operator}:`) === 0)];
 
 export default class KnexProcessor<
@@ -37,10 +37,12 @@ export default class KnexProcessor<
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
+    const Resource = Object.create(this.resourceFor(type));
+    const attributes = Object.keys(Resource.__proto__.attributes);
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(builder => this.filtersToKnex(builder, filters))
-      .select();
+      .select(attributes);
 
     return this.convertToResources(type, records);
   }
@@ -108,11 +110,7 @@ export default class KnexProcessor<
     Object.keys(filters).forEach((key) => {
 
       let value = filters[key];
-      let operator = getOperator(filters[key]);
-
-      if (!operator) {
-        operator = '=';
-      }
+      let operator = getOperator(filters[key]) || '=';
 
       if (value.substring(value.indexOf(':') + 1)) {
         value = value.substring(value.indexOf(':') + 1)
