@@ -19,8 +19,16 @@ const operators = {
   nin: 'not in'
 };
 
-const getOperator = (paramValue: string) =>
+const getOperator = (paramValue: string): string =>
   operators[Object.keys(operators).find(operator => paramValue.indexOf(`${operator}:`) === 0)];
+
+const buildSortClause = (sort) =>  sort.split(',').map(criteria => {
+    if (criteria.startsWith('-')) {
+      return { field: camelize(criteria.substr(1)), direction: 'DESC' };
+    }
+
+    return { field: camelize(criteria), direction: 'ASC' };
+  });
 
 export default class KnexProcessor<
   ResourceT = Resource
@@ -41,8 +49,9 @@ export default class KnexProcessor<
     const attributes = Object.keys(Resource.__proto__.attributes);
 
     const records: KnexRecord[] = await this.knex(tableName)
-      .where(builder => this.filtersToKnex(builder, filters))
-      .select(attributes);
+      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
+      .select(...attributes, 'id')
+      .modify(queryBuilder => this.optionsBuilder(queryBuilder, op));
 
     return this.convertToResources(type, records);
   }
@@ -100,7 +109,7 @@ export default class KnexProcessor<
     return pluralize(type);
   }
 
-  filtersToKnex(builder, filters: {}) {
+  filtersToKnex(queryBuilder, filters: {}) {
     const processedFilters = [];
 
     Object.keys(filters).forEach(
@@ -127,7 +136,20 @@ export default class KnexProcessor<
     });
 
     return processedFilters.forEach((filter) => {
-      return builder.andWhere(filter.column, filter.operator, filter.value);
+      return queryBuilder.andWhere(filter.column, filter.operator, filter.value);
     });
+  }
+
+  optionsBuilder(queryBuilder, op) {
+    const { sort, page } = op.params;
+    if (sort) {
+      buildSortClause(sort).forEach(({ field, direction }) => {
+        queryBuilder.orderBy(field, direction);
+      });
+    }
+
+    if (page) {
+      queryBuilder.offset(page.offset).limit(page.limit);
+    }
   }
 }
