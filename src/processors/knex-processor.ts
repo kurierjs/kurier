@@ -37,10 +37,12 @@ export default class KnexProcessor<
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
     const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
+    const Resource = Object.create(this.resourceFor(type));
+    const attributes = Object.keys(Resource.__proto__.attributes);
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(builder => this.filtersToKnex(builder, filters))
-      .select();
+      .select(attributes);
 
     return this.convertToResources(type, records);
   }
