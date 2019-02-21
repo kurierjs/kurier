@@ -50,7 +50,7 @@ export default class KnexProcessor<
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
-      .select(attributes)
+      .select(...attributes, 'id')
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op));
 
     return this.convertToResources(type, records);
