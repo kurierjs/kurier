@@ -35,6 +35,16 @@ const buildSortClause = sort =>
     return { field: camelize(criteria), direction: "ASC" };
   });
 
+const getAttributes = (attributes, fields, type): [] => {
+  if (Object.entries(fields).length === 0 && fields.constructor === Object) {
+    return attributes;
+  }
+
+  return attributes.filter(attribute =>
+    fields[pluralize(type)].includes(attribute)
+  );
+};
+
 export default class KnexProcessor<
   ResourceT = Resource
 > extends OperationProcessor<ResourceT> {
@@ -51,9 +61,13 @@ export default class KnexProcessor<
     const { id, type } = ref;
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
-    const Resource = Object.create(this.resourceFor(type));
+    const resource = Object.create(this.resourceFor(type));
     const fields = params ? { ...params.fields } : {};
-    const attributes = Object.keys(Resource.__proto__.attributes);
+    const attributes = getAttributes(
+      Object.keys(resource.__proto__.attributes),
+      fields,
+      type
+    );
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
