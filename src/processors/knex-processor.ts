@@ -61,11 +61,10 @@ export default class KnexProcessor<
     const { id, type } = ref;
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
-    const ResourceClass = this.resourceFor(type);
-    const resource = new ResourceClass();
+    const resource = Object.create(this.resourceFor(type));
     const fields = params ? { ...params.fields } : {};
     const attributes = getAttributes(
-      Object.keys(resource.attributes),
+      Object.keys(resource.__proto__.attributes),
       fields,
       type
     );

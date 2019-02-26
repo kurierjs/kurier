@@ -107,8 +107,6 @@ export type ResourceConstructor<ResourceT = Resource> = {
     attributes?: {};
     relationships?: ResourceTypeRelationships;
   }): ResourceT;
-
-  attributes: {};
 };
 
 export type KnexRecord = {
