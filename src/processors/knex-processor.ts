@@ -64,7 +64,7 @@ export default class KnexProcessor<
     const resource = this.resourceFor(type);
     const fields = params ? { ...params.fields } : {};
     const attributes = getAttributes(
-      Object.keys(resource.prototype.attributes),
+      Object.keys(resource.attributes),
       fields,
       type
     );
