@@ -1,6 +1,6 @@
+import { camelize } from "ember-cli-string-utils";
 import * as Knex from "knex";
 import * as pluralize from "pluralize";
-import { camelize } from 'ember-cli-string-utils';
 
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
@@ -8,26 +8,31 @@ import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import OperationProcessor from "./operation-processor";
 
 const operators = {
-  eq: '=',
-  ne: '!=',
-  lt: '<',
-  gt: '>',
-  le: '<=',
-  ge: '>=',
-  like: 'like',
-  in: 'in',
-  nin: 'not in'
+  eq: "=",
+  ne: "!=",
+  lt: "<",
+  gt: ">",
+  le: "<=",
+  ge: ">=",
+  like: "like",
+  in: "in",
+  nin: "not in"
 };
 
 const getOperator = (paramValue: string): string =>
-  operators[Object.keys(operators).find(operator => paramValue.indexOf(`${operator}:`) === 0)];
+  operators[
+    Object.keys(operators).find(
+      operator => paramValue.indexOf(`${operator}:`) === 0
+    )
+  ];
 
-const buildSortClause = (sort) =>  sort.split(',').map(criteria => {
-    if (criteria.startsWith('-')) {
-      return { field: camelize(criteria.substr(1)), direction: 'DESC' };
+const buildSortClause = sort =>
+  sort.split(",").map(criteria => {
+    if (criteria.startsWith("-")) {
+      return { field: camelize(criteria.substr(1)), direction: "DESC" };
     }
 
-    return { field: camelize(criteria), direction: 'ASC' };
+    return { field: camelize(criteria), direction: "ASC" };
   });
 
 export default class KnexProcessor<
@@ -42,15 +47,17 @@ export default class KnexProcessor<
   }
 
   async get(op: Operation): Promise<ResourceT[]> {
-    const { id, type } = op.ref;
+    const { params, ref } = op;
+    const { id, type } = ref;
     const tableName = this.typeToTableName(type);
-    const filters = op.params ? { id, ...(op.params.filter || {}) } : { id };
+    const filters = params ? { id, ...(params.filter || {}) } : { id };
     const Resource = Object.create(this.resourceFor(type));
+    const fields = params ? { ...params.fields } : {};
     const attributes = Object.keys(Resource.__proto__.attributes);
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
-      .select(...attributes, 'id')
+      .select(...attributes, "id")
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op));
 
     return this.convertToResources(type, records);
@@ -113,30 +120,32 @@ export default class KnexProcessor<
     const processedFilters = [];
 
     Object.keys(filters).forEach(
-      key => filters[key] === undefined && delete filters[key],
+      key => filters[key] === undefined && delete filters[key]
     );
 
-    Object.keys(filters).forEach((key) => {
-
+    Object.keys(filters).forEach(key => {
       let value = filters[key];
-      let operator = getOperator(filters[key]) || '=';
+      const operator = getOperator(filters[key]) || "=";
 
-      if (value.substring(value.indexOf(':') + 1)) {
-        value = value.substring(value.indexOf(':') + 1)
+      if (value.substring(value.indexOf(":") + 1)) {
+        value = value.substring(value.indexOf(":") + 1);
       }
 
-      value = value !== 'null' ? value : 0;
-
+      value = value !== "null" ? value : 0;
 
       processedFilters.push({
         value,
         operator,
-        column: camelize(key),
+        column: camelize(key)
       });
     });
 
-    return processedFilters.forEach((filter) => {
-      return queryBuilder.andWhere(filter.column, filter.operator, filter.value);
+    return processedFilters.forEach(filter => {
+      return queryBuilder.andWhere(
+        filter.column,
+        filter.operator,
+        filter.value
+      );
     });
   }
 
