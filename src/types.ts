@@ -97,7 +97,7 @@ export type OperationResponse = {
   data: Resource | Resource[] | null;
 };
 
-export type ResourceConstructor = {
+export type ResourceConstructor<ResourceT = Resource> = {
   new ({
     id,
     attributes,
@@ -106,7 +106,7 @@ export type ResourceConstructor = {
     id?: string;
     attributes?: {};
     relationships?: ResourceTypeRelationships;
-  }): Resource;
+  }): ResourceT;
 };
 
 export type KnexRecord = {

@@ -35,18 +35,18 @@ export default class Application {
     );
   }
 
-  private async createTransaction(ops: Promise<OperationResponse>[]) {
+  async createTransaction(ops: Promise<OperationResponse>[]) {
     return await Promise.all(ops);
   }
 
-  private processorFor(op: Operation): OperationProcessor {
+  processorFor(op: Operation): OperationProcessor {
     return (
       this.processors.find(processor => processor.shouldHandle(op)) ||
       this.defaultProcessor
     );
   }
 
-  private buildOperationResponse(
+  buildOperationResponse(
     data: Resource | Resource[] | void
   ): OperationResponse {
     return {

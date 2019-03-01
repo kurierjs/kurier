@@ -1,3 +1,5 @@
+import { URL } from "url";
+
 import { JsonApiParams } from "../types";
 
 const JSON_API_ARRAY_KEYS = ["include", "sort", "fields"];
