@@ -15,7 +15,7 @@ export default function decorateWith(
   ...decoratorArgs: any[]
 ) {
   return (
-    target: OperationProcessor | Function,
+    target: OperationProcessor<any> | Function,
     propertyKey?: string,
     descriptor?: TypedPropertyDescriptor<any>
   ): any => {
