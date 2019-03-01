@@ -1,21 +1,14 @@
-import * as camelize from "camelize";
-import * as dasherize from "dasherize";
-import * as pluralize from "pluralize";
-
 import Application from "../application";
 import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
-import capitalize from "../utils/capitalize";
+import { classify, singularize } from "../utils/string";
 
 export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
   public resourceClass?: ResourceConstructor;
 
   shouldHandle(op: Operation) {
-    return (
-      this.resourceClass &&
-      op.ref.type === camelize(dasherize(this.resourceClass.name))
-    );
+    return this.resourceClass && op.ref.type === this.resourceClass.name;
   }
 
   execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
@@ -25,7 +18,7 @@ export default class OperationProcessor<ResourceT = Resource> {
 
   resourceFor(type: string = ""): ResourceConstructor {
     return this.app.types.find(({ name }: { name: string }) => {
-      return name === capitalize(pluralize.singular(camelize(type)));
+      return name === classify(singularize(type));
     });
   }
 

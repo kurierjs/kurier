@@ -1,9 +1,8 @@
-import { camelize } from "ember-cli-string-utils";
 import * as Knex from "knex";
-import * as pluralize from "pluralize";
 
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
+import { camelize, pluralize } from "../utils/string";
 
 import OperationProcessor from "./operation-processor";
 
