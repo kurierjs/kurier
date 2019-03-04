@@ -73,7 +73,7 @@ export default class KnexProcessor<
       .select(...attributes, "id")
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op));
 
-    return this.convertToResources(type, records);
+    return records;
   }
 
   async remove(op: Operation): Promise<void> {
@@ -97,7 +97,7 @@ export default class KnexProcessor<
       .where({ id })
       .select();
 
-    return this.convertToResources(type, records)[0];
+    return records;
   }
 
   async add(op: Operation): Promise<ResourceT> {
@@ -109,20 +109,7 @@ export default class KnexProcessor<
       .where({ id })
       .select();
 
-    return this.convertToResources(type, records)[0];
-  }
-
-  convertToResources(type: string, records: KnexRecord[]) {
-    return records.map(record => {
-      const id = record.id;
-      delete record.id;
-      const attributes = record;
-      const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
-        type
-      ) as unknown) as ResourceConstructor<ResourceT>;
-
-      return new resourceClass({ id, attributes });
-    });
+    return records;
   }
 
   typeToTableName(type: string): string {
