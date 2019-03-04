@@ -100,7 +100,7 @@ export default class KnexProcessor<
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
       .select(getColumns(resourceClass, fields));
 
-    return this.convertToResources(resourceClass, records);
+    return records;
   }
 
   async remove(op: Operation): Promise<void> {
@@ -142,7 +142,7 @@ export default class KnexProcessor<
       .select(getColumns(resourceClass))
       .first();
 
-    return this.convertToResource(resourceClass, record);
+    return records;
   }
 
   async add(op: Operation): Promise<ResourceT> {
@@ -160,58 +160,7 @@ export default class KnexProcessor<
       .select(getColumns(resourceClass))
       .first();
 
-    return this.convertToResource(resourceClass, record);
-  }
-
-  async convertToResources(
-    resourceClass: ResourceConstructor,
-    records: KnexRecord[]
-  ): Promise<ResourceT[]> {
-    return Promise.all(
-      records.map(async record => this.convertToResource(resourceClass, record))
-    );
-  }
-
-  async convertToResource(
-    resourceClass: ResourceConstructor,
-    record: KnexRecord
-  ): Promise<ResourceT> {
-    const id = record.id;
-    const attributesKeys = Object.keys(resourceClass.schema.attributes);
-    const attributes = pick(record, attributesKeys);
-    const relationships = this.convertToRelationships(resourceClass, record);
-
-    return (new resourceClass({
-      id,
-      attributes,
-      relationships
-    }) as unknown) as ResourceT;
-  }
-
-  convertToRelationships(
-    resourceClass: ResourceConstructor,
-    record: KnexRecord
-  ): ResourceRelationships {
-    return Object.entries(resourceClass.schema.relationships).reduce(
-      (relationships, [key, relationship]) => {
-        return {
-          ...relationships,
-          [key]: {
-            data: this.relationshipData(record[`${key}Id`], relationship)
-          }
-        };
-      },
-      {}
-    );
-  }
-
-  relationshipData(
-    id: string,
-    relationship: ResourceSchemaRelationship
-  ): ResourceRelationshipData {
-    if (relationship.belongsTo) {
-      return id ? { id, type: relationship.type().type } : null;
-    }
+    return records;
   }
 
   typeToTableName(type: string): string {

@@ -2,6 +2,10 @@ import Application from "../application";
 import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
 
+interface HasId {
+  id: any;
+}
+
 export default class OperationProcessor<ResourceT = Resource> {
   static resourceClass?: ResourceConstructor;
 
@@ -13,7 +17,27 @@ export default class OperationProcessor<ResourceT = Resource> {
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
-    return this[action] && this[action].call(this, op);
+    let result = await this[action] && this[action].call(this, op);
+
+    return this.convertToResources(op.ref.type, result);
+  }
+
+  convertToResources(type: string, records: HasId[] | HasId) {
+    if (Array.isArray(records)) {
+      return records.map(record => {
+        return this.convertToResources(type, record);
+      });
+    }
+
+    const record = {...records};
+    const id = record.id;
+    delete record.id;
+    const attributes = record;
+    const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
+      type
+    ) as unknown) as ResourceConstructor<ResourceT>;
+
+    return new resourceClass({ id, attributes });
   }
 
   async resourceFor(
