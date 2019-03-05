@@ -34,15 +34,6 @@ const buildSortClause = sort =>
     return { field: camelize(criteria), direction: "ASC" };
   });
 
-const getAttributes = (attributes, fields, type): [] => {
-  if (Object.entries(fields).length === 0 && fields.constructor === Object) {
-    return attributes;
-  }
-
-  return attributes.filter(attribute =>
-    fields[pluralize(type)].includes(attribute)
-  );
-};
 
 export default class KnexProcessor<
   ResourceT = Resource
@@ -55,6 +46,12 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
+  getColumns(attributes, fields, type): string[] {
+
+    return this.getAttributes(attributes, fields, type)
+      .filter(attribute => !this.computedPropertyNames.includes(attribute));
+  }
+
   async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id, type } = ref;
@@ -62,7 +59,7 @@ export default class KnexProcessor<
     const filters = params ? { id, ...(params.filter || {}) } : { id };
     const resource = Object.create(this.resourceFor(type));
     const fields = params ? { ...params.fields } : {};
-    const attributes = getAttributes(
+    const attributes = this.getColumns(
       Object.keys(resource.__proto__.attributes),
       fields,
       type
