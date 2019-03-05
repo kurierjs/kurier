@@ -3,7 +3,7 @@ import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
 import { classify, singularize } from "../utils/string";
 
-interface HasId {
+export interface HasId {
   id: any;
 }
 
@@ -46,7 +46,7 @@ export default class OperationProcessor<ResourceT = Resource> {
     });
   }
 
-  async get(op: Operation): Promise<ResourceT[]> {
+  async get(op: Operation): Promise<HasId[]> {
     return [];
   }
 
@@ -54,11 +54,11 @@ export default class OperationProcessor<ResourceT = Resource> {
     return Promise.reject();
   }
 
-  async update(op: Operation): Promise<ResourceT> {
+  async update(op: Operation): Promise<HasId> {
     return Promise.reject();
   }
 
-  async add(op: Operation): Promise<ResourceT> {
+  async add(op: Operation): Promise<HasId> {
     return Promise.reject();
   }
 }

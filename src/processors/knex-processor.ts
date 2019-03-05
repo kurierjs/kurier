@@ -4,7 +4,7 @@ import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import { camelize, pluralize } from "../utils/string";
 
-import OperationProcessor from "./operation-processor";
+import OperationProcessor, { HasId } from "./operation-processor";
 
 const operators = {
   eq: "=",
@@ -55,7 +55,7 @@ export default class KnexProcessor<
     this.knex = Knex(knexOptions);
   }
 
-  async get(op: Operation): Promise<ResourceT[]> {
+  async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id, type } = ref;
     const tableName = this.typeToTableName(type);
@@ -85,7 +85,7 @@ export default class KnexProcessor<
       .then(() => undefined);
   }
 
-  async update(op: Operation): Promise<ResourceT> {
+  async update(op: Operation): Promise<HasId> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
 
@@ -93,23 +93,23 @@ export default class KnexProcessor<
       .where({ id })
       .update(op.data.attributes);
 
-    const records: KnexRecord[] = await this.knex(tableName)
+    const records: HasId[] = await this.knex(tableName)
       .where({ id })
       .select();
 
-    return records;
+    return records[0];
   }
 
-  async add(op: Operation): Promise<ResourceT> {
+  async add(op: Operation): Promise<HasId> {
     const { type } = op.ref;
     const tableName = this.typeToTableName(type);
 
     const [id] = await this.knex(tableName).insert(op.data.attributes);
-    const records: KnexRecord[] = await this.knex(tableName)
+    const records: HasId[] = await this.knex(tableName)
       .where({ id })
       .select();
 
-    return records;
+    return records[0];
   }
 
   typeToTableName(type: string): string {
