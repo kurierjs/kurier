@@ -51,10 +51,10 @@ export default class OperationProcessor<ResourceT = Resource> {
   }
 
   async getComputedProperties(record: HasId) {
-    return promiseHashMap(this.attributes, (key) => this.attributes[key](record));
+    return promiseHashMap(this.attributes, (key) => this.attributes[key].call(this, record));
   }
   async getRelationships(record: HasId) {
-    return promiseHashMap(this.relationships, (key) => this.relationships[key](record));
+    return promiseHashMap(this.relationships, (key) => this.relationships[key].call(this, record));
   }
 
   async convertToResources(type: string, records: HasId[] | HasId) {
@@ -66,10 +66,10 @@ export default class OperationProcessor<ResourceT = Resource> {
 
     const record = {...records};
     const id = record.id;
-    delete record.id;
-    const attributes = record;
     const computedAttributes = await this.getComputedProperties(record);
     const relationships = await this.getRelationships(record);
+    delete record.id;
+    const attributes = record;
     const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
       type
     ) as unknown) as ResourceConstructor<ResourceT>;
