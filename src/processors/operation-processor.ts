@@ -67,8 +67,11 @@ export default class OperationProcessor<ResourceT = Resource> {
 
     const record = {...records};
     const id = record.id;
-    const computedAttributes = await this.getComputedProperties(record);
-    const relationships = await this.getRelationships(record);
+    const [computedAttributes, relationships] = await Promise.all([
+      this.getComputedProperties(record),
+      this.getRelationships(record)
+    ]);
+
     delete record.id;
     const attributes = record;
     const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
