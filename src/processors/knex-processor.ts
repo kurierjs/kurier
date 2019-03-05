@@ -4,7 +4,7 @@ import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceRelationships, ResourceSchemaRelationship } from "../types";
 import { camelize, pluralize } from "../utils/string";
-import OperationProcessor from "./operation-processor";
+import OperationProcessor, { HasId } from "./operation-processor";
 
 const operators = {
   eq: "=",
@@ -84,7 +84,7 @@ export default class KnexProcessor<
     this.knex = app.services.knex;
   }
 
-  async get(op: Operation): Promise<ResourceT[]> {
+  async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id, type } = ref;
 
@@ -120,7 +120,7 @@ export default class KnexProcessor<
       .then(() => undefined);
   }
 
-  async update(op: Operation): Promise<ResourceT> {
+  async update(op: Operation): Promise<HasId> {
     const { id, type } = op.ref;
 
     const resourceClass = await this.resourceFor(type);
@@ -137,15 +137,13 @@ export default class KnexProcessor<
       throw JsonApiErrors.RecordNotExists();
     }
 
-    const record = await this.knex(tableName)
+    return await this.knex(tableName)
       .where({ id })
       .select(getColumns(resourceClass))
       .first();
-
-    return records;
   }
 
-  async add(op: Operation): Promise<ResourceT> {
+  async add(op: Operation): Promise<HasId> {
     const { type } = op.ref;
 
     const resourceClass = await this.resourceFor(type);
@@ -155,12 +153,10 @@ export default class KnexProcessor<
 
     const ids = await this.knex(tableName).insert(op.data.attributes, "id");
 
-    const record = await this.knex(tableName)
+    return await this.knex(tableName)
       .whereIn("id", ids)
       .select(getColumns(resourceClass))
       .first();
-
-    return records;
   }
 
   typeToTableName(type: string): string {
