@@ -1,6 +1,6 @@
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
-import { Operation, OperationResponse, ResourceConstructor } from "./types";
+import { camelize, classify, singularize } from "./utils/string";
 
 export default class Application {
   public namespace?: string;
@@ -39,9 +39,15 @@ export default class Application {
     return await Promise.all(ops);
   }
 
-  processorFor(op: Operation): OperationProcessor {
+  resourceFor(type: string = ""): ResourceConstructor {
+    return this.types.find(({ name }: { name: string }) => {
+      return name === classify(singularize(type));
+    });
+  }
+
+  processorFor(type: string): OperationProcessor {
     return (
-      this.processors.find(processor => processor.shouldHandle(op)) ||
+      this.processors.find(processor => processor.shouldHandle(type)) ||
       this.defaultProcessor
     );
   }
