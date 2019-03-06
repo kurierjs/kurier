@@ -71,7 +71,7 @@ export type JsonApiError = {
 export type JsonApiParams = {
   include?: string[];
   sort?: string[];
-  filter?: { [key: string]: string };
+  filter?: { [key: string]: string | string[] };
   page?: { [key: string]: string[] };
   fields?: { [key: string]: string[] };
 };
@@ -99,6 +99,9 @@ export type OperationResponse = {
 };
 
 export type ResourceConstructor<ResourceT = Resource> = {
+  attributes: ResourceTypeAttributes;
+  relationships: { [key: string]: any };
+
   new ({
     id,
     attributes,

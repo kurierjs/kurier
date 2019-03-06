@@ -60,10 +60,10 @@ export default class KnexProcessor<
     const { id, type } = ref;
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
-    const resource = Object.create(this.resourceFor(type));
+    const resourceClass = this.resourceFor(type);
     const fields = params ? { ...params.fields } : {};
     const attributes = getAttributes(
-      Object.keys(resource.__proto__.attributes),
+      Object.keys(resourceClass.attributes || {}),
       fields,
       type
     );
@@ -130,35 +130,28 @@ export default class KnexProcessor<
   }
 
   filtersToKnex(queryBuilder, filters: {}) {
-    const processedFilters = [];
-
-    Object.keys(filters).forEach(
-      key => filters[key] === undefined && delete filters[key]
-    );
-
     Object.keys(filters).forEach(key => {
       let value = filters[key];
-      const operator = getOperator(filters[key]) || "=";
+      const filterKey = camelize(key);
 
-      if (value.substring(value.indexOf(":") + 1)) {
-        value = value.substring(value.indexOf(":") + 1);
+      if (value === undefined) {
+        return;
       }
 
-      value = value !== "null" ? value : 0;
+      let operator = "=";
 
-      processedFilters.push({
-        value,
-        operator,
-        column: camelize(key)
-      });
-    });
+      if (Array.isArray(value)) {
+        queryBuilder.whereIn(filterKey, value);
+      } else {
+        operator = getOperator(value) || "=";
 
-    return processedFilters.forEach(filter => {
-      return queryBuilder.andWhere(
-        filter.column,
-        filter.operator,
-        filter.value
-      );
+        if (value.substring(value.indexOf(":") + 1)) {
+          value = value.substring(value.indexOf(":") + 1);
+        }
+
+        value = value !== "null" ? value : 0;
+        queryBuilder.andWhere(filterKey, operator, value);
+      }
     });
   }
 
