@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/ebryn/jsonapi-ts#readme",
   "dependencies": {
+    "array.prototype.flat": "^1.2.1",
     "ember-cli-string-utils": "^1.1.0",
     "escape-string-regexp": "^1.0.5",
     "jsonwebtoken": "^8.4.0",
