@@ -1,10 +1,13 @@
-export { plural as pluralize, singular as singularize } from "pluralize";
+import { plural, singular } from "pluralize";
 
-export {
-  decamelize,
-  dasherize,
-  camelize,
-  classify,
-  underscore,
-  capitalize
-} from "ember-cli-string-utils";
+function pluralize(word = "") {
+  return plural(word);
+}
+
+function singularize(word = "") {
+  return singular(word);
+}
+
+export { camelize, capitalize, classify, dasherize, decamelize, underscore } from "ember-cli-string-utils";
+export { pluralize, singularize };
+
