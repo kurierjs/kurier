@@ -3,18 +3,11 @@ import { decode } from "jsonwebtoken";
 import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
-
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
-import {
-  JsonApiDocument,
-  JsonApiError,
-  JsonApiErrorsDocument,
-  Operation,
-  OperationResponse
-} from "../types";
+import { JsonApiDocument, JsonApiError, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
-import { classify, singularize } from "../utils/string";
+import { camelize, singularize } from "../utils/string";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -38,9 +31,9 @@ export default function jsonApiKoa(
       return await next();
     }
 
-    const typeNames = app.types.map(t => t.name);
+    const typeNames = app.types.map(t => t.type);
 
-    if (typeNames.includes(classify(singularize(data.resource)))) {
+    if (typeNames.includes(camelize(singularize(data.resource)))) {
       ctx.urlData = data;
       return await handleJsonApiEndpoints(app, ctx).then(() => next());
     }
@@ -117,7 +110,7 @@ async function handleJsonApiEndpoints(app: Application, ctx: Context) {
 
 function convertHttpRequestToOperation(ctx: Context): Operation {
   const { id, resource } = ctx.urlData;
-  const type = classify(singularize(resource));
+  const type = camelize(singularize(resource));
 
   const opMap = {
     GET: "get",
