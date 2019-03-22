@@ -75,7 +75,7 @@ function urlData(app: Application, ctx: Context) {
   const urlRegexp = new RegExp(
     `^\/?(?<namespace>${escapeStringRegexp(
       app.namespace
-    )})(\/?(?<resource>[\\w|-]+))?(\/(?<id>\\S+))?`
+    )})(\/?(?<resource>[^\/]+))?(\/(?<id>\\S+))?`
   );
 
   return (ctx.path.match(urlRegexp) || {})["groups"] || {};
