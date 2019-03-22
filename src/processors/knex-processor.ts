@@ -1,10 +1,10 @@
 import * as Knex from "knex";
-
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import { camelize, pluralize } from "../utils/string";
-
 import OperationProcessor from "./operation-processor";
+
+
 
 const operators = {
   eq: "=",
@@ -63,7 +63,7 @@ export default class KnexProcessor<
     const resource = Object.create(this.resourceFor(type));
     const fields = params ? { ...params.fields } : {};
     const attributes = getAttributes(
-      Object.keys(resource.__proto__.attributes),
+      Object.keys(resource.__proto__.attributes || {}),
       fields,
       type
     );
