@@ -1,14 +1,14 @@
 import Application from "../application";
 import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
-import { classify, singularize } from "../utils/string";
+import { camelize, singularize } from "../utils/string";
 
 export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
   public resourceClass?: ResourceConstructor;
 
   shouldHandle(op: Operation) {
-    return this.resourceClass && op.ref.type === this.resourceClass.name;
+    return this.resourceClass && op.ref.type === this.resourceClass.type;
   }
 
   execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
@@ -16,9 +16,9 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this[action] && this[action].call(this, op);
   }
 
-  resourceFor(type: string = ""): ResourceConstructor {
-    return this.app.types.find(({ name }: { name: string }) => {
-      return name === classify(singularize(type));
+  resourceFor(resourceType: string = ""): ResourceConstructor {
+    return this.app.types.find(({ type }: { type: string }) => {
+      return type === camelize(singularize(resourceType));
     });
   }
 

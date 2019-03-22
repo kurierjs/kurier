@@ -98,6 +98,8 @@ export type OperationResponse = {
 };
 
 export type ResourceConstructor<ResourceT = Resource> = {
+  type: string;
+
   new ({
     id,
     attributes,
