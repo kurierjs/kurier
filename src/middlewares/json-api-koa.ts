@@ -73,9 +73,9 @@ async function authenticate(app: Application, ctx: Context) {
 
 function urlData(app: Application, ctx: Context) {
   const urlRegexp = new RegExp(
-    `^\/?(?<namespace>${escapeStringRegexp(
+    `^(\/+)?((?<namespace>${escapeStringRegexp(
       app.namespace
-    )})(\/?(?<resource>[^\/]+))?(\/(?<id>\\S+))?`
+    )})(\/+|$))?(?<resource>[^\s\/?]+)?(\/+)?(?<id>[^\s\/?]+)?(\/+)?`
   );
 
   return (ctx.path.match(urlRegexp) || {})["groups"] || {};
