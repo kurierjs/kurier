@@ -99,6 +99,8 @@ export type OperationResponse = {
 
 export type ResourceConstructor<ResourceT = Resource> = {
   type: string;
+  attributes: ResourceTypeAttributes;
+  relationships: ResourceTypeRelationships;
 
   new ({
     id,
@@ -106,7 +108,7 @@ export type ResourceConstructor<ResourceT = Resource> = {
     relationships
   }: {
     id?: string;
-    attributes?: {};
+    attributes?: ResourceTypeAttributes;
     relationships?: ResourceTypeRelationships;
   }): ResourceT;
 };
