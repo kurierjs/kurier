@@ -18,6 +18,11 @@ const jsonApiErrors: {
   Unauthorized: (): JsonApiError => ({
     status: HttpStatusCode.Unauthorized,
     code: "unauthorized"
+  }),
+
+  RecordNotExists: (): JsonApiError => ({
+    status: HttpStatusCode.NotFound,
+    code: "not_found"
   })
 };
 
