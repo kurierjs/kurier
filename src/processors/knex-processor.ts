@@ -4,8 +4,6 @@ import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
-
-
 const operators = {
   eq: "=",
   ne: "!=",
@@ -47,7 +45,7 @@ const getAttributes = (attributes, fields, type): [] => {
 export default class KnexProcessor<
   ResourceT = Resource
 > extends OperationProcessor<ResourceT> {
-  private knex: Knex;
+  protected knex: Knex;
 
   constructor(public knexOptions: Knex.Config = {}) {
     super();
