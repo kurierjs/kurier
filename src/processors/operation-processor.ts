@@ -7,7 +7,7 @@ export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
   public resourceClass?: ResourceConstructor;
 
-  shouldHandle(op: Operation) {
+  async shouldHandle(op: Operation): Promise<boolean> {
     return this.resourceClass && op.ref.type === this.resourceClass.type;
   }
 
