@@ -3,9 +3,17 @@ import { decode } from "jsonwebtoken";
 import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
+
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
-import { JsonApiDocument, JsonApiError, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
+import {
+  JsonApiDocument,
+  JsonApiError,
+  JsonApiErrorsDocument,
+  Meta,
+  Operation,
+  OperationResponse
+} from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 
@@ -57,11 +65,12 @@ async function authenticate(app: Application, ctx: Context) {
 
     const [user] = await app.executeOperations([
       {
-        op: "get",
+        op: "identify",
         ref: {
           type: "user",
           id: userId
-        }
+        },
+        params: {}
       } as Operation
     ]);
 
