@@ -7,6 +7,9 @@ export default abstract class Resource {
   attributes: ResourceTypeAttributes;
   relationships: ResourceTypeRelationships;
 
+  static attributes: ResourceTypeAttributes = {};
+  static relationships: ResourceTypeRelationships = {};
+
   static get type() {
     return camelize(this.name);
   }

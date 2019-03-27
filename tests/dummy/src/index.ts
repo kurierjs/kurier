@@ -1,5 +1,4 @@
 import * as Koa from "koa";
-
 import { Application, jsonApiKoa, KnexProcessor } from "./jsonapi-ts";
 import User from "./resources/user/resource";
 
