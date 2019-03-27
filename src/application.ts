@@ -27,23 +27,46 @@ export default class Application {
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
     return await this.createTransaction(
-      ops.map(async op => {
-        const processor = this.processorFor(op);
-        const result = await processor.execute(op);
-        return this.buildOperationResponse(result);
-      })
+      ops
+        .map(async op => {
+          const processor = await this.processorFor(op);
+
+          if (processor) {
+            return this.executeOperation(op, processor);
+          }
+        })
+        .filter(Boolean)
     );
+  }
+
+  async executeOperation(
+    op: Operation,
+    processor: OperationProcessor
+  ): Promise<OperationResponse> {
+    const result = await processor.execute(op);
+    return this.buildOperationResponse(result);
   }
 
   async createTransaction(ops: Promise<OperationResponse>[]) {
     return await Promise.all(ops);
   }
 
-  processorFor(op: Operation): OperationProcessor {
-    return (
-      this.processors.find(processor => processor.shouldHandle(op)) ||
-      this.defaultProcessor
+  async processorFor(op: Operation): Promise<OperationProcessor | undefined> {
+    const processors = await Promise.all(
+      this.processors.map(
+        async processor => (await processor.shouldHandle(op)) && processor
+      )
     );
+
+    const processor = processors.find(Boolean);
+
+    if (processor) {
+      return processor;
+    }
+
+    if (this.types.map(t => t.type).includes(op.ref.type)) {
+      return this.defaultProcessor;
+    }
   }
 
   buildOperationResponse(

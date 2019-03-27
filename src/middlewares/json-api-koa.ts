@@ -3,17 +3,9 @@ import { decode } from "jsonwebtoken";
 import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
-
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
-import {
-  JsonApiDocument,
-  JsonApiError,
-  JsonApiErrorsDocument,
-  Meta,
-  Operation,
-  OperationResponse
-} from "../types";
+import { JsonApiDocument, JsonApiError, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 
@@ -39,14 +31,9 @@ export default function jsonApiKoa(
       return await next();
     }
 
-    const typeNames = app.types.map(t => t.type);
+    ctx.urlData = data;
 
-    if (typeNames.includes(camelize(singularize(data.resource)))) {
-      ctx.urlData = data;
-      return await handleJsonApiEndpoints(app, ctx).then(() => next());
-    }
-
-    await next();
+    return await handleJsonApiEndpoint(app, ctx).then(() => next());
   };
 
   return compose([koaBody({ json: true }), ...middlewares, jsonApiKoa]);
@@ -63,18 +50,21 @@ async function authenticate(app: Application, ctx: Context) {
 
     if (!userId) return;
 
-    const [user] = await app.executeOperations([
-      {
-        op: "identify",
-        ref: {
-          type: "user",
-          id: userId
-        },
-        params: {}
-      } as Operation
-    ]);
+    const op = {
+      op: "identify",
+      ref: {
+        type: "user",
+        id: userId
+      },
+      params: {}
+    } as Operation;
 
-    currentUser = user.data[0];
+    const processor = await app.processorFor(op);
+
+    if (processor) {
+      const user = await app.executeOperation(op, processor);
+      currentUser = user.data[0];
+    }
   }
 
   app.user = currentUser;
@@ -98,22 +88,29 @@ async function handleBulkEndpoint(app: Application, ctx: Context) {
   ctx.body = { operations };
 }
 
-async function handleJsonApiEndpoints(app: Application, ctx: Context) {
+async function handleJsonApiEndpoint(app: Application, ctx: Context) {
   const op: Operation = convertHttpRequestToOperation(ctx);
 
-  try {
-    const [result]: OperationResponse[] = await app.executeOperations([op]);
+  const processor = await app.processorFor(op);
 
-    ctx.body = convertOperationResponseToHttpResponse(ctx, result);
-    ctx.status = STATUS_MAPPING[ctx.method];
-  } catch (e) {
-    const isJsonApiError = e && e.status;
-    if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
+  if (processor) {
+    try {
+      const result: OperationResponse = await app.executeOperation(
+        op,
+        processor
+      );
 
-    const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
+      ctx.body = convertOperationResponseToHttpResponse(ctx, result);
+      ctx.status = STATUS_MAPPING[ctx.method];
+    } catch (e) {
+      const isJsonApiError = e && e.status;
+      if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
 
-    ctx.body = convertJsonApiErrorToHttpResponse(jsonApiError);
-    ctx.status = jsonApiError.status;
+      const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
+
+      ctx.body = convertJsonApiErrorToHttpResponse(jsonApiError);
+      ctx.status = jsonApiError.status;
+    }
   }
 }
 
