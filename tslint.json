@@ -6,7 +6,7 @@
   ],
   "rules": {
     "prettier": true,
-    "ordered-imports": [true, { "grouped-imports": true }],
+    "ordered-imports": [false, { "grouped-imports": true }],
     "import-name": false
   }
 }

@@ -1,4 +1,5 @@
 import * as Knex from "knex";
+import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor } from "../types";
 import { camelize, pluralize } from "../utils/string";
@@ -77,6 +78,14 @@ export default class KnexProcessor<
   async remove(op: Operation): Promise<void> {
     const tableName = this.typeToTableName(op.ref.type);
 
+    const record = await this.knex(tableName)
+      .where({ id: op.ref.id })
+      .first();
+
+    if (!record) {
+      throw JsonApiErrors.RecordNotExists();
+    }
+
     return await this.knex(tableName)
       .where({ id: op.ref.id })
       .del()
@@ -86,14 +95,22 @@ export default class KnexProcessor<
   async update(op: Operation): Promise<ResourceT> {
     const { id, type } = op.ref;
     const tableName = this.typeToTableName(type);
+    const resourceClass = this.resourceFor(type);
 
-    await this.knex(tableName)
-      .where({ id })
-      .update(op.data.attributes);
+    const record = await this.knex(tableName)
+      .where({ id: op.ref.id })
+      .first();
 
-    const records: KnexRecord[] = await this.knex(tableName)
+    if (!record) {
+      throw JsonApiErrors.RecordNotExists();
+    }
+
+    const records = await this.knex(tableName)
       .where({ id })
-      .select();
+      .update(op.data.attributes, [
+        "id",
+        ...Object.keys(resourceClass.attributes || {})
+      ]);
 
     return this.convertToResources(type, records)[0];
   }
@@ -101,11 +118,12 @@ export default class KnexProcessor<
   async add(op: Operation): Promise<ResourceT> {
     const { type } = op.ref;
     const tableName = this.typeToTableName(type);
+    const resourceClass = this.resourceFor(type);
 
-    const [id] = await this.knex(tableName).insert(op.data.attributes);
-    const records: KnexRecord[] = await this.knex(tableName)
-      .where({ id })
-      .select();
+    const records = await this.knex(tableName).insert(op.data.attributes, [
+      "id",
+      ...Object.keys(resourceClass.attributes || {})
+    ]);
 
     return this.convertToResources(type, records)[0];
   }
@@ -124,7 +142,7 @@ export default class KnexProcessor<
   }
 
   typeToTableName(type: string): string {
-    return pluralize(type);
+    return camelize(pluralize(type));
   }
 
   filtersToKnex(queryBuilder, filters: {}) {
