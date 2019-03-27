@@ -1,3 +1,7 @@
 import { Resource } from "../../jsonapi-ts";
 
-export default class User extends Resource {}
+export default class User extends Resource {
+  static attributes = {
+    email: ""
+  };
+}

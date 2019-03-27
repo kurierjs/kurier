@@ -1,7 +1,7 @@
 import * as Knex from "knex";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { KnexRecord, Operation, ResourceConstructor } from "../types";
+import { KnexRecord, Operation } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
@@ -57,12 +57,14 @@ export default class KnexProcessor<
   async get(op: Operation): Promise<ResourceT[]> {
     const { params, ref } = op;
     const { id, type } = ref;
+    const resourceClass = await this.resourceFor(type);
+    if (!resourceClass) return [];
+
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
-    const resource = Object.create(this.resourceFor(type));
     const fields = params ? { ...params.fields } : {};
     const attributes = getAttributes(
-      Object.keys(resource.__proto__.attributes || {}),
+      Object.keys(resourceClass.attributes || {}),
       fields,
       type
     );
@@ -94,8 +96,11 @@ export default class KnexProcessor<
 
   async update(op: Operation): Promise<ResourceT> {
     const { id, type } = op.ref;
+
+    const resourceClass = await this.resourceFor(type);
+    if (!resourceClass) return;
+
     const tableName = this.typeToTableName(type);
-    const resourceClass = this.resourceFor(type);
 
     const record = await this.knex(tableName)
       .where({ id: op.ref.id })
@@ -117,8 +122,11 @@ export default class KnexProcessor<
 
   async add(op: Operation): Promise<ResourceT> {
     const { type } = op.ref;
+
+    const resourceClass = await this.resourceFor(type);
+    if (!resourceClass) return;
+
     const tableName = this.typeToTableName(type);
-    const resourceClass = this.resourceFor(type);
 
     const records = await this.knex(tableName).insert(op.data.attributes, [
       "id",
@@ -128,17 +136,22 @@ export default class KnexProcessor<
     return this.convertToResources(type, records)[0];
   }
 
-  convertToResources(type: string, records: KnexRecord[]) {
-    return records.map(record => {
-      const id = record.id;
-      delete record.id;
-      const attributes = record;
-      const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
-        type
-      ) as unknown) as ResourceConstructor<ResourceT>;
+  async convertToResources(
+    type: string,
+    records: KnexRecord[]
+  ): Promise<ResourceT[]> {
+    const resourceClass = await this.resourceFor(type);
+    if (!resourceClass) return [];
 
-      return new resourceClass({ id, attributes });
-    });
+    return (Promise.all(
+      records.map(async record => {
+        const id = record.id;
+        delete record.id;
+        const attributes = record;
+
+        return new resourceClass({ id, attributes });
+      })
+    ) as unknown) as ResourceT[];
   }
 
   typeToTableName(type: string): string {
