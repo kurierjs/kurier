@@ -103,20 +103,19 @@ export default class KnexProcessor<
 
     const tableName = this.typeToTableName(type);
 
-    const recordExist = await this.knex(tableName)
-      .where({ id: op.ref.id })
-      .first();
+    const updated = await this.knex(tableName)
+      .where({ id })
+      .first()
+      .update(op.data.attributes);
 
-    if (!recordExist) {
+    if (!updated) {
       throw JsonApiErrors.RecordNotExists();
     }
 
-    const [record] = await this.knex(tableName)
+    const record = await this.knex(tableName)
       .where({ id })
-      .update(op.data.attributes, [
-        "id",
-        ...Object.keys(resourceClass.attributes || {})
-      ]);
+      .select(["id", ...Object.keys(resourceClass.attributes || {})])
+      .first();
 
     return this.convertToResource(resourceClass, record);
   }
@@ -129,10 +128,12 @@ export default class KnexProcessor<
 
     const tableName = this.typeToTableName(type);
 
-    const [record] = await this.knex(tableName).insert(op.data.attributes, [
-      "id",
-      ...Object.keys(resourceClass.attributes || {})
-    ]);
+    const ids = await this.knex(tableName).insert(op.data.attributes);
+
+    const record = await this.knex(tableName)
+      .whereIn("id", ids)
+      .select(["id", ...Object.keys(resourceClass.attributes || {})])
+      .first();
 
     return this.convertToResource(resourceClass, record);
   }
