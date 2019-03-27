@@ -140,20 +140,18 @@ export default class KnexProcessor<
     type: string,
     records: KnexRecord[]
   ): Promise<ResourceT[]> {
-    const resources = await Promise.all(
+    const resourceClass = await this.resourceFor(type);
+    if (!resourceClass) return [];
+
+    return (Promise.all(
       records.map(async record => {
         const id = record.id;
         delete record.id;
         const attributes = record;
-        const resourceClass = await this.resourceFor(type);
 
-        if (resourceClass) {
-          return new resourceClass({ id, attributes });
-        }
+        return new resourceClass({ id, attributes });
       })
-    );
-
-    return (resources.filter(Boolean) as unknown) as ResourceT[];
+    ) as unknown) as ResourceT[];
   }
 
   typeToTableName(type: string): string {
