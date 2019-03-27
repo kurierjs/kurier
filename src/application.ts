@@ -64,9 +64,15 @@ export default class Application {
       return processor;
     }
 
-    if (this.types.map(t => t.type).includes(op.ref.type)) {
+    if (await this.resourceFor(op.ref.type)) {
       return this.defaultProcessor;
     }
+  }
+
+  async resourceFor(
+    resourceType: string
+  ): Promise<ResourceConstructor | undefined> {
+    return this.types.find(({ type }) => type && type === resourceType);
   }
 
   buildOperationResponse(

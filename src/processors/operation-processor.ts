@@ -1,7 +1,6 @@
 import Application from "../application";
 import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
-import { camelize, singularize } from "../utils/string";
 
 export default class OperationProcessor<ResourceT = Resource> {
   public app: Application;
@@ -11,15 +10,15 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this.resourceClass && op.ref.type === this.resourceClass.type;
   }
 
-  execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
+  async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
     return this[action] && this[action].call(this, op);
   }
 
-  resourceFor(resourceType: string = ""): ResourceConstructor {
-    return this.app.types.find(({ type }: { type: string }) => {
-      return type === camelize(singularize(resourceType));
-    });
+  async resourceFor(
+    resourceType: string
+  ): Promise<ResourceConstructor | undefined> {
+    return this.app.resourceFor(resourceType);
   }
 
   async get(op: Operation): Promise<ResourceT[]> {
