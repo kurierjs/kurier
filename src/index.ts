@@ -1,6 +1,7 @@
 import Application from "./application";
 import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
+import IfUser from "./decorators/if-user";
 import JsonApiErrors from "./json-api-errors";
 import jsonApiKoa from "./middlewares/json-api-koa";
 import KnexProcessor from "./processors/knex-processor";
@@ -17,7 +18,8 @@ export {
   OperationProcessor,
   // Decorators API
   decorateWith,
-  Authorize
+  Authorize,
+  IfUser
 };
 
 export * from "./types";
