@@ -128,7 +128,7 @@ export default class KnexProcessor<
 
     const tableName = this.typeToTableName(type);
 
-    const ids = await this.knex(tableName).insert(op.data.attributes);
+    const ids = await this.knex(tableName).insert(op.data.attributes, "id");
 
     const record = await this.knex(tableName)
       .whereIn("id", ids)
