@@ -117,3 +117,8 @@ export type KnexRecord = {
   id: string;
   [key: string]: any;
 };
+
+export type AttributeValueMatch = {
+  attribute: string;
+  value: string | number | boolean;
+};
