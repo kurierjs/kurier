@@ -3,8 +3,11 @@ import { AttributeValueMatch } from "../types";
 
 import decorateWith from "./decorator";
 
-function authorizeMiddleware(operation: Function) {
-  return function(...conditions: AttributeValueMatch[]) {
+function authorizeMiddleware(
+  operation: Function,
+  conditions: AttributeValueMatch[]
+) {
+  return function() {
     if (!this.app.user) {
       throw JsonApiErrors.Unauthorized();
     }
