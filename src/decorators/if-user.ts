@@ -1,4 +1,4 @@
-export default function ifEquals(
+export default function ifUser(
   attribute: string,
   value: string | number | boolean
 ) {
