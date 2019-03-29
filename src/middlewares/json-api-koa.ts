@@ -90,27 +90,24 @@ async function handleBulkEndpoint(app: Application, ctx: Context) {
 
 async function handleJsonApiEndpoint(app: Application, ctx: Context) {
   const op: Operation = convertHttpRequestToOperation(ctx);
+  if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
   const processor = await app.processorFor(op);
+  if (!processor) return;
 
-  if (processor) {
-    try {
-      const result: OperationResponse = await app.executeOperation(
-        op,
-        processor
-      );
+  try {
+    const result: OperationResponse = await app.executeOperation(op, processor);
 
-      ctx.body = convertOperationResponseToHttpResponse(ctx, result);
-      ctx.status = STATUS_MAPPING[ctx.method];
-    } catch (e) {
-      const isJsonApiError = e && e.status;
-      if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
+    ctx.body = convertOperationResponseToHttpResponse(ctx, result);
+    ctx.status = STATUS_MAPPING[ctx.method];
+  } catch (e) {
+    const isJsonApiError = e && e.status;
+    if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
 
-      const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
+    const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
 
-      ctx.body = convertJsonApiErrorToHttpResponse(jsonApiError);
-      ctx.status = jsonApiError.status;
-    }
+    ctx.body = convertJsonApiErrorToHttpResponse(jsonApiError);
+    ctx.status = jsonApiError.status;
   }
 }
 
