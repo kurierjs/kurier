@@ -24,6 +24,20 @@ const getOperator = (paramValue: string): string =>
     )
   ];
 
+const getWhereMethod = (value: string, operator: string) => {
+  if (value !== "null") {
+    return "andWhere";
+  }
+
+  if (value === "null" && operator === "=") {
+    return "whereNull";
+  }
+
+  if (value === "null" && operator === "!=") {
+    return "whereNotNull";
+  }
+};
+
 const buildSortClause = (sort: string[]) =>
   sort.map(criteria => {
     if (criteria.startsWith("-")) {
@@ -177,17 +191,16 @@ export default class KnexProcessor<
         value = value.substring(value.indexOf(":") + 1);
       }
 
-      value = value !== "null" ? value : 0;
-
       processedFilters.push({
         value,
         operator,
+        method: getWhereMethod(value, operator),
         column: camelize(key)
       });
     });
 
     return processedFilters.forEach(filter => {
-      return queryBuilder.andWhere(
+      return queryBuilder[filter.method](
         filter.column,
         filter.operator,
         filter.value
