@@ -24,8 +24,8 @@ const getOperator = (paramValue: string): string =>
     )
   ];
 
-const buildSortClause = sort =>
-  sort.split(",").map(criteria => {
+const buildSortClause = (sort: string[]) =>
+  sort.map(criteria => {
     if (criteria.startsWith("-")) {
       return { field: camelize(criteria.substr(1)), direction: "DESC" };
     }
