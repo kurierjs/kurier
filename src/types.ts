@@ -120,5 +120,5 @@ export type KnexRecord = {
 
 export type AttributeValueMatch = {
   attribute: string;
-  value: string | number | boolean;
+  value: string | string[] | number | number[] | boolean;
 };
