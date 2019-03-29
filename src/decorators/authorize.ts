@@ -14,7 +14,16 @@ function authorizeMiddleware(
 
     if (
       !conditions.every(
-        ({ attribute, value }) => this.app.user[attribute] === value
+        ({
+          attribute,
+          value
+        }: {
+          attribute: string;
+          value: string | string[] | number | number[] | boolean;
+        }) =>
+          Array.isArray(value)
+            ? value.includes(this.app.user[attribute])
+            : value === this.app.user[attribute]
       )
     ) {
       throw JsonApiErrors.AccessDenied();
