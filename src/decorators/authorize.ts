@@ -22,8 +22,8 @@ function authorizeMiddleware(
           value: string | string[] | number | number[] | boolean;
         }) =>
           Array.isArray(value)
-            ? value.includes(this.app.user[attribute])
-            : value === this.app.user[attribute]
+            ? value.includes(this.app.user.attributes[attribute])
+            : value === this.app.user.attibutes[attribute]
       )
     ) {
       throw JsonApiErrors.AccessDenied();
