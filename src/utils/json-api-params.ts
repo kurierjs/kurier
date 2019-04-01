@@ -1,6 +1,6 @@
 import { URL } from "url";
-
 import { JsonApiParams } from "../types";
+
 
 const JSON_API_ARRAY_KEYS = ["include", "sort", "fields"];
 
@@ -22,7 +22,7 @@ export function parse(url: string): JsonApiParams {
       }
 
       if (paramValue !== "") {
-        params[key][nestedKey] = parseValueForKey(paramKey, paramValue);
+        params[key][nestedKey] = parseValueForKey(key, paramValue);
       }
     } else {
       if (paramValue !== "") {
