@@ -74,10 +74,19 @@ function urlData(app: Application, ctx: Context) {
   const urlRegexp = new RegExp(
     `^(\/+)?((?<namespace>${escapeStringRegexp(
       app.namespace
-    )})(\/+|$))?(?<resource>[^\\s\/?]+)?(\/+)?(?<id>[^\\s\/?]+)?(\/+)?`
+    )})(\/+|$))?(?<resource>[^\\s\/?]+)?(\/+)?((?<id>[^\\s\/?]+)?(\/+)?\(?<relationships>relationships)?(\/+)?)?` +
+      "(?<relationship>[^\\s/?]+)?(/+)?$"
   );
 
-  return (ctx.path.match(urlRegexp) || {})["groups"] || {};
+  const { resource, id, relationships, relationship } =
+    (ctx.path.match(urlRegexp) || {})["groups"] || ({} as any);
+
+  return {
+    id,
+    resource,
+    relationship,
+    isRelationships: !!relationships
+  };
 }
 
 async function handleBulkEndpoint(app: Application, ctx: Context) {
@@ -112,7 +121,7 @@ async function handleJsonApiEndpoint(app: Application, ctx: Context) {
 }
 
 function convertHttpRequestToOperation(ctx: Context): Operation {
-  const { id, resource } = ctx.urlData;
+  const { id, resource, relationship } = ctx.urlData;
   const type = camelize(singularize(resource));
 
   const opMap = {
@@ -126,7 +135,7 @@ function convertHttpRequestToOperation(ctx: Context): Operation {
   return {
     op: opMap[ctx.method],
     params: parse(ctx.href),
-    ref: { id, type },
+    ref: { id, type, relationship },
     data: ctx.request.body.data
   } as Operation;
 }
