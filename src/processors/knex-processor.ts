@@ -1,7 +1,7 @@
 import * as Knex from "knex";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { KnexRecord, Operation, ResourceConstructor } from "../types";
+import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceSchemaRelationship } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
@@ -47,14 +47,30 @@ const buildSortClause = (sort: string[]) =>
     return { field: camelize(criteria), direction: "ASC" };
   });
 
-const getAttributes = (attributes, fields, type): [] => {
-  if (Object.entries(fields).length === 0 && fields.constructor === Object) {
-    return attributes;
+const pick = (object = {}, list = []): {} => {
+  return list.reduce((acc, key) => ({ ...acc, [key]: object[key] }), {});
+};
+
+const getColumns = (
+  resourceClass: ResourceConstructor,
+  fields = {}
+): string[] => {
+  const type = resourceClass.type;
+  const { attributes, relationships } = resourceClass.schema;
+
+  const relationshipsKeys = Object.entries(relationships)
+    .filter(([key, value]) => value.belongsTo)
+    .map(([key]) => `${key}Id`);
+
+  let attributesKeys = Object.keys(attributes);
+
+  if (Object.keys(fields).length) {
+    attributesKeys = attributesKeys.filter(key =>
+      fields[pluralize(type)].includes(key)
+    );
   }
 
-  return attributes.filter(attribute =>
-    fields[pluralize(type)].includes(attribute)
-  );
+  return [...attributesKeys, ...relationshipsKeys, "id"];
 };
 
 export default class KnexProcessor<
@@ -78,16 +94,11 @@ export default class KnexProcessor<
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
     const fields = params ? { ...params.fields } : {};
-    const attributes = getAttributes(
-      Object.keys(resourceClass.attributes || {}),
-      fields,
-      type
-    );
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
-      .select(...attributes, "id")
-      .modify(queryBuilder => this.optionsBuilder(queryBuilder, op));
+      .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
+      .select(getColumns(resourceClass, fields));
 
     return this.convertToResources(resourceClass, records);
   }
@@ -128,7 +139,7 @@ export default class KnexProcessor<
 
     const record = await this.knex(tableName)
       .where({ id })
-      .select(["id", ...Object.keys(resourceClass.attributes || {})])
+      .select(getColumns(resourceClass))
       .first();
 
     return this.convertToResource(resourceClass, record);
@@ -146,7 +157,7 @@ export default class KnexProcessor<
 
     const record = await this.knex(tableName)
       .whereIn("id", ids)
-      .select(["id", ...Object.keys(resourceClass.attributes || {})])
+      .select(getColumns(resourceClass))
       .first();
 
     return this.convertToResource(resourceClass, record);
@@ -166,10 +177,41 @@ export default class KnexProcessor<
     record: KnexRecord
   ): Promise<ResourceT> {
     const id = record.id;
-    delete record.id;
-    const attributes = record;
+    const attributesKeys = Object.keys(resourceClass.schema.attributes);
+    const attributes = pick(record, attributesKeys);
+    const relationships = this.convertToRelationships(resourceClass, record);
 
-    return (new resourceClass({ id, attributes }) as unknown) as ResourceT;
+    return (new resourceClass({
+      id,
+      attributes,
+      relationships
+    }) as unknown) as ResourceT;
+  }
+
+  convertToRelationships(
+    resourceClass: ResourceConstructor,
+    record: KnexRecord
+  ) {
+    return Object.entries(resourceClass.schema.relationships).reduce(
+      (relationships, [key, relationship]) => {
+        return {
+          ...relationships,
+          [key]: {
+            data: this.relationshipData(record[`${key}Id`], relationship)
+          }
+        };
+      },
+      {}
+    );
+  }
+
+  relationshipData(
+    id: string,
+    relationship: ResourceSchemaRelationship
+  ): ResourceRelationshipData {
+    if (relationship.belongsTo) {
+      return id ? { id, type: relationship.type().type } : null;
+    }
   }
 
   typeToTableName(type: string): string {
