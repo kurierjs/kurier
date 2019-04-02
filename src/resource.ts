@@ -1,18 +1,20 @@
-import { ResourceTypeAttributes, ResourceTypeRelationships } from "./types";
+import { ResourceSchema, ResourceTypeAttributes, ResourceTypeRelationships } from "./types";
 import { camelize } from "./utils/string";
 
 export default abstract class Resource {
+  static get type() {
+    return camelize(this.name);
+  }
+
+  static schema: ResourceSchema = {
+    attributes: {},
+    relationships: {}
+  };
+
   id?: string;
   type: string;
   attributes: ResourceTypeAttributes;
   relationships: ResourceTypeRelationships;
-
-  static attributes: ResourceTypeAttributes = {};
-  static relationships: ResourceTypeRelationships = {};
-
-  static get type() {
-    return camelize(this.name);
-  }
 
   constructor({
     id,

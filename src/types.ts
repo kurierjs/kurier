@@ -23,14 +23,16 @@ export type ResourceTypeAttributes = {
 };
 
 export type ResourceTypeRelationships = {
-  [key: string]: ResourceRelationships;
-};
-
-export type ResourceRelationships = {
-  data: ResourceRelationship | ResourceRelationship[];
+  [key: string]: ResourceRelationship;
 };
 
 export type ResourceRelationship = {
+  meta?: Meta;
+  links: Links;
+  data?: ResourceRelationshipData | ResourceRelationshipData[];
+};
+
+export type ResourceRelationshipData = {
   type: string;
   id: string;
 };
@@ -76,7 +78,15 @@ export type JsonApiParams = {
   fields?: { [key: string]: string[] };
 };
 
-export type Links = {};
+export type Links = {
+  self: string | Link;
+  related?: string | Link;
+};
+
+export type Link = {
+  href: string;
+  meta?: Meta;
+};
 
 export type Operation = {
   op: string;
@@ -99,8 +109,7 @@ export type OperationResponse = {
 
 export type ResourceConstructor<ResourceT = Resource> = {
   type: string;
-  attributes: ResourceTypeAttributes;
-  relationships: ResourceTypeRelationships;
+  schema: ResourceSchema;
 
   new ({
     id,
@@ -121,4 +130,23 @@ export type KnexRecord = {
 export type AttributeValueMatch = {
   attribute: string;
   value: string | number | boolean | string[] | number[];
+};
+
+export type ResourceSchema = {
+  attributes: ResourceSchemaAttributes;
+  relationships: ResourceSchemaRelationships;
+};
+
+export type ResourceSchemaAttributes = {
+  [key: string]: StringConstructor | NumberConstructor | BooleanConstructor;
+};
+
+export type ResourceSchemaRelationships = {
+  [key: string]: ResourceSchemaRelationship;
+};
+
+export type ResourceSchemaRelationship = {
+  type: () => ResourceConstructor;
+  hasMany?: boolean;
+  belongsTo?: boolean;
 };
