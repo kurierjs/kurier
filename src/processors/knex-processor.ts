@@ -1,7 +1,7 @@
 import * as Knex from "knex";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceSchemaRelationship } from "../types";
+import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceRelationships, ResourceSchemaRelationship } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
@@ -191,7 +191,7 @@ export default class KnexProcessor<
   convertToRelationships(
     resourceClass: ResourceConstructor,
     record: KnexRecord
-  ) {
+  ): ResourceRelationships {
     return Object.entries(resourceClass.schema.relationships).reduce(
       (relationships, [key, relationship]) => {
         return {

@@ -18,11 +18,11 @@ export type OperationDecorator = (
 
 // Generic types for JSONAPI document structure.
 
-export type ResourceTypeAttributes = {
+export type ResourceAttributes = {
   [key: string]: string | number | boolean;
 };
 
-export type ResourceTypeRelationships = {
+export type ResourceRelationships = {
   [key: string]: ResourceRelationship;
 };
 
@@ -117,8 +117,8 @@ export type ResourceConstructor<ResourceT = Resource> = {
     relationships
   }: {
     id?: string;
-    attributes?: ResourceTypeAttributes;
-    relationships?: ResourceTypeRelationships;
+    attributes?: ResourceAttributes;
+    relationships?: ResourceRelationships;
   }): ResourceT;
 };
 
