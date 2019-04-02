@@ -60,12 +60,8 @@ const getAttributes = (attributes, fields, type): [] => {
 export default class KnexProcessor<
   ResourceT = Resource
 > extends OperationProcessor<ResourceT> {
-  protected knex: Knex;
-
-  constructor(public knexOptions: Knex.Config = {}) {
-    super();
-
-    this.knex = Knex(knexOptions);
+  getConnection(): Knex {
+    return this.app.services.knex;
   }
 
   async get(op: Operation): Promise<ResourceT[]> {
@@ -84,7 +80,7 @@ export default class KnexProcessor<
       type
     );
 
-    const records: KnexRecord[] = await this.knex(tableName)
+    const records: KnexRecord[] = await this.getConnection()(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
       .select(...attributes, "id")
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op));
@@ -95,7 +91,7 @@ export default class KnexProcessor<
   async remove(op: Operation): Promise<void> {
     const tableName = this.typeToTableName(op.ref.type);
 
-    const record = await this.knex(tableName)
+    const record = await this.getConnection()(tableName)
       .where({ id: op.ref.id })
       .first();
 
@@ -103,7 +99,7 @@ export default class KnexProcessor<
       throw JsonApiErrors.RecordNotExists();
     }
 
-    return await this.knex(tableName)
+    return await this.getConnection()(tableName)
       .where({ id: op.ref.id })
       .del()
       .then(() => undefined);
@@ -117,7 +113,7 @@ export default class KnexProcessor<
 
     const tableName = this.typeToTableName(type);
 
-    const updated = await this.knex(tableName)
+    const updated = await this.getConnection()(tableName)
       .where({ id })
       .first()
       .update(op.data.attributes);
@@ -126,7 +122,7 @@ export default class KnexProcessor<
       throw JsonApiErrors.RecordNotExists();
     }
 
-    const record = await this.knex(tableName)
+    const record = await this.getConnection()(tableName)
       .where({ id })
       .select(["id", ...Object.keys(resourceClass.attributes || {})])
       .first();
@@ -142,9 +138,9 @@ export default class KnexProcessor<
 
     const tableName = this.typeToTableName(type);
 
-    const ids = await this.knex(tableName).insert(op.data.attributes, "id");
+    const ids = await this.getConnection()(tableName).insert(op.data.attributes, "id");
 
-    const record = await this.knex(tableName)
+    const record = await this.getConnection()(tableName)
       .whereIn("id", ids)
       .select(["id", ...Object.keys(resourceClass.attributes || {})])
       .first();

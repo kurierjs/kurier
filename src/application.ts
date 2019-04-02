@@ -8,6 +8,7 @@ export default class Application {
   public processors: OperationProcessor[];
   public defaultProcessor: OperationProcessor;
   public user: Resource;
+  private registeredProcessors: Map<string, OperationProcessor> = new Map();
 
   constructor(settings: {
     namespace?: string;
@@ -52,21 +53,28 @@ export default class Application {
   }
 
   async processorFor(op: Operation): Promise<OperationProcessor | undefined> {
-    const processors = await Promise.all(
-      this.processors.map(
-        async processor => (await processor.shouldHandle(op)) && processor
-      )
-    );
+    let processor = this.registeredProcessors.get(op.data.type);
 
-    const processor = processors.find(Boolean);
-
-    if (processor) {
+    if (processor !== undefined) {
       return processor;
     }
 
-    if (await this.resourceFor(op.ref.type)) {
-      return this.defaultProcessor;
+    if (/* Look for custom processors here maybe */false) {
+      this.registeredProcessors.set(op.data.type, processor);
+      return processor;
     }
+
+    let resource = await this.resourceFor(op.data.type);
+
+    // Default procesor
+    class ProcessorDefinition extends this.defaultProcessor {
+      resourceClass? = resource
+    }
+
+    processor = new ProcessorDefinition();
+
+    this.registeredProcessors.set(op.data.type, processor);
+    return processor;
   }
 
   async resourceFor(
