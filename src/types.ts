@@ -75,7 +75,7 @@ export type JsonApiError = {
 export type JsonApiParams = {
   include?: string[];
   sort?: string[];
-  filter?: { [key: string]: string };
+  filter?: { [key: string]: string | string[] };
   page?: { [key: string]: string[] };
   fields?: { [key: string]: string[] };
 };
