@@ -74,9 +74,7 @@ export default class OperationProcessor<ResourceT = Resource> {
 
     delete record.id;
     const attributes = record;
-    const resourceClass: ResourceConstructor<ResourceT> = (this.resourceFor(
-      type
-    ) as unknown) as ResourceConstructor<ResourceT>;
+    const resourceClass = await this.resourceFor(type);
 
     return new resourceClass({
       id,

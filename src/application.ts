@@ -57,7 +57,7 @@ export default class Application {
       )
     );
 
-    const processor = processors.find(Boolean);
+    const processor = processors.find(a => a !== undefined);
 
     if (processor) {
       return new processor(this);
