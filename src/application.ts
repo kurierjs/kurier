@@ -1,28 +1,27 @@
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
-import { Operation, OperationResponse, ResourceConstructor } from "./types";
+import { Operation, OperationResponse, ProcessorConstructor, ResourceConstructor } from "./types";
 
 export default class Application {
-  public namespace?: string;
-  public types: ResourceConstructor[];
-  public processors: OperationProcessor[];
-  public defaultProcessor: OperationProcessor;
-  public user: Resource;
+  namespace: string;
+  types: ResourceConstructor[];
+  processors: ProcessorConstructor[];
+  defaultProcessor: ProcessorConstructor;
+  user: Resource;
+  services: { [key: string]: any };
 
   constructor(settings: {
     namespace?: string;
     types?: ResourceConstructor[];
-    processors?: OperationProcessor[];
-    defaultProcessor?: OperationProcessor;
+    processors?: ProcessorConstructor[];
+    defaultProcessor?: ProcessorConstructor;
+    services?: {};
   }) {
     this.namespace = settings.namespace || "";
     this.types = settings.types || [];
     this.processors = settings.processors || [];
-    this.defaultProcessor =
-      settings.defaultProcessor || new OperationProcessor();
-
-    this.defaultProcessor.app = this;
-    this.processors.forEach(processor => (processor.app = this));
+    this.services = settings.services || {};
+    this.defaultProcessor = settings.defaultProcessor || OperationProcessor;
   }
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
@@ -61,11 +60,11 @@ export default class Application {
     const processor = processors.find(Boolean);
 
     if (processor) {
-      return processor;
+      return new processor(this);
     }
 
     if (await this.resourceFor(op.ref.type)) {
-      return this.defaultProcessor;
+      return new this.defaultProcessor(this);
     }
   }
 

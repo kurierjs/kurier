@@ -1,4 +1,5 @@
 import * as Knex from "knex";
+import { Application } from "..";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
 import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceRelationships, ResourceSchemaRelationship } from "../types";
@@ -78,10 +79,9 @@ export default class KnexProcessor<
 > extends OperationProcessor<ResourceT> {
   protected knex: Knex;
 
-  constructor(public knexOptions: Knex.Config = {}) {
-    super();
-
-    this.knex = Knex(knexOptions);
+  constructor(app: Application) {
+    super(app);
+    this.knex = app.services.knex;
   }
 
   async get(op: Operation): Promise<ResourceT[]> {

@@ -1,3 +1,5 @@
+import Application from "./application";
+import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 
 export enum HttpStatusCode {
@@ -105,6 +107,12 @@ export type Operation = {
 
 export type OperationResponse = {
   data: Resource | Resource[] | null;
+};
+
+export type ProcessorConstructor = {
+  resourceClass?: ResourceConstructor;
+  new (app: Application): OperationProcessor;
+  shouldHandle(op: Operation): Promise<boolean>;
 };
 
 export type ResourceConstructor<ResourceT = Resource> = {

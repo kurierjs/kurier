@@ -3,12 +3,13 @@ import Resource from "../resource";
 import { Operation, ResourceConstructor } from "../types";
 
 export default class OperationProcessor<ResourceT = Resource> {
-  public app: Application;
-  public resourceClass?: ResourceConstructor;
+  static resourceClass?: ResourceConstructor;
 
-  async shouldHandle(op: Operation): Promise<boolean> {
+  static async shouldHandle(op: Operation): Promise<boolean> {
     return this.resourceClass && op.ref.type === this.resourceClass.type;
   }
+
+  constructor(protected app: Application) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
