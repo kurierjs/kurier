@@ -20,10 +20,10 @@ export default class UserProcessor extends KnexProcessor<User> {
   }
 
   relationships = {
-    async posts(this: UserProcessor, user: any) {
-      if (user.posts !== undefined) {
+    async posts(this: UserProcessor, user: User, otherData: any) {
+      if (otherData.posts) {
         console.log('Loading Already Done!');
-        return user.posts;
+        return otherData.posts.filter(a => a.authorId == user.id);
       }
 
       console.log('Loading Async');
