@@ -5,8 +5,8 @@ import { Operation, ResourceConstructor } from "../types";
 export default class OperationProcessor<ResourceT = Resource> {
   static resourceClass?: ResourceConstructor;
 
-  static async shouldHandle(op: Operation): Promise<boolean> {
-    return this.resourceClass && op.ref.type === this.resourceClass.type;
+  static async shouldHandle(resourceType: string): Promise<boolean> {
+    return this.resourceClass && resourceType === this.resourceClass.type;
   }
 
   constructor(protected app: Application) {}
@@ -14,12 +14,6 @@ export default class OperationProcessor<ResourceT = Resource> {
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
     return this[action] && this[action].call(this, op);
-  }
-
-  async resourceFor(
-    resourceType: string
-  ): Promise<ResourceConstructor | undefined> {
-    return this.app.resourceFor(resourceType);
   }
 
   async get(op: Operation): Promise<ResourceT[]> {
@@ -36,5 +30,17 @@ export default class OperationProcessor<ResourceT = Resource> {
 
   async add(op: Operation): Promise<ResourceT> {
     return Promise.reject();
+  }
+
+  protected async resourceFor(
+    resourceType: string
+  ): Promise<ResourceConstructor | undefined> {
+    return this.app.resourceFor(resourceType);
+  }
+
+  protected async processorFor(
+    resourceType: string
+  ): Promise<OperationProcessor | undefined> {
+    return this.app.processorFor(resourceType);
   }
 }

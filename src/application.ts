@@ -28,7 +28,7 @@ export default class Application {
     return await this.createTransaction(
       ops
         .map(async op => {
-          const processor = await this.processorFor(op);
+          const processor = await this.processorFor(op.ref.type);
 
           if (processor) {
             return this.executeOperation(op, processor);
@@ -50,10 +50,13 @@ export default class Application {
     return await Promise.all(ops);
   }
 
-  async processorFor(op: Operation): Promise<OperationProcessor | undefined> {
+  async processorFor(
+    resourceType: string
+  ): Promise<OperationProcessor | undefined> {
     const processors = await Promise.all(
       this.processors.map(
-        async processor => (await processor.shouldHandle(op)) && processor
+        async processor =>
+          (await processor.shouldHandle(resourceType)) && processor
       )
     );
 
@@ -63,7 +66,7 @@ export default class Application {
       return new processor(this);
     }
 
-    if (await this.resourceFor(op.ref.type)) {
+    if (await this.resourceFor(resourceType)) {
       return new this.defaultProcessor(this);
     }
   }

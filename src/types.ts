@@ -112,7 +112,7 @@ export type OperationResponse = {
 export type ProcessorConstructor = {
   resourceClass?: ResourceConstructor;
   new (app: Application): OperationProcessor;
-  shouldHandle(op: Operation): Promise<boolean>;
+  shouldHandle(resourceType: string): Promise<boolean>;
 };
 
 export type ResourceConstructor<ResourceT = Resource> = {
