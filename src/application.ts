@@ -78,9 +78,11 @@ export default class Application {
   }
 
   buildOperationResponse(
-    data: Resource | Resource[] | void
+    data: Resource | Resource[] | void,
+    included?: Resource[]
   ): OperationResponse {
     return {
+      included,
       data: data || null
     };
   }

@@ -107,6 +107,7 @@ export type Operation = {
 
 export type OperationResponse = {
   data: Resource | Resource[] | null;
+  included?: Resource[];
 };
 
 export type ProcessorConstructor = {
@@ -155,6 +156,7 @@ export type ResourceSchemaRelationships = {
 
 export type ResourceSchemaRelationship = {
   type: () => ResourceConstructor;
+  inverse?: string;
   hasMany?: boolean;
   belongsTo?: boolean;
 };

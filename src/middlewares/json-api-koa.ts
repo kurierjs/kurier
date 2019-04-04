@@ -147,7 +147,7 @@ function convertOperationResponseToHttpResponse(
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(ctx.method)) {
-    return { data: operation.data };
+    return { data: operation.data, included: operation.included };
   }
 }
 
