@@ -2,7 +2,8 @@ import * as Knex from "knex";
 import { Application } from "..";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceRelationships, ResourceSchemaRelationship } from "../types";
+import { JsonApiParams, KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceRelationships, ResourceSchemaRelationship } from "../types";
+import promiseHash from "../utils/promise-hash";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
@@ -78,6 +79,7 @@ export default class KnexProcessor<
   ResourceT = Resource
 > extends OperationProcessor<ResourceT> {
   protected knex: Knex;
+  protected relationships: {};
 
   constructor(app: Application) {
     super(app);
@@ -100,7 +102,11 @@ export default class KnexProcessor<
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
       .select(getColumns(resourceClass, fields));
 
-    return this.convertToResources(resourceClass, records);
+    const resources = await this.convertToResources(resourceClass, records);
+
+    this.includeRelationships(resourceClass, resources, op.params.include);
+
+    return resources;
   }
 
   async remove(op: Operation): Promise<void> {
@@ -205,6 +211,86 @@ export default class KnexProcessor<
     );
   }
 
+  async includeRelationships(
+    resourceClass: ResourceConstructor,
+    resources: ResourceT[],
+    includes = []
+  ) {
+    await Promise.all(
+      resources.map(async resource => {
+        const relationships = await this.getRelationships(
+          resourceClass,
+          includes,
+          resource
+        );
+
+        // TODO: Do sth with relationships | assign to resources etc...
+      })
+    );
+  }
+
+  async getRelationships(
+    resourceClass: ResourceConstructor,
+    relationshipNames: string[],
+    resource: ResourceT
+  ) {
+    return promiseHash(
+      relationshipNames.reduce((acc, relationshipName) => {
+        acc[relationshipName] = this.getRelationship(
+          relationshipName,
+          resourceClass,
+          (resource as unknown) as Resource
+        );
+
+        return acc;
+      }, {})
+    );
+  }
+
+  async getRelationship(
+    relationshipName: string,
+    resourceClass: ResourceConstructor,
+    resource: Resource
+  ): Promise<ResourceT | ResourceT[]> {
+    const hasCustomRelationship =
+      this.relationships && this.relationships.hasOwnProperty(relationshipName);
+
+    if (hasCustomRelationship) {
+      return this.relationships[relationshipName];
+    }
+
+    const relationship = resourceClass.schema.relationships[relationshipName];
+    if (!relationship) return;
+
+    const relationshipType = relationship.type().type;
+    const processor = await this.processorFor(relationshipType);
+
+    // TODO: Replace with query?
+
+    const filterKey = relationship.hasMany
+      ? `${camelize(relationship.inverse || resource.type)}Id`
+      : "id";
+
+    const op = {
+      ref: {
+        type: relationshipType
+      },
+      params: {
+        filter: {
+          [filterKey]: resource.id
+        }
+      } as JsonApiParams
+    } as Operation;
+
+    const relationshipResources = processor.get(op);
+
+    if (relationship.belongsTo) {
+      return relationshipResources[0] as ResourceT;
+    }
+
+    return (relationshipResources as unknown) as ResourceT[];
+  }
+
   relationshipData(
     id: string,
     relationship: ResourceSchemaRelationship
@@ -234,9 +320,9 @@ export default class KnexProcessor<
         value = String(value);
         const operator = getOperator(value) || "=";
 
-      if (value.substring(value.indexOf(":") + 1)) {
-        value = value.substring(value.indexOf(":") + 1);
-      }
+        if (value.substring(value.indexOf(":") + 1)) {
+          value = value.substring(value.indexOf(":") + 1);
+        }
 
         queryBuilder[getWhereMethod(value, operator)](
           filterKey,
