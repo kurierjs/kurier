@@ -221,25 +221,28 @@ export default class KnexProcessor<
   filtersToKnex(queryBuilder, filters: {}) {
     Object.keys(filters).forEach(key => {
       let value = filters[key];
-      const filterKey = camelize(key);
 
       if (value === undefined) {
         return;
       }
 
-      let operator = "=";
+      const filterKey = camelize(key);
 
       if (Array.isArray(value)) {
         queryBuilder.whereIn(filterKey, value);
       } else {
-        operator = getOperator(value) || "=";
+        value = String(value);
+        const operator = getOperator(value) || "=";
 
       if (value.substring(value.indexOf(":") + 1)) {
         value = value.substring(value.indexOf(":") + 1);
       }
 
-        value = value !== "null" ? value : 0;
-        queryBuilder.andWhere(filterKey, operator, value);
+        queryBuilder[getWhereMethod(value, operator)](
+          filterKey,
+          operator,
+          value
+        );
       }
     });
   }
