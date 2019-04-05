@@ -8,7 +8,10 @@ export default class ArticleProcessor extends KnexProcessor<Article> {
 
   relationships = {
     async author(this: ArticleProcessor, article: HasId) {
-      return await this.getQuery("users")
+      const processor = await this.processorFor("user");
+
+      return await (processor as KnexProcessor)
+        .getQuery()
         .where({ id: article.authorId })
         .select();
     }
