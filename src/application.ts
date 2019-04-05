@@ -60,13 +60,14 @@ export default class Application {
     );
 
     const processor = processors.find(p => p !== false);
+    const resourceClass = await this.resourceFor(resourceType);
 
-    if (processor) {
-      return new processor(this);
+    if (processor && resourceClass) {
+      return new processor(this, resourceClass);
     }
 
-    if (await this.resourceFor(op.ref.type)) {
-      return new this.defaultProcessor(this);
+    if (resourceClass) {
+      return new this.defaultProcessor(this, resourceClass);
     }
   }
 

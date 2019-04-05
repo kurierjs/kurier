@@ -76,21 +76,18 @@ export default class KnexProcessor<
 > extends OperationProcessor<ResourceT> {
   protected knex: Knex;
 
-  constructor(app: Application) {
-    super(app);
+  constructor(app: Application, resourceClass: ResourceConstructor) {
+    super(app, resourceClass);
     this.knex = app.services.knex;
   }
 
-  getQuery(tableName): Knex.QueryBuilder {
-    return this.knex(tableName);
+  getQuery(): Knex.QueryBuilder {
+    return this.knex(this.typeToTableName(this.resourceClass.type));
   }
 
   async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id, type } = ref;
-
-    const resourceClass = await this.resourceFor(type);
-    if (!resourceClass) return [];
 
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
@@ -98,7 +95,7 @@ export default class KnexProcessor<
     const records: KnexRecord[] = await this.knex(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
-      .select(getColumns(resourceClass, op.params.fields));
+      .select(getColumns(this.resourceClass, op.params.fields));
 
     return records;
   }
@@ -123,9 +120,6 @@ export default class KnexProcessor<
   async update(op: Operation): Promise<HasId> {
     const { id, type } = op.ref;
 
-    const resourceClass = await this.resourceFor(type);
-    if (!resourceClass) return;
-
     const tableName = this.typeToTableName(type);
 
     const updated = await this.knex(tableName)
@@ -139,15 +133,12 @@ export default class KnexProcessor<
 
     return await this.knex(tableName)
       .where({ id })
-      .select(getColumns(resourceClass))
+      .select(getColumns(this.resourceClass))
       .first();
   }
 
   async add(op: Operation): Promise<HasId> {
     const { type } = op.ref;
-
-    const resourceClass = await this.resourceFor(type);
-    if (!resourceClass) return;
 
     const tableName = this.typeToTableName(type);
 
@@ -155,7 +146,7 @@ export default class KnexProcessor<
 
     return await this.knex(tableName)
       .whereIn("id", ids)
-      .select(getColumns(resourceClass))
+      .select(getColumns(this.resourceClass))
       .first();
   }
 

@@ -33,7 +33,10 @@ export default class OperationProcessor<ResourceT = Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(protected app: Application) {}
+  constructor(
+    protected app: Application,
+    public resourceClass: ResourceConstructor
+  ) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
