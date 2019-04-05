@@ -26,7 +26,7 @@ const promiseHashMap = async (hash, callback) => {
 };
 
 export default class OperationProcessor<ResourceT = Resource> {
-  static async shouldHandle(op: Operation): Promise<boolean> {
+  static async shouldHandle(resourceType: string): Promise<boolean> {
     return false;
   }
 
@@ -110,6 +110,12 @@ export default class OperationProcessor<ResourceT = Resource> {
     resourceType: string
   ): Promise<ResourceConstructor | undefined> {
     return this.app.resourceFor(resourceType);
+  }
+
+  async processorFor(
+    resourceType: string
+  ): Promise<OperationProcessor | undefined> {
+    return this.app.processorFor(resourceType);
   }
 
   async get(op: Operation): Promise<HasId[]> {

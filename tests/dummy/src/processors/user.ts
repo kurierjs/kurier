@@ -1,13 +1,13 @@
-import { HasId, KnexProcessor, Operation } from "../jsonapi-ts";
+import { HasId, KnexProcessor } from "../jsonapi-ts";
 import User from "../resources/user";
 
 export default class UserProcessor extends KnexProcessor<User> {
-  static async shouldHandle(op: Operation): Promise<boolean> {
-    return op.ref.type === User.type;
+  static async shouldHandle(resourceType: string): Promise<boolean> {
+    return resourceType === User.type;
   }
 
   attributes = {
-    async friends(user: User) {
+    async friends() {
       return [{ name: "Joel" }, { name: "Ryan" }];
     },
 
