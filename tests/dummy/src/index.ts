@@ -1,9 +1,9 @@
 import * as Knex from "knex";
 import * as Koa from "koa";
 import { Application, jsonApiKoa, KnexProcessor } from "./jsonapi-ts";
+import UserProcessor from "./processors/user";
 import Article from "./resources/article";
 import User from "./resources/user";
-import UserProcessor from "./resources/user/processor";
 
 const knexConfig = {
   client: "sqlite3",
