@@ -81,6 +81,10 @@ export default class KnexProcessor<
     this.knex = app.services.knex;
   }
 
+  getQuery(tableName): Knex.QueryBuilder {
+    return this.knex(tableName);
+  }
+
   async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id, type } = ref;

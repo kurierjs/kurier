@@ -1,4 +1,4 @@
-import { KnexProcessor, Operation } from "../jsonapi-ts";
+import { HasId, KnexProcessor, Operation } from "../jsonapi-ts";
 import User from "../resources/user";
 
 export default class UserProcessor extends KnexProcessor<User> {
@@ -17,8 +17,8 @@ export default class UserProcessor extends KnexProcessor<User> {
   };
 
   relationships = {
-    async articles(this: UserProcessor, user: User) {
-      return await this.knex("articles")
+    async articles(this: UserProcessor, user: HasId) {
+      return await this.getQuery("articles")
         .where({ authorId: user.id })
         .select();
     }

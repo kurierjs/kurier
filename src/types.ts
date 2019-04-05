@@ -161,4 +161,5 @@ export type ResourceSchemaRelationship = {
 
 export interface HasId {
   id: any;
+  [key: string]: any;
 }
