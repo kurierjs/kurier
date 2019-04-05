@@ -1,11 +1,10 @@
 import Application from "../application";
 import Resource from "../resource";
-import { Operation, ResourceConstructor } from "../types";
-import { pluralize } from "../utils/string";
+import { HasId, Operation, ResourceConstructor } from "../types";
 
-export interface HasId {
-  id: any;
-}
+const pick = (object = {}, list = []): {} => {
+  return list.reduce((acc, key) => ({ ...acc, [key]: object[key] }), {});
+};
 
 const promiseHashMap = async (hash, callback) => {
   const keys = Object.keys(hash);
@@ -40,16 +39,6 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this.convertToResources(op.ref.type, result);
   }
 
-  getAttributes(attributes, fields, type): string[] {
-    if (Object.entries(fields).length === 0 && fields.constructor === Object) {
-      return attributes;
-    }
-
-    return attributes.filter(attribute =>
-      fields[pluralize(type)].includes(attribute)
-    );
-  }
-
   get computedPropertyNames(): string[] {
     return Object.keys(this.attributes);
   }
@@ -59,6 +48,7 @@ export default class OperationProcessor<ResourceT = Resource> {
       this.attributes[key].call(this, record)
     );
   }
+
   async getRelationships(record: HasId) {
     return promiseHashMap(this.relationships, key =>
       this.relationships[key].call(this, record)
@@ -75,23 +65,27 @@ export default class OperationProcessor<ResourceT = Resource> {
     }
 
     const record = { ...records };
-    const id = record.id;
+    const resourceClass = await this.resourceFor(type);
+
+    const { id } = record;
+
+    const attributes = pick(
+      record,
+      Object.keys(resourceClass.schema.attributes)
+    );
+
     const [computedAttributes, relationships] = await Promise.all([
       this.getComputedProperties(record),
       this.getRelationships(record)
     ]);
 
-    delete record.id;
-    const attributes = record;
-    const resourceClass = await this.resourceFor(type);
-
     return new resourceClass({
       id,
+      relationships,
       attributes: {
         ...attributes,
         ...computedAttributes
-      },
-      relationships
+      }
     });
   }
 

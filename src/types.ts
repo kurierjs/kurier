@@ -158,3 +158,7 @@ export type ResourceSchemaRelationship = {
   hasMany?: boolean;
   belongsTo?: boolean;
 };
+
+export interface HasId {
+  id: any;
+}

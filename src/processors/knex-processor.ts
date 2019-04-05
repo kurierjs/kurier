@@ -2,9 +2,9 @@ import * as Knex from "knex";
 import { Application } from "..";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { KnexRecord, Operation, ResourceConstructor, ResourceRelationshipData, ResourceRelationships, ResourceSchemaRelationship } from "../types";
+import { HasId, KnexRecord, Operation, ResourceConstructor } from "../types";
 import { camelize, pluralize } from "../utils/string";
-import OperationProcessor, { HasId } from "./operation-processor";
+import OperationProcessor from "./operation-processor";
 
 const operators = {
   eq: "=",
@@ -39,17 +39,14 @@ const getWhereMethod = (value: string, operator: string) => {
   }
 };
 
-const buildSortClause = (sort: string[]) =>
-  sort.map(criteria => {
+const buildSortClause = (sort: string[]) => {
+  return sort.map(criteria => {
     if (criteria.startsWith("-")) {
       return { field: camelize(criteria.substr(1)), direction: "DESC" };
     }
 
     return { field: camelize(criteria), direction: "ASC" };
   });
-
-const pick = (object = {}, list = []): {} => {
-  return list.reduce((acc, key) => ({ ...acc, [key]: object[key] }), {});
 };
 
 const getColumns = (
