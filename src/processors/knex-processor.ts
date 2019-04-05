@@ -60,13 +60,13 @@ const getColumns = (
     .filter(([key, value]) => value.belongsTo)
     .map(([key]) => `${key}Id`);
 
-  let attributesKeys = Object.keys(attributes);
+  const typeFields = (fields[type] || []).filter(key =>
+    Object.keys(attributes).includes(key)
+  );
 
-  if (Object.keys(fields).length) {
-    attributesKeys = attributesKeys.filter(key =>
-      fields[pluralize(type)].includes(key)
-    );
-  }
+  const attributesKeys = typeFields.length
+    ? typeFields
+    : Object.keys(attributes);
 
   return [...attributesKeys, ...relationshipsKeys, "id"];
 };
@@ -90,12 +90,11 @@ export default class KnexProcessor<
 
     const tableName = this.typeToTableName(type);
     const filters = params ? { id, ...(params.filter || {}) } : { id };
-    const fields = params ? { ...params.fields } : {};
 
     const records: KnexRecord[] = await this.knex(tableName)
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
-      .select(getColumns(resourceClass, fields));
+      .select(getColumns(resourceClass, op.params.fields));
 
     return records;
   }
