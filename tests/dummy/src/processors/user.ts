@@ -17,7 +17,7 @@ export default class UserProcessor extends KnexProcessor<User> {
   };
 
   relationships = {
-    async articles(this: UserProcessor, user: User, otherData: any) {
+    async articles(this: UserProcessor, user: User) {
       return await this.knex("articles")
         .where({ authorId: user.id })
         .select();

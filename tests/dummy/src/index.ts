@@ -1,6 +1,7 @@
 import * as Knex from "knex";
 import * as Koa from "koa";
 import { Application, jsonApiKoa, KnexProcessor } from "./jsonapi-ts";
+import ArticleProcessor from "./processors/article";
 import UserProcessor from "./processors/user";
 import Article from "./resources/article";
 import User from "./resources/user";
@@ -16,7 +17,7 @@ const knexConfig = {
 const app = new Application({
   namespace: "api",
   types: [User, Article],
-  processors: [UserProcessor],
+  processors: [UserProcessor, ArticleProcessor],
   defaultProcessor: KnexProcessor
 });
 
