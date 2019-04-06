@@ -1,7 +1,7 @@
 import { ResourceAttributes, ResourceRelationships, ResourceSchema } from "./types";
 import { camelize } from "./utils/string";
 
-export default abstract class Resource {
+export default class Resource {
   static get type() {
     return camelize(this.name);
   }

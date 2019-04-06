@@ -1,5 +1,3 @@
-import Application from "./application";
-import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 
 export enum HttpStatusCode {
@@ -109,30 +107,6 @@ export type OperationResponse = {
   data: Resource | Resource[] | null;
 };
 
-export type ProcessorConstructor = {
-  new (
-    app: Application,
-    resourceClass: ResourceConstructor
-  ): OperationProcessor;
-
-  shouldHandle(resourceType: string): Promise<boolean>;
-};
-
-export type ResourceConstructor<ResourceT = Resource> = {
-  type: string;
-  schema: ResourceSchema;
-
-  new ({
-    id,
-    attributes,
-    relationships
-  }: {
-    id?: string;
-    attributes?: ResourceAttributes;
-    relationships?: ResourceRelationships;
-  }): ResourceT;
-};
-
 export type KnexRecord = {
   id: string;
   [key: string]: any;
@@ -157,7 +131,7 @@ export type ResourceSchemaRelationships = {
 };
 
 export type ResourceSchemaRelationship = {
-  type: () => ResourceConstructor;
+  type: () => typeof Resource;
   hasMany?: boolean;
   belongsTo?: boolean;
 };

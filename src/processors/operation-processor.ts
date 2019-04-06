@@ -1,6 +1,6 @@
 import Application from "../application";
 import Resource from "../resource";
-import { HasId, Operation, ResourceConstructor } from "../types";
+import { HasId, Operation } from "../types";
 
 const pick = (object = {}, list = []): {} => {
   return list.reduce((acc, key) => {
@@ -26,16 +26,23 @@ const promiseHashMap = async (hash, callback) => {
 };
 
 export default class OperationProcessor<ResourceT = Resource> {
+  static resourceClass: typeof Resource;
+
   static async shouldHandle(resourceType: string): Promise<boolean> {
-    return false;
+    return this.resourceClass && resourceType === this.resourceClass.type;
+  }
+
+  get resourceClass() : typeof Resource {
+    let staticMember = this.constructor as typeof OperationProcessor;
+
+    return staticMember.resourceClass;
   }
 
   protected attributes = {};
   protected relationships = {};
 
   constructor(
-    protected app: Application,
-    public resourceClass: ResourceConstructor
+    protected app: Application
   ) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
@@ -47,7 +54,7 @@ export default class OperationProcessor<ResourceT = Resource> {
 
   async getComputedProperties(
     op: Operation,
-    resourceClass: ResourceConstructor,
+    resourceClass: typeof Resource,
     record: HasId
   ) {
     const typeFields = op.params.fields && op.params.fields[resourceClass.type];
@@ -63,7 +70,7 @@ export default class OperationProcessor<ResourceT = Resource> {
 
   async getAttributes(
     op: Operation,
-    resourceClass: ResourceConstructor,
+    resourceClass: typeof Resource,
     record: HasId
   ) {
     const attributeKeys =
@@ -111,13 +118,13 @@ export default class OperationProcessor<ResourceT = Resource> {
 
   async resourceFor(
     resourceType: string
-  ): Promise<ResourceConstructor | undefined> {
+  ): Promise<typeof Resource> {
     return this.app.resourceFor(resourceType);
   }
 
   async processorFor(
     resourceType: string
-  ): Promise<OperationProcessor | undefined> {
+  ): Promise<OperationProcessor> {
     return this.app.processorFor(resourceType);
   }
 

@@ -1,20 +1,20 @@
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
-import { Operation, OperationResponse, ProcessorConstructor, ResourceConstructor } from "./types";
+import { Operation, OperationResponse } from "./types";
 
 export default class Application {
   namespace: string;
-  types: ResourceConstructor[];
-  processors: ProcessorConstructor[];
-  defaultProcessor: ProcessorConstructor;
+  types: typeof Resource[];
+  processors: typeof OperationProcessor[];
+  defaultProcessor: typeof OperationProcessor;
   user: Resource;
   services: { [key: string]: any };
 
   constructor(settings: {
     namespace?: string;
-    types?: ResourceConstructor[];
-    processors?: ProcessorConstructor[];
-    defaultProcessor?: ProcessorConstructor;
+    types?: typeof Resource[];
+    processors?: typeof OperationProcessor[];
+    defaultProcessor?: typeof OperationProcessor;
     services?: {};
   }) {
     this.namespace = settings.namespace || "";
@@ -53,6 +53,8 @@ export default class Application {
   async processorFor(
     resourceType: string
   ): Promise<OperationProcessor | undefined> {
+    const resourceClass = await this.resourceFor(resourceType);
+
     const processors = await Promise.all(
       this.processors.map(async processor =>
         (await processor.shouldHandle(resourceType)) ? processor : false
@@ -60,20 +62,19 @@ export default class Application {
     );
 
     const processor = processors.find(p => p !== false);
-    const resourceClass = await this.resourceFor(resourceType);
 
     if (processor && resourceClass) {
-      return new processor(this, resourceClass);
+      return new processor(this);
     }
 
     if (resourceClass) {
-      return new this.defaultProcessor(this, resourceClass);
+      return new this.defaultProcessor(this);
     }
   }
 
   async resourceFor(
     resourceType: string
-  ): Promise<ResourceConstructor | undefined> {
+  ): Promise<typeof Resource | undefined> {
     return this.types.find(({ type }) => type && type === resourceType);
   }
 

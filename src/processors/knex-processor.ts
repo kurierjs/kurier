@@ -2,7 +2,7 @@ import * as Knex from "knex";
 import { Application } from "..";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { HasId, KnexRecord, Operation, ResourceConstructor } from "../types";
+import { HasId, KnexRecord, Operation } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
@@ -50,7 +50,7 @@ const buildSortClause = (sort: string[]) => {
 };
 
 const getColumns = (
-  resourceClass: ResourceConstructor,
+  resourceClass: typeof Resource,
   fields = {}
 ): string[] => {
   const type = resourceClass.type;
@@ -76,8 +76,8 @@ export default class KnexProcessor<
 > extends OperationProcessor<ResourceT> {
   protected knex: Knex;
 
-  constructor(app: Application, resourceClass: ResourceConstructor) {
-    super(app, resourceClass);
+  constructor(app: Application) {
+    super(app);
     this.knex = app.services.knex;
   }
 
