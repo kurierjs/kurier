@@ -1,6 +1,6 @@
 import Application from "../application";
 import Resource from "../resource";
-import { HasId, Operation, ResourceConstructor } from "../types";
+import { HasId, Operation, ResourceConstructor, ResourceSchemaRelationship } from "../types";
 
 const pick = (object = {}, list = []): {} => {
   return list.reduce((acc, key) => {
@@ -22,6 +22,19 @@ const promiseHashMap = async (hash, callback) => {
 
   return promises.reduce((accum, { key, value }) => {
     return { ...accum, [key]: value };
+  }, {});
+};
+
+const promiseHash = async (hash = {}) => {
+  const promises = await Promise.all(
+    Object.entries(hash).map(async ([key, value]) => ({
+      key,
+      value: await value
+    }))
+  );
+
+  return promises.reduce((acc, { key, value }) => {
+    return { ...acc, [key]: value };
   }, {});
 };
 
@@ -73,12 +86,34 @@ export default class OperationProcessor<ResourceT = Resource> {
     return pick(record, attributeKeys);
   }
 
-  async getRelationships(op: Operation, record: HasId) {
-    const relationships = pick(this.relationships, op.params.include);
+  async getRelationships(op: Operation, record: HasId): Object {
+    const relationships = (op.params.include || []).reduce(
+      (acc, relationshipName) => {
+        const relationship = this.resourceClass.schema.relationships[
+          relationshipName
+        ];
 
-    return promiseHashMap(relationships, key => {
-      return relationships[key].call(this, record);
-    });
+        return relationship
+          ? {
+              ...acc,
+              [relationshipName]: this.getRelationship(relationship, record)
+            }
+          : acc;
+      },
+      {}
+    );
+
+    return promiseHash(relationships);
+  }
+
+  async getRelationship(
+    relationship: ResourceSchemaRelationship,
+    record: HasId
+  ): Promise<HasId | HasId[]> {
+    return (this.relationships[relationship.key], function() {}).call(
+      this,
+      record
+    );
   }
 
   async convertToResources(op: Operation, records: HasId[] | HasId) {

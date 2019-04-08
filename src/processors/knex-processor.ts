@@ -2,7 +2,7 @@ import * as Knex from "knex";
 import { Application } from "..";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { HasId, KnexRecord, Operation, ResourceConstructor } from "../types";
+import { HasId, KnexRecord, Operation, ResourceConstructor, ResourceSchemaRelationship } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import OperationProcessor from "./operation-processor";
 
@@ -148,6 +148,32 @@ export default class KnexProcessor<
       .whereIn("id", ids)
       .select(getColumns(this.resourceClass))
       .first();
+  }
+
+  async getRelationship(
+    relationship: ResourceSchemaRelationship,
+    record: HasId
+  ): Promise<HasId | HasId[]> {
+    const result = await super.getRelationship(relationship, record);
+    if (result !== undefined) return result;
+
+    const relationshipResourceType = relationship.type().type;
+    const processor = await this.processorFor(relationshipResourceType);
+
+    const filterKey = relationship.hasMany
+      ? `${camelize(relationship.inverse || this.resourceClass.type)}Id`
+      : "id";
+
+    const records = await (processor as KnexProcessor)
+      .getQuery()
+      .where({ [filterKey]: record.id })
+      .select();
+
+    if (relationship.belongsTo) {
+      return records[0];
+    }
+
+    return records;
   }
 
   typeToTableName(type: string): string {

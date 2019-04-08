@@ -158,6 +158,8 @@ export type ResourceSchemaRelationships = {
 
 export type ResourceSchemaRelationship = {
   type: () => ResourceConstructor;
+  key: string;
+  inverse?: string;
   hasMany?: boolean;
   belongsTo?: boolean;
 };
