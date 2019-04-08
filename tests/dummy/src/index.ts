@@ -17,7 +17,7 @@ const knexConfig = {
 const app = new Application({
   namespace: "api",
   types: [User, Article],
-  processors: [UserProcessor, ArticleProcessor],
+  processors: [ArticleProcessor, UserProcessor],
   defaultProcessor: KnexProcessor
 });
 
