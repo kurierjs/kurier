@@ -63,18 +63,20 @@ export default class Application {
 
     const processor = processors.find(p => p !== false);
 
-    if (processor && resourceClass) {
+    if (processor) {
       return new processor(this);
     }
 
-    if (resourceClass) {
-      return new this.defaultProcessor(this);
+    class ResourceProcessor extends this.defaultProcessor {
+      static resourceClass = resourceClass;
     }
+
+    return new ResourceProcessor(this);
   }
 
   async resourceFor(
     resourceType: string
-  ): Promise<typeof Resource | undefined> {
+  ): Promise<typeof Resource> {
     return this.types.find(({ type }) => type && type === resourceType);
   }
 
