@@ -1,7 +1,7 @@
 import { HasId, KnexProcessor } from "../jsonapi-ts";
 import User from "../resources/user";
 
-export default class UserProcessor<User> extends KnexProcessor<User> {
+export default class UserProcessor<RT = User> extends KnexProcessor<RT> {
   static resourceClass = User;
 
   attributes = {
