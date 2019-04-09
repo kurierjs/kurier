@@ -237,3 +237,40 @@ A `get` operation can retrieve:
     }
   }
   ```
+
+Results can also be sorted, paginated or partially retrieved using `params.sort`, `params.page` and `params.fields` respectively:
+
+```json
+// Get the first 5 books' name, sorted by name.
+
+{
+  "op": "get",
+  "ref": {
+    "type": "book"
+  },
+  "params": {
+    "sort": ["name"],
+    "fields": ["name"],
+    "page": {
+      "number": 0,
+      "size": 5
+    }
+  }
+}
+```
+
+Also, if the resource being retrieved is related to other resources, it's possible to sideload the related resources using `params.include`:
+
+```json
+// Get all books and their respective authors.
+
+{
+  "op": "get",
+  "ref": {
+    "type": "book"
+  },
+  "params": {
+    "include": ["author"]
+  }
+}
+```
