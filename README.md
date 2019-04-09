@@ -113,6 +113,10 @@ A resource is comprised of:
 
 It distinguishes a given resource from another. Usually it manifests as auto-incremental integer numbers, [GUIDs or UUIDs](https://en.wikipedia.org/wiki/Universally_unique_identifier).
 
+#### A type
+
+A type is a human-readable name that describes the kind of entity the resource represents.
+
 #### A list of attributes
 
 An attribute is something that helps describe different aspects of a resource. For example, if we're creating a _Book_ resource, some possible attributes would be its _name_, its _year of publication_ and its _price_.
