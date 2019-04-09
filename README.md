@@ -96,3 +96,28 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
      "included": []
    }
    ```
+
+## Resources
+
+### What is a resource?
+
+A resource can be understood as follows:
+
+> Any information that can be named can be a resource: a document or image, a temporal service (e.g. “today’s weather in Los Angeles”), a collection of other resources, a non-virtual object (e.g. a person), and so on. In other words, (...) A resource is a conceptual mapping to a set of entities (...).
+
+<p align="right"><sup><i><b>Source:</b> <a href="https://www.ics.uci.edu/~fielding/pubs/dissertation/fielding_dissertation.pdf">Architectural Styles and the Design of Network-based Software Architectures"; Fielding, R.; 2000; p. 88</a></i></sup></p>
+
+A resource is comprised of:
+
+#### A unique identifier
+
+It distinguishes a given resource from another. Usually it manifests as auto-incremental integer numbers, [GUIDs or UUIDs](https://en.wikipedia.org/wiki/Universally_unique_identifier).
+
+#### A list of attributes
+
+An attribute is something that helps describe different aspects of a resource. For example, if we're creating a _Book_ resource, some possible attributes would be its _name_, its _year of publication_ and its _price_.
+
+#### A list of relationships
+
+A resource can exist on its own or be expanded through relations with other resources. Following up on our _Book_ resource example, we could state that a book _belongs to_ a certain author. That _author_ could be described as a resource itself.
+
