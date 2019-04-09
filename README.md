@@ -238,6 +238,20 @@ A `get` operation can retrieve:
   }
   ```
 
+The following filter operations are supported:
+
+| Operator | Comparison type                                                              |
+| -------- | ---------------------------------------------------------------------------- |
+| `eq`     | Equals                                                                       |
+| `ne`     | Not equals                                                                   |
+| `lt`     | Less than                                                                    |
+| `gt`     | Greater than                                                                 |
+| `le`     | Less than or equal                                                           |
+| `ge`     | Greater than or equal                                                        |
+| `like`   | `like:%foo%`: Contains<br>`like:foo%`: Starts with<br>`like:%foo`: Ends with |
+| `in`     | Value is in a list of possible values                                        |
+| `nin`    | Value is not in a list of possible values                                    |
+
 Results can also be sorted, paginated or partially retrieved using `params.sort`, `params.page` and `params.fields` respectively:
 
 ```json
@@ -479,7 +493,7 @@ The middleware, if successful, will respond with a `200 OK` HTTP status code.
 
 ```bash
 # Remove the "Learning JSONAPI" book.
-DELETE /books//ef70e4a4-5016-467b-958d-449ead0ce08e
+DELETE /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 ```
 
 The middleware, if successful, will respond with a `204 No Content` HTTP status code.
@@ -494,3 +508,20 @@ JSONAPI-TS includes two built-in processors:
 
 - an abstract `OperationProcessor` which defines an API capable of executing the fundamental operations on a resource;
 - a concrete `KnexProcessor`, which is a Knex-powered DB-capable implementation of the `OperationProcessor`.
+
+### The `OperationProcessor` class
+
+This class defines the basic API any processor needs to implement.
+
+Each operation type is handled by a separate async function, which receives the current operation payload as an argument, and returns either a list of resources of a given type, a single resource of that type or nothing at all.
+
+```ts
+class OperationProcessor<ResourceT> {
+  async get(op: Operation): Promise<ResourceT[]>;
+  async remove(op: Operation): Promise<void>;
+  async update(op: Operation): Promise<ResourceT>;
+  async add(op: Operation): Promise<ResourceT>;
+}
+```
+
+Also, the `OperationProcessor` exposes an `app` property that allows access to the [JSONAPI application](#The-JSONAPI-application) instance.
