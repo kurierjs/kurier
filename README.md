@@ -169,4 +169,76 @@ Dates are supported in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) fo
 
 ### What is an operation?
 
-An operation is an action that affects one
+An operation is an action that affects one or more resources.
+
+Every operation is written in JSON, and contains the following properties:
+
+- `op`: the type of action to execute _(see [Operation types](#Operation-Types) just below this section)_.
+- `ref`: a reference to a resource or kind of resource.
+  - `id`: the unique identifier of the affected resource.
+  - `type`: the affected resource's type
+- `data`: a Resource object to be written into the data store.
+- `params`: a key/value object used to configure how resources should be fetched from the data store. See [the `get` operation](#get)
+
+The JSONAPI spec defines four elemental operations:
+
+- **get**: Retrieves a list of resources. Can be filtered by `id` or any defined `attribute`.
+- **add**: Inserts a new resource in the data store.
+- **remove**: Removes a resource from the data store.
+- **update**: Edits one or more attributes of a given resource and saves the changes in the data store.
+
+You can define your own operations as well. See the [Processors](#Processors) section below.
+
+### The `get` operation
+
+A `get` operation can retrieve:
+
+- all resources of a given type:
+
+  ```json
+  // Get all books.
+
+  {
+    "op": "get",
+    "ref": {
+      "type": "book"
+    }
+  }
+  ```
+
+- a subset of resources of given type which satisfy a certain criteria:
+
+  ```json
+  // Get all books with a price greater than 100.
+
+  {
+    "op": "get",
+    "ref": {
+      "type": "book"
+    },
+    "params": {
+      "filter": {
+        "price": "gt:100"
+      }
+    }
+  }
+  ```
+
+- a single, uniquely identified resource of a given type:
+
+  ```json
+  // Get all books with a price greater than 100.
+
+  {
+    "op": "get",
+    "ref": {
+      "type": "book",
+      "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
+    },
+    "params": {
+      "filter": {
+        "price": "gt:100"
+      }
+    }
+  }
+  ```
