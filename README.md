@@ -134,13 +134,13 @@ This is how our _Book_ resource would look like, without relationships:
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class Book extends Resource {
-  // The *type* is usually inferred automatically from the name
-  // of the class. Nonetheless, if we need/want to, we can override it.
+  // The *type* is usually inferred automatically from the resource's
+  // class name. Nonetheless, if we need/want to, we can override it.
   static get type(): string {
     return "libraryBook";
   }
 
-  // Every field we declare in a resource is called a *schema*.
+  // Every field we declare in a resource is contained in a *schema*.
   // A schema comprises attributes and relationships.
   static schema = {
     attributes: {
@@ -164,3 +164,9 @@ However, JSONAPI-TS supports three primitive types for now: `String`, `Number` a
 Dates are supported in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:MM:SS.sss` + the time zone).
 
 > ⚠️ If you need to store complex types like arrays, you might want to reconsider and think of those array items as different resources of the same type and relate them to the parent resource.
+
+## Operations
+
+### What is an operation?
+
+An operation is an action that affects one
