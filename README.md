@@ -234,11 +234,6 @@ A `get` operation can retrieve:
     "ref": {
       "type": "book",
       "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
-    },
-    "params": {
-      "filter": {
-        "price": "gt:100"
-      }
     }
   }
   ```
