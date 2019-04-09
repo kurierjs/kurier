@@ -338,3 +338,20 @@ An `update` operation represents the intent of changing some or all of the data 
 
 The response, if successful, will be a single resource object, reflecting the changes the `update` operation requested.
 
+### The `delete` operation
+
+A `delete` operation represents the intent to destroy an existing resources in the data store.
+
+```json
+// Remove the "Learning JSONAPI" book.
+
+{
+  "op": "remove",
+  "ref": {
+    "type": "book",
+    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
+  }
+}
+```
+
+The response, if successful, will be `typeof void`.
