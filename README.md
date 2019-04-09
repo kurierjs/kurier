@@ -483,3 +483,14 @@ DELETE /books//ef70e4a4-5016-467b-958d-449ead0ce08e
 ```
 
 The middleware, if successful, will respond with a `204 No Content` HTTP status code.
+
+## Processors
+
+### What is a processor?
+
+A processor is responsable of executing JSONAPI operations for certain resource types. If you're familiar with the Model-View-Controller pattern, processor can be somewhat compared to the `C` in `MVC`.
+
+JSONAPI-TS includes two built-in processors:
+
+- an abstract `OperationProcessor` which defines an API capable of executing the fundamental operations on a resource;
+- a concrete `KnexProcessor`, which is a Knex-powered DB-capable implementation of the `OperationProcessor`.
