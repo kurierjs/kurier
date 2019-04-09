@@ -119,7 +119,7 @@ A type is a human-readable name that describes the kind of entity the resource r
 
 #### A list of attributes
 
-An attribute is something that helps describe different aspects of a resource. For example, if we're creating a _Book_ resource, some possible attributes would be its _name_, its _year of publication_ and its _price_.
+An attribute is something that helps describe different aspects of a resource. For example, if we're creating a _Book_ resource, some possible attributes would be its _title_, its _year of publication_ and its _price_.
 
 #### A list of relationships
 
