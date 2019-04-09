@@ -355,3 +355,131 @@ A `delete` operation represents the intent to destroy an existing resources in t
 ```
 
 The response, if successful, will be `typeof void`.
+
+## Transport layers
+
+JSONAPI-TS is built following a decoupled, modular approach, providing somewhat opinionated methodologies regarding how to make the API usable to consumers.
+
+### jsonApiKoa
+
+Currently we support integrating with [Koa](https://koajs.com) by providing a `jsonApiKoa` middleware, that can be imported and piped through your Koa server, along with other middlewares.
+
+#### Usage
+
+As seen in the [Getting started](#getting-started) section, once your [JSONAPI application](#The-JSONAPI-application) is instantiated, you can simply do:
+
+```ts
+// Assume `api` is a Koa server,
+// `app` is a JSONAPI application instance.
+
+api.use(jsonApiKoa(app));
+```
+
+#### Converting operations into HTTP endpoints
+
+The `jsonApiKoa` middleware takes care of mapping the fundamental operation types (`get`, `add`, `update`, `remove`) into valid HTTP verbs and endpoints.
+
+This is the basic pattern for any endpoint:
+
+```
+<verb> /:type[/:id][?params...]
+```
+
+Any operation payload is parsed as follows:
+
+| Operation property | HTTP property | Comments                                                                                                                               |
+| ------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `op`               | HTTP verb     | `get` => `GET`<br>`add` => `POST`<br>`update` => `PUT`<br>`remove` => `DELETE`                                                         |
+| `data`, `included` | HTTP body     | Any resources are returned into the response body.                                                                                     |
+| `ref.type`         | `:type`       | Type is inflected into its plural form, so `book` becomes `books`.                                                                     |
+| `ref.id`           | `:id`         | ID is used to affect a single resource.                                                                                                |
+| `params.*`         | `?params...`  | Everything related to filters, sorting, pagination,<br>partial resource retrieval and sideloading<br>is expressed as query parameters. |
+
+#### Request/response mapping
+
+The following examples show HTTP requests that can be converted into JSONAPI operations.
+
+Any operation can return the following error codes:
+
+- `400 Bad Request`: the operation is malformed and cannot be executed.
+- `404 Not Found`: the requested resource does not exist.
+- `401 Unauthorized`: the request resource/operation requires authorization.
+- `403 Forbidden`: the request's credentials do not have enough privileges to execute the operation.
+- `500 Internal Server Error`: an operation crashed and didn't execute properly.
+
+##### `get` operations
+
+```bash
+# Get all books.
+GET /books
+
+# Get all books with a price greater than 100.
+GET /books?filter[price]=gt:100
+
+# Get a single book.
+GET /books/ef70e4a4-5016-467b-958d-449ead0ce08e
+GET /books?filter[id]=ef70e4a4-5016-467b-958d-449ead0ce08e
+
+# Get the first 5 book names, sorted by name.
+GET /books?fields=name&page[number]=0&page[size]=5&sort=name
+```
+
+The middleware, if successful, will respond with a `200 OK` HTTP status code.
+
+##### `add` operations
+
+```bash
+# Add a new book.
+POST /books
+Content-Type: application/json; charset=utf-8
+
+{
+  "data": {
+    "type": "book",
+    "attributes": {
+      "title": "Learning JSONAPI",
+      "yearPublished": 2019,
+      "price": 100.0
+    },
+    "relationships": {
+      "author": {
+        "data": {
+          "type": "author",
+          "id": "888a7106-c797-4b22-b31e-0244483cf108"
+        }
+      }
+    }
+  }
+}
+```
+
+The middleware, if successful, will respond with a `201 Created` HTTP status code.
+
+##### `update` operations
+
+```bash
+# Increase the price of "Learning JSONAPI" to 200.
+PUT /books/ef70e4a4-5016-467b-958d-449ead0ce08e
+Content-Type: application/json; charset=utf-8
+
+{
+  "data": {
+    "type": "book",
+    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e",
+    "attributes": {
+      "price": 200.0
+    }
+  }
+}
+```
+
+The middleware, if successful, will respond with a `200 OK` HTTP status code.
+
+##### `delete` operations
+
+```bash
+# Remove the "Learning JSONAPI" book.
+DELETE /books//ef70e4a4-5016-467b-958d-449ead0ce08e
+```
+
+The middleware, if successful, will respond with a `204 No Content` HTTP status code.
