@@ -274,3 +274,67 @@ Also, if the resource being retrieved is related to other resources, it's possib
   }
 }
 ```
+
+The response, if successful, will be a list of one or more resources, mathing the specified parameters.
+
+### The `add` operation
+
+An `add` operation represents the intent of writing a new resource of a given type into the data store.
+
+```json
+// Add a new book. Notice that by default, you don't need
+// to provide an ID. JSONAPI-TS can generate it automatically.
+
+{
+  "op": "add",
+  "ref": {
+    "type": "book"
+  },
+  "data": {
+    "type": "book",
+    "attributes": {
+      "title": "Learning JSONAPI",
+      "yearPublished": 2019,
+      "price": 100.0
+    },
+    // If we want to link this book to an author,
+    // we can add a relationship.
+    "relationships": {
+      "author": {
+        "data": {
+          "type": "author",
+          "id": "888a7106-c797-4b22-b31e-0244483cf108"
+        }
+      }
+    }
+  }
+}
+```
+
+The response, if successful, will be a single resource object, with either a generated `id` or the `id` provided in the operation.
+
+### The `update` operation
+
+An `update` operation represents the intent of changing some or all of the data for an existing resource of a given type from the data store.
+
+```json
+// Increase the price of "Learning JSONAPI" to 200.
+
+{
+  "op": "update",
+  "ref": {
+    "type": "book",
+    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
+  },
+  "data": {
+    "type": "book",
+    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
+    "attributes": {
+      "price": 200.00
+    }
+  }
+}
+```
+
+The response, if successful, will be a single resource object, reflecting the changes the `update` operation requested.
+
