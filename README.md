@@ -125,4 +125,42 @@ An attribute is something that helps describe different aspects of a resource. F
 
 A resource can exist on its own or be expanded through relations with other resources. Following up on our _Book_ resource example, we could state that a book _belongs to_ a certain author. That _author_ could be described as a resource itself. On a reverse point of view, we could also state than an author _has many_ books.
 
+### Declaring a resource
 
+This is how our _Book_ resource would look like, without relationships:
+
+```ts
+// resources/book.ts
+import { Resource } from "@ebryn/jsonapi-ts";
+
+export default class Book extends Resource {
+  // The *type* is usually inferred automatically from the name
+  // of the class. Nonetheless, if we need/want to, we can override it.
+  static get type(): string {
+    return "libraryBook";
+  }
+
+  // Every field we declare in a resource is called a *schema*.
+  // A schema comprises attributes and relationships.
+  static schema = {
+    attributes: {
+      // An attribute has a name and a primitive type.
+      // Accepted types are String, Number and Boolean.
+      title: String,
+      yearOfPublication: Number,
+      price: Number
+    },
+    relationships: {}
+  };
+}
+```
+
+### Accepted attribute types
+
+The JSONAPI spec restricts any attribute value to "any valid JSON value".
+
+However, JSONAPI-TS supports three primitive types for now: `String`, `Number` and `Boolean`. `null` is also a valid value.
+
+Dates are supported in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:MM:SS.sss` + the time zone).
+
+> ⚠️ If you need to store complex types like arrays, you might want to reconsider and think of those array items as different resources of the same type and relate them to the parent resource.
