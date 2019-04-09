@@ -227,7 +227,7 @@ A `get` operation can retrieve:
 - a single, uniquely identified resource of a given type:
 
   ```json
-  // Get all books with a price greater than 100.
+  // Get a single book.
 
   {
     "op": "get",
