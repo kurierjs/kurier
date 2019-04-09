@@ -34,7 +34,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
    export default class Author extends Resource {
      static schema = {
-       attributes = {
+       attributes: {
          firstName: String,
          lastName: String
        }
@@ -42,25 +42,13 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
    }
    ```
 
-3. Create an Application:
-
-   ```ts
-   import { Application } from "@ebryn/jsonapi-ts";
-   import Author from "./resources/author";
-
-   const app = new Application({
-     namespace: "api",
-     types: [Author],
-     defaultProcessor: new KnexProcessor(/* knex options */)
-   });
-   ```
-
-4. Inject it into your Koa server:
+3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
    ```ts
    import { Application, jsonApiKoa as jsonApi } from "@ebryn/jsonapi-ts";
-   import Author from "./resources/author";
    import Koa from "koa";
+
+   import Author from "./resources/author";
 
    const app = new Application({
      namespace: "api",
@@ -75,7 +63,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
    api.listen(3000);
    ```
 
-5. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
+4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
    ```json
    {
@@ -84,7 +72,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
    }
    ```
 
-6. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
+5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
    ```json
    {
