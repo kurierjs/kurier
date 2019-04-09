@@ -48,7 +48,11 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
    ```ts
-   import { Application, jsonApiKoa as jsonApi } from "@ebryn/jsonapi-ts";
+   import {
+     Application,
+     jsonApiKoa as jsonApi,
+     KnexProcessor
+   } from "@ebryn/jsonapi-ts";
    import Koa from "koa";
 
    import Author from "./resources/author";
