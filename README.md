@@ -284,6 +284,8 @@ An `add` operation represents the intent of writing a new resource of a given ty
 ```json
 // Add a new book. Notice that by default, you don't need
 // to provide an ID. JSONAPI-TS can generate it automatically.
+// Also, we're relating this new resource to an existing
+// "author" resource.
 
 {
   "op": "add",
@@ -297,8 +299,6 @@ An `add` operation represents the intent of writing a new resource of a given ty
       "yearPublished": 2019,
       "price": 100.0
     },
-    // If we want to link this book to an author,
-    // we can add a relationship.
     "relationships": {
       "author": {
         "data": {
@@ -328,9 +328,9 @@ An `update` operation represents the intent of changing some or all of the data 
   },
   "data": {
     "type": "book",
-    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
+    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e",
     "attributes": {
-      "price": 200.00
+      "price": 200.0
     }
   }
 }
