@@ -77,7 +77,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
    import { Resource } from "@ebryn/jsonapi-ts";
 
    export default class Author extends Resource {
-     static schema = {
+     static schema: {
        attributes: {
          firstName: String,
          lastName: String
@@ -189,7 +189,7 @@ export default class Book extends Resource {
 
   // Every field we declare in a resource is contained in a *schema*.
   // A schema comprises attributes and relationships.
-  static schema = {
+  static schema: {
     attributes: {
       // An attribute has a name and a primitive type.
       // Accepted types are String, Number and Boolean.
@@ -588,15 +588,14 @@ import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
 import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
-export default class ReadOnlyProcessor<ResourceT> extends OperationProcessor<
-  ResourceT
-> {
-  async get(op: Operation): Promise<ResourceT[]> {
+export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
+  async get(op: Operation): Promise<Resource[]> {
     const files = readdirSync(resolvePath(__dirname, `data/${op.ref.type}`));
     return files.map(file => ({
       type: op.ref.type,
       id: basename(file),
-      attributes: JSON.parse(readFileSync(file))
+      attributes: JSON.parse(readFileSync(file).toString()),
+      relationships: {}
     }));
   }
 }
@@ -610,23 +609,23 @@ What happens if in the previous example something goes wrong? For example, a rec
 import {
   OperationProcessor,
   Operation,
-  JsonApiErrors
+  JsonApiErrors,
+  Resource
 } from "@ebryn/jsonapi-ts";
 import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
-export default class ReadOnlyProcessor<ResourceT> extends OperationProcessor<
-  ResourceT
-> {
-  async get(op: Operation): Promise<ResourceT[]> {
+export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
+  async get(op: Operation): Promise<Resource[]> {
     const files = readdirSync(resolvePath(__dirname, `data/${op.ref.type}`));
-    return files.map(file => {
+    return files.map((file: string) => {
       try {
-        const attributes = JSON.parse(fs.readFileSync(file));
+        const attributes = JSON.parse(readFileSync(file).toString());
         return {
           type: op.ref.type,
           id: basename(file),
-          attributes
+          attributes,
+          relationships: {}
         };
       } catch {
         throw JsonApiErrors.UnhandledError();
@@ -668,11 +667,13 @@ Let's assume we have a `Moment` resource:
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class Moment extends Resource {
-  static schema = {
+  static schema: {
     attributes: {
       date: string,
       time: string
-    }
+    },
+    type:string,
+    id:string
   };
 }
 ```
@@ -681,10 +682,10 @@ All you need to do is extend the Processor, set the generic type to `Moment`, an
 
 ```ts
 import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
-import { Moment } from "./resources";
+import Moment from "../resources/moment";
 
 export default class MomentProcessor extends OperationProcessor<Moment> {
-  // This binds the processor to the resource. This way the JSONAPI
+  // This property binds the processor to the resource. This way the JSONAPI
   // application knows how to resolve operations for the `Moment`
   // resource.
   public resourceClass = Moment;
@@ -692,21 +693,22 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
   // Notice that the return type is `Moment` and not a generic.
   async get(op: Operation): Promise<Moment[]> {
     const now = new Date();
-    const id = now.valueOf();
+    const id = now.valueOf().toString();
     const [date] = now.toJSON().split("T");
     const [, time] = now
       .toJSON()
-      .split("T")
-      .replace(/Z/g, "");
+      .replace(/Z/g, "")
+      .split("T");
 
-    return {
+    return [{
       type: "moment",
       id,
       attributes: {
         date,
         time
-      }
-    };
+      },
+      relationships: {}
+    }];
   }
 }
 ```
@@ -741,8 +743,9 @@ export default class BookProcessor extends KnexProcessor<Book> {
       type: "bookCount",
       attributes: {
         count: (await super.get(op)).length
-      }
-    } as BookCount;
+      },
+      relationships: {}
+    };
   }
 }
 ```
@@ -772,7 +775,7 @@ A minimal, bare-bones declaration of an `User` resource could look something lik
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class User extends Resource {
-  static schema = {
+  static schema: {
     attributes: {
       name: string;
     }
@@ -789,14 +792,14 @@ export default class UserProcessor extends KnexProcessor<User> {
   public resourceClass = User;
 
   async identify(op: Operation): Promise<User> {
-    return super.get(op);
+    return super.get(op)[0];
   }
 }
 ```
 
 Now, in order to generate that token, you'll need to build a resource and processor to serve and create it.
 
-> ⚠️ The following examples are **NOT** production-ready and **NOT** safe. They're only for educational purposes.
+> ⚠️ The following examples are **NOT** production-ready and are **NOT** safe. They're only for educational purposes.
 
 ### Defining a `Session` resource
 
@@ -808,7 +811,7 @@ When requesting to create a `Session`, we'll need the username and password the
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class Session extends Resource {
-  static schema = {
+  static schema: {
     attributes: {
       username: string,
       password: string,
@@ -876,7 +879,8 @@ export default class SessionProcessor extends KnexProcessor {
       id: uuid(),
       attributes: {
         token
-      }
+      },
+      relationships: {}
     };
 
     return session;
