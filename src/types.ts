@@ -141,3 +141,5 @@ export interface HasId {
   id: any;
   [key: string]: any;
 }
+
+export type EagerLoadedData = { [key: string]: KnexRecord[] | undefined };

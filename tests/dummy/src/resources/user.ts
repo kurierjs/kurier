@@ -11,7 +11,7 @@ export default class User extends Resource {
       articles: {
         type: () => Article,
         hasMany: true,
-        foreignKeyName: "author"
+        foreignKeyName: "authorId"
       }
     }
   };

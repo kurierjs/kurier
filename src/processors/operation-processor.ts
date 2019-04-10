@@ -1,6 +1,6 @@
 import Application from "../application";
 import Resource from "../resource";
-import { HasId, Operation } from "../types";
+import { HasId, Operation, EagerLoadedData } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 
@@ -25,14 +25,20 @@ export default class OperationProcessor<ResourceT = Resource> {
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
     const result = this[action] && (await this[action].call(this, op));
+    const eagerLoadedData = await this.eagerLoad(op, result);
 
-    return this.convertToResources(op, result);
+    return this.convertToResources(op, result, eagerLoadedData);
+  }
+
+  async eagerLoad(op: Operation, result: ResourceT | ResourceT[] | void) {
+    return {};
   }
 
   async getComputedProperties(
     op: Operation,
     resourceClass: typeof Resource,
-    record: HasId
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
   ) {
     const typeFields = op.params.fields && op.params.fields[resourceClass.type];
 
@@ -48,7 +54,8 @@ export default class OperationProcessor<ResourceT = Resource> {
   async getAttributes(
     op: Operation,
     resourceClass: typeof Resource,
-    record: HasId
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
   ) {
     const attributeKeys =
       (op.params.fields && op.params.fields[resourceClass.type]) ||
@@ -57,7 +64,11 @@ export default class OperationProcessor<ResourceT = Resource> {
     return pick(record, attributeKeys);
   }
 
-  async getRelationships(op: Operation, record: HasId) {
+  async getRelationships(
+    op: Operation,
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
+  ) {
     const relationships = pick(this.relationships, op.params.include);
 
     return promiseHashMap(relationships, key => {
@@ -65,11 +76,15 @@ export default class OperationProcessor<ResourceT = Resource> {
     });
   }
 
-  async convertToResources(op: Operation, records: HasId[] | HasId) {
+  async convertToResources(
+    op: Operation,
+    records: HasId[] | HasId,
+    eagerLoadedData: EagerLoadedData
+  ) {
     if (Array.isArray(records)) {
       return Promise.all(
         records.map(record => {
-          return this.convertToResources(op, record);
+          return this.convertToResources(op, record, eagerLoadedData);
         })
       );
     }
@@ -78,9 +93,9 @@ export default class OperationProcessor<ResourceT = Resource> {
     const resourceClass = await this.resourceFor(op.ref.type);
 
     const [attributes, computedAttributes, relationships] = await Promise.all([
-      this.getAttributes(op, resourceClass, record),
-      this.getComputedProperties(op, resourceClass, record),
-      this.getRelationships(op, record)
+      this.getAttributes(op, resourceClass, record, eagerLoadedData),
+      this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
+      this.getRelationships(op, record, eagerLoadedData)
     ]);
 
     return new resourceClass({

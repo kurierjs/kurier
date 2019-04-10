@@ -6,7 +6,8 @@ import {
   HasId,
   KnexRecord,
   Operation,
-  ResourceSchemaRelationship
+  ResourceSchemaRelationship,
+  EagerLoadedData
 } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import pick from "../utils/pick";
@@ -64,7 +65,7 @@ const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
     .filter(([key, value]) => value.belongsTo)
     .map(([key]) => `${key}Id`);
 
-  const typeFields = (fields[type] || []).filter(key =>
+  const typeFields = (fields[type] || []).filter((key: string) =>
     Object.keys(attributes).includes(key)
   );
 
@@ -87,6 +88,19 @@ export default class KnexProcessor<
 
   getQuery(): Knex.QueryBuilder {
     return this.knex(this.typeToTableName(this.resourceClass.type));
+  }
+
+  async eagerLoad(op: Operation, result: ResourceT | ResourceT[] | void) {
+    const relationships = pick(
+      this.resourceClass.schema.relationships,
+      op.params.include
+    );
+
+    return promiseHashMap(relationships, (key: string) => {
+      const relationshipSchema = this.resourceClass.schema.relationships[key];
+
+      return this.eagerFetchRelationship(relationshipSchema);
+    });
   }
 
   async get(op: Operation): Promise<HasId[]> {
@@ -122,7 +136,6 @@ export default class KnexProcessor<
 
   async update(op: Operation): Promise<HasId> {
     const { id, type } = op.ref;
-
 
     const updated = await this.getQuery()
       .where({ id })
@@ -199,47 +212,84 @@ export default class KnexProcessor<
     }
   }
 
-  async getRelationships(op: Operation, record: HasId) {
+  async getRelationships(
+    op: Operation,
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
+  ) {
     const relationships = pick(
       this.resourceClass.schema.relationships,
       op.params.include
     );
 
-    return promiseHashMap(relationships, key => {
+    return promiseHashMap(relationships, (key: string) => {
       if (relationships[key] instanceof Function) {
         return relationships[key].call(this, record);
       }
 
       const relationshipSchema = this.resourceClass.schema.relationships[key];
 
-      return this.fetchRelationship(relationshipSchema, record);
+      return this.fetchRelationship(
+        key,
+        relationshipSchema,
+        record,
+        eagerLoadedData
+      );
     });
   }
 
-  async fetchRelationship(
-    relationship: ResourceSchemaRelationship,
-    record: HasId
-  ) {
-    const relationProcessor: KnexProcessor = await this.processorFor(relationship.type().type) as KnexProcessor;
+  async eagerFetchRelationship(
+    relationship: ResourceSchemaRelationship
+  ): Promise<KnexRecord[] | void> {
+    const relationProcessor: KnexProcessor = (await this.processorFor(
+      relationship.type().type
+    )) as KnexProcessor;
     const query = relationProcessor.getQuery();
     const foreignTableName = relationProcessor.tableName;
 
     if (relationship.belongsTo) {
-      const foreignKey = relationship.foreignKeyName || `${relationship.type().type}Id`;
+      const foreignKey =
+        relationship.foreignKeyName || `${relationship.type().type}Id`;
       return query
-        .join(this.tableName, `${foreignTableName}.id`, '=', `${this.tableName}.${foreignKey}`)
-        .where(`${this.tableName}.id`, record.id)
-        .first();
+        .join(
+          this.tableName,
+          `${foreignTableName}.id`,
+          "=",
+          `${this.tableName}.${foreignKey}`
+        )
+        .select(`${foreignTableName}.*`);
+    }
+  }
+
+  async fetchRelationship(
+    key: string,
+    relationship: ResourceSchemaRelationship,
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
+  ): Promise<KnexRecord | KnexRecord[] | void> {
+    const relationProcessor: KnexProcessor = (await this.processorFor(
+      relationship.type().type
+    )) as KnexProcessor;
+    const query = relationProcessor.getQuery();
+
+    if (relationship.belongsTo) {
+      const foreignKey =
+        relationship.foreignKeyName || `${relationship.type().type}Id`;
+
+      if (!eagerLoadedData[key]) {
+        return;
+      }
+
+      return eagerLoadedData[key].find(
+        (eagerLoadedRecord: KnexRecord) =>
+          eagerLoadedRecord.id === record[foreignKey]
+      );
     }
 
     if (relationship.hasMany) {
-      const foreignKey = relationship.foreignKeyName || `${this.resourceClass.type}Id`;
-      return query
-        .where(
-          foreignKey,
-          record.id
-        )
-        .select();
+      const foreignKey =
+        relationship.foreignKeyName || `${this.resourceClass.type}Id`;
+      return query.where(foreignKey, record.id).select();
     }
   }
 }
