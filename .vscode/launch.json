@@ -17,6 +17,9 @@
         "-r",
         "ts-node/register"
       ],
+      "env": {
+        "DEBUG": "*"
+      },
       "internalConsoleOptions": "openOnSessionStart"
     }
   ]

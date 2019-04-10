@@ -14,14 +14,14 @@ export default class UserProcessor<RT = User> extends KnexProcessor<RT> {
     }
   };
 
-  relationships = {
-    async articles(this: UserProcessor<User>, user: HasId) {
-      const processor = await this.processorFor("article");
+  // relationships = {
+  //   async articles(this: UserProcessor<User>, user: HasId) {
+  //     const processor = await this.processorFor("article");
 
-      return await (processor as KnexProcessor)
-        .getQuery()
-        .where({ id: user.id })
-        .select();
-    }
-  };
+  //     return await (processor as KnexProcessor)
+  //       .getQuery()
+  //       .where({ id: user.id })
+  //       .select();
+  //   }
+  // };
 }

@@ -134,9 +134,12 @@ export type ResourceSchemaRelationship = {
   type: () => typeof Resource;
   hasMany?: boolean;
   belongsTo?: boolean;
+  foreignKeyName?: string;
 };
 
 export interface HasId {
   id: any;
   [key: string]: any;
 }
+
+export type EagerLoadedData = { [key: string]: KnexRecord[] | undefined };
