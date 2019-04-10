@@ -1,8 +1,8 @@
 import { URL } from "url";
 import { JsonApiParams } from "../types";
 
-
-const JSON_API_ARRAY_KEYS = ["include", "sort", "fields"];
+const JSON_API_OBJECT_KEYS = ["fields", "filter"];
+const JSON_API_ARRAY_VALUES = ["include", "sort", "fields"];
 
 export function parse(url: string): JsonApiParams {
   const params = {};
@@ -26,7 +26,11 @@ export function parse(url: string): JsonApiParams {
       }
     } else {
       if (paramValue !== "") {
-        params[paramKey] = parseValueForKey(paramKey, paramValue);
+        const value = parseValueForKey(paramKey, paramValue);
+
+        params[paramKey] = JSON_API_OBJECT_KEYS.includes(paramKey)
+          ? { ...(value as any) }
+          : value;
       }
     }
   }
@@ -35,7 +39,7 @@ export function parse(url: string): JsonApiParams {
 }
 
 function parseValueForKey(key: string, value = "") {
-  if (JSON_API_ARRAY_KEYS.includes(key)) {
+  if (JSON_API_ARRAY_VALUES.includes(key)) {
     return value.split(",");
   }
 

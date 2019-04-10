@@ -59,7 +59,7 @@ async function authenticate(app: Application, ctx: Context) {
       params: {}
     } as Operation;
 
-    const processor = await app.processorFor(op);
+    const processor = await app.processorFor(op.ref.type);
 
     if (processor) {
       const user = await app.executeOperation(op, processor);
@@ -101,7 +101,7 @@ async function handleJsonApiEndpoint(app: Application, ctx: Context) {
   const op: Operation = convertHttpRequestToOperation(ctx);
   if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
-  const processor = await app.processorFor(op);
+  const processor = await app.processorFor(op.ref.type);
   if (!processor) return;
 
   try {

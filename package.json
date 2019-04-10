@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf dist/ && tsc -b",
+    "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
@@ -42,6 +43,6 @@
     "tslint-config-airbnb": "^5.11.1",
     "tslint-config-prettier": "^1.17.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.3.3"
+    "typescript": "^3.4"
   }
 }

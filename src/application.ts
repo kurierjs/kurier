@@ -1,35 +1,34 @@
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
-import { Operation, OperationResponse, ResourceConstructor } from "./types";
+import { Operation, OperationResponse } from "./types";
 
 export default class Application {
-  public namespace?: string;
-  public types: ResourceConstructor[];
-  public processors: OperationProcessor[];
-  public defaultProcessor: OperationProcessor;
-  public user: Resource;
+  namespace: string;
+  types: typeof Resource[];
+  processors: typeof OperationProcessor[];
+  defaultProcessor: typeof OperationProcessor;
+  user: Resource;
+  services: { [key: string]: any };
 
   constructor(settings: {
     namespace?: string;
-    types?: ResourceConstructor[];
-    processors?: OperationProcessor[];
-    defaultProcessor?: OperationProcessor;
+    types?: typeof Resource[];
+    processors?: typeof OperationProcessor[];
+    defaultProcessor?: typeof OperationProcessor;
+    services?: {};
   }) {
     this.namespace = settings.namespace || "";
     this.types = settings.types || [];
     this.processors = settings.processors || [];
-    this.defaultProcessor =
-      settings.defaultProcessor || new OperationProcessor();
-
-    this.defaultProcessor.app = this;
-    this.processors.forEach(processor => (processor.app = this));
+    this.services = settings.services || {};
+    this.defaultProcessor = settings.defaultProcessor || OperationProcessor;
   }
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
     return await this.createTransaction(
       ops
         .map(async op => {
-          const processor = await this.processorFor(op);
+          const processor = await this.processorFor(op.ref.type);
 
           if (processor) {
             return this.executeOperation(op, processor);
@@ -51,27 +50,33 @@ export default class Application {
     return await Promise.all(ops);
   }
 
-  async processorFor(op: Operation): Promise<OperationProcessor | undefined> {
+  async processorFor(
+    resourceType: string
+  ): Promise<OperationProcessor | undefined> {
+    const resourceClass = await this.resourceFor(resourceType);
+
     const processors = await Promise.all(
-      this.processors.map(
-        async processor => (await processor.shouldHandle(op)) && processor
+      this.processors.map(async processor =>
+        (await processor.shouldHandle(resourceType)) ? processor : false
       )
     );
 
-    const processor = processors.find(Boolean);
+    const processor = processors.find(p => p !== false);
 
     if (processor) {
-      return processor;
+      return new processor(this);
     }
 
-    if (await this.resourceFor(op.ref.type)) {
-      return this.defaultProcessor;
+    class ResourceProcessor extends this.defaultProcessor {
+      static resourceClass = resourceClass;
     }
+
+    return new ResourceProcessor(this);
   }
 
   async resourceFor(
     resourceType: string
-  ): Promise<ResourceConstructor | undefined> {
+  ): Promise<typeof Resource> {
     return this.types.find(({ type }) => type && type === resourceType);
   }
 
