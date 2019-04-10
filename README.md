@@ -824,11 +824,9 @@ In order to create the session, you'll need to implement a processor that encode
 
 ```ts
 import { KnexProcessor, Operation, JsonApiErrors } from "@ebryn/jsonapi-ts";
-import hash from "../utils/hash";
 import { sign } from "jsonwebtoken";
-import Session from "../resources/Session";
+import { Session } from "./resources";
 import { v4 as uuid } from "uuid";
-import { Log } from "logepi";
 
 export default class SessionProcessor extends KnexProcessor {
   public resourceClass = Session;
