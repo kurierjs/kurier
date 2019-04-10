@@ -10,7 +10,8 @@ export default class User extends Resource {
     relationships: {
       articles: {
         type: () => Article,
-        hasMany: true
+        hasMany: true,
+        foreignKeyName: "author"
       }
     }
   };

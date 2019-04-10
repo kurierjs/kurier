@@ -1,29 +1,8 @@
 import Application from "../application";
 import Resource from "../resource";
 import { HasId, Operation } from "../types";
-
-const pick = (object = {}, list = []): {} => {
-  return list.reduce((acc, key) => {
-    const hasProperty = object.hasOwnProperty(key);
-    return hasProperty ? { ...acc, [key]: object[key] } : acc;
-  }, {});
-};
-
-const promiseHashMap = async (hash, callback) => {
-  const keys = Object.keys(hash);
-  const promises = await Promise.all(
-    keys.map(async key => {
-      return {
-        key,
-        value: await callback(key)
-      };
-    })
-  );
-
-  return promises.reduce((accum, { key, value }) => {
-    return { ...accum, [key]: value };
-  }, {});
-};
+import pick from "../utils/pick";
+import promiseHashMap from "../utils/promise-hash-map";
 
 export default class OperationProcessor<ResourceT = Resource> {
   static resourceClass: typeof Resource;
@@ -32,8 +11,8 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this.resourceClass && resourceType === this.resourceClass.type;
   }
 
-  get resourceClass() : typeof Resource {
-    let staticMember = this.constructor as typeof OperationProcessor;
+  get resourceClass(): typeof Resource {
+    const staticMember = this.constructor as typeof OperationProcessor;
 
     return staticMember.resourceClass;
   }
@@ -41,9 +20,7 @@ export default class OperationProcessor<ResourceT = Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(
-    protected app: Application
-  ) {}
+  constructor(protected app: Application) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
@@ -116,15 +93,11 @@ export default class OperationProcessor<ResourceT = Resource> {
     });
   }
 
-  async resourceFor(
-    resourceType: string
-  ): Promise<typeof Resource> {
+  async resourceFor(resourceType: string): Promise<typeof Resource> {
     return this.app.resourceFor(resourceType);
   }
 
-  async processorFor(
-    resourceType: string
-  ): Promise<OperationProcessor> {
+  async processorFor(resourceType: string): Promise<OperationProcessor> {
     return this.app.processorFor(resourceType);
   }
 

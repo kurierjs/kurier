@@ -2,8 +2,15 @@ import * as Knex from "knex";
 import { Application } from "..";
 import JsonApiErrors from "../json-api-errors";
 import Resource from "../resource";
-import { HasId, KnexRecord, Operation } from "../types";
+import {
+  HasId,
+  KnexRecord,
+  Operation,
+  ResourceSchemaRelationship
+} from "../types";
 import { camelize, pluralize } from "../utils/string";
+import pick from "../utils/pick";
+import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
 
 const operators = {
@@ -49,10 +56,7 @@ const buildSortClause = (sort: string[]) => {
   });
 };
 
-const getColumns = (
-  resourceClass: typeof Resource,
-  fields = {}
-): string[] => {
+const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
   const type = resourceClass.type;
   const { attributes, relationships } = resourceClass.schema;
 
@@ -177,13 +181,9 @@ export default class KnexProcessor<
       });
     });
 
-    return processedFilters.forEach(filter => {
-      return queryBuilder[filter.method](
-        filter.column,
-        filter.operator,
-        filter.value
-      );
-    });
+    return processedFilters.forEach(filter =>
+      queryBuilder[filter.method](filter.column, filter.operator, filter.value)
+    );
   }
 
   optionsBuilder(queryBuilder, op) {
@@ -196,6 +196,47 @@ export default class KnexProcessor<
 
     if (page) {
       queryBuilder.offset(page.offset).limit(page.limit);
+    }
+  }
+
+  async getRelationships(op: Operation, record: HasId) {
+    const relationships = pick(
+      this.resourceClass.schema.relationships,
+      op.params.include
+    );
+
+    return promiseHashMap(relationships, key => {
+      if (relationships[key] instanceof Function) {
+        return relationships[key].call(this, record);
+      }
+
+      const relationshipSchema = this.resourceClass.schema.relationships[key];
+
+      return this.fetchRelationship(relationshipSchema, record);
+    });
+  }
+
+  async fetchRelationship(
+    relationship: ResourceSchemaRelationship,
+    record: HasId
+  ) {
+    if (relationship.belongsTo) {
+      const sourceTable = this.typeToTableName(
+        relationship.foreignKeyName || relationship.type().type
+      );
+      return this.knex(sourceTable)
+        .where("id", record.id)
+        .first();
+    }
+
+    if (relationship.hasMany) {
+      const sourceTable = this.typeToTableName(relationship.type().type);
+      return this.knex(sourceTable)
+        .where(
+          `${relationship.foreignKeyName || this.resourceClass.type}Id`,
+          record.id
+        )
+        .select();
     }
   }
 }
