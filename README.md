@@ -32,6 +32,18 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
   - [The `KnexProcessor` class](#the-knexprocessor-class)
   - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
+- [Authorization](#authorization)
+  - [Defining an `User` resource](#defining-an-user-resource)
+  - [Implementing an `User` processor](#implementing-an-user-processor)
+  - [Defining a `Session` resource](#defining-a-session-resource)
+  - [Implementing a `Session` processor](#implementing-a-session-processor)
+  - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
+  - [Using the `IfUser()` helper](#using-the-ifuser-helper)
+  - [Front-end requirements](#front-end-requirements)
+- [The JSONAPI application](#the-jsonapi-application)
+  - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
+  - [Referencing types and processors](#referencing-types-and-processors)
+  - [Using a default processor](#using-a-default-processor)
 
 ## Features
 
@@ -713,6 +725,8 @@ It maps operations to queries like this:
 | `remove`  | `DELETE`, supporting `WHERE`                         |
 |           |                                                      |
 
+It receives a single argument, `options`, which is passed to the `Knex` constructor. See the [Knex documentation](https://knexjs.org/#Installation-client) for detailed examples.
+
 ### Extending the `KnexProcessor` class
 
 Like the `OperationProcessor` class, the `KnexProcessor` can be extended to support custom operations. Suppose we want to count how many books an author has. We could implement a `count()` method.
@@ -924,3 +938,74 @@ In order for authorization to work, whichever app is consuming the JSONAPI expos
 ```
 Authorization: Bearer JWT_HASH_GOES_HERE
 ```
+
+## The JSONAPI Application
+
+The last piece of the framework is the `Application` object. This component wraps and connects everything we've described so far.
+
+### What is a JSONAPI application?
+
+It's what orchestrates, routes and executes operations. In code, we're talking about something like this:
+
+```ts
+import {
+  Application,
+  jsonApiKoa as jsonApi,
+  KnexProcessor
+} from "@ebryn/jsonapi-ts";
+import Koa from "koa";
+
+import Author from "./resources/author";
+
+// This is what any transport layer like jsonApiKoa will use
+// to process all operations.
+const app = new Application({
+  namespace: "api",
+  types: [Author],
+  defaultProcessor: new KnexProcessor(/* knex options */)
+});
+
+const api = new Koa();
+
+api.use(jsonApi(app));
+
+api.listen(3000);
+```
+
+The `Application` object is instantiated with the following settings:
+
+- `namespace`: Used in HTTP transport layers. It prefixes the resource URI with a string. If set, the base URI pattern is `:namespace/:type/:id`. If not, it goes straight to `:type/:id`.
+- `types`: A list of all resource types declared and handled by this app.
+- `processors`: If you define custom processors, they have to be registered here as instances.
+- `defaultProcessor`: All non-bound-to-processor resources will be handled by this processor.
+
+### Referencing types and processors
+
+This is how you register your resources and processors in an application:
+
+```ts
+// Assumes all necessary imports are in place.
+const app = new Application({
+  namespace: "api",
+  types: [Author, Book, BookCount],
+  processors: {
+    new BookProcessor(/* processor args */)
+  }
+});
+```
+
+### Using a default processor
+
+If you do not need custom processors, you can simply declare your resources and have them all work with a built-in processor:
+
+```ts
+const app = new Application({
+  namespace: "api",
+  types: [Author, Book, BookCount],
+  defaultProcessor: new KnexProcessor(/* db settings */)
+});
+```
+
+## License
+
+[MIT](./license)
