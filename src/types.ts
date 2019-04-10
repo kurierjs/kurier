@@ -134,6 +134,7 @@ export type ResourceSchemaRelationship = {
   type: () => typeof Resource;
   hasMany?: boolean;
   belongsTo?: boolean;
+  foreignKeyName?: string;
 };
 
 export interface HasId {
