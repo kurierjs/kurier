@@ -29,6 +29,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [The `OperationProcessor` class](#the-operationprocessor-class)
   - [How does an operation gets executed?](#how-does-an-operation-gets-executed)
   - [Controlling errors while executing an operation](#controlling-errors-while-executing-an-operation)
+  - [Extending the OperationProcessor class](#extending-the-operationprocessor-class)
 
 ## Features
 
