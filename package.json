@@ -8,6 +8,7 @@
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "run:dummy": "yarn build:dummy && tsnd tests/dummy/src/",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
   "repository": {
@@ -38,7 +39,7 @@
     "axios": "^0.18.0",
     "prettier": "^1.15.3",
     "sqlite3": "^4.0.6",
-    "ts-node": "^7.0.1",
+    "ts-node-dev": "^1.0.0-pre.32",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "tslint-config-prettier": "^1.17.0",
