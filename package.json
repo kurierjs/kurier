@@ -8,7 +8,7 @@
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run:dummy": "yarn build:dummy && tsnd tests/dummy/src/",
+    "run:dummy": "tsnd tests/dummy/src/",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
   "repository": {
