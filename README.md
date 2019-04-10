@@ -573,18 +573,18 @@ You could implement a generic `ReadOnlyProcessor` with something like this:
 
 ```ts
 import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
-import { readDirSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
 export default class ReadOnlyProcessor<ResourceT> extends OperationProcessor<
   ResourceT
 > {
   async get(op: Operation): Promise<ResourceT[]> {
-    const files = readDirSync(resolvePath(__dirname, `data/${op.ref.type}`));
+    const files = readdirSync(resolvePath(__dirname, `data/${op.ref.type}`));
     return files.map(file => ({
       type: op.ref.type,
       id: basename(file),
-      attributes: JSON.parse(fs.readFileSync(file))
+      attributes: JSON.parse(readFileSync(file))
     }));
   }
 }
@@ -600,14 +600,14 @@ import {
   Operation,
   JsonApiErrors
 } from "@ebryn/jsonapi-ts";
-import { readDirSync } from "fs";
+import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
 export default class ReadOnlyProcessor<ResourceT> extends OperationProcessor<
   ResourceT
 > {
   async get(op: Operation): Promise<ResourceT[]> {
-    const files = readDirSync(resolvePath(__dirname, `data/${op.ref.type}`));
+    const files = readdirSync(resolvePath(__dirname, `data/${op.ref.type}`));
     return files.map(file => {
       try {
         const attributes = JSON.parse(fs.readFileSync(file));
@@ -736,3 +736,191 @@ export default class BookProcessor extends KnexProcessor<Book> {
 The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor and then do other actions around it.
 
 > ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
+
+## Authorization
+
+JSONAPI-TS has authorization capabilities by using [JSON Web Tokens](https://www.jsonwebtoken.io/). Basically, it allows you to allow or deny operation execution based on user/role presence in a token.
+
+For this feature to work, you'll need to:
+
+- Declare an `User` resource
+- Implement an `User` processor
+- Declare a `Session` resource
+- Implement a `Session` processor
+- Apply the `@Authorize` decorator and the `IfUser()` helper where necessary
+- Have your front-end send requests with an `Authorization` header
+
+### Defining an `User` resource
+
+A minimal, bare-bones declaration of an `User` resource could look something like this:
+
+```ts
+import { Resource } from "@ebryn/jsonapi-ts";
+
+export default class User extends Resource {
+  static schema = {
+    attributes: {
+      name: string;
+    }
+  }
+}
+```
+
+### Implementing an `User` processor
+
+The key to implement the `UserProcessor` is to use the private `identify` operation. This operation is not mapped through any transport layer, so it's only code by the `jsonApiKoa` middleware to get all of the user data to see if it matches with a given token.
+
+```ts
+export default class UserProcessor extends KnexProcessor<User> {
+  public resourceClass = User;
+
+  async identify(op: Operation): Promise<User> {
+    return super.get(op);
+  }
+}
+```
+
+Now, in order to generate that token, you'll need to build a resource and processor to serve and create it.
+
+> ⚠️ The following examples are **NOT** production-ready and **NOT** safe. They're only for educational purposes.
+
+### Defining a `Session` resource
+
+A `Session` resource is a container for a JSON Web Token.
+
+When requesting to create a `Session`, we'll need the username and password the
+
+```ts
+import { Resource } from "@ebryn/jsonapi-ts";
+
+export default class Session extends Resource {
+  static schema = {
+    attributes: {
+      username: string,
+      password: string,
+      token?: string;
+    }
+  }
+}
+```
+
+### Implementing a `Session` processor
+
+In order to create the session, you'll need to implement a processor that encodes the `User` resource into a JSON Web Token. Such processor would look something like this:
+
+```ts
+import { KnexProcessor, Operation, JsonApiErrors } from "@ebryn/jsonapi-ts";
+import hash from "../utils/hash";
+import { sign } from "jsonwebtoken";
+import Session from "../resources/Session";
+import { v4 as uuid } from "uuid";
+import { Log } from "logepi";
+
+export default class SessionProcessor extends KnexProcessor {
+  public resourceClass = Session;
+
+  // We use the `add` operation since we're "creating"
+  // a session. A valid approach would also be to create
+  // a custom `login` operation.
+  public async add(op: Operation): Promise<Session> {
+    // Find the user. Since we're using a KnexProcessor as a base class,
+    // we have access to the Knex instance.
+    const user = await this.knex("users")
+      .where({
+        username: op.data.attributes.username,
+        password: op.data.attributes.password
+      })
+      .first();
+
+    // If we didn't get a user, we abort the operation with an error.
+    if (!user) {
+      throw JsonApiErrors.AccessDenied();
+    }
+
+    const userId = user.id;
+
+    // Scrub any privileged data.
+    delete user.password;
+    delete user.id;
+
+    const secureData = {
+      type: "user",
+      id: userId,
+      attributes: {
+        ...user
+      },
+      relationships: {}
+    };
+
+    // Create the JWT.
+    const token = sign(secureData, process.env.SESSION_KEY, {
+      subject: secureData.id,
+      expiresIn: "1d"
+    });
+
+    // Return it.
+    const session = {
+      type: "session",
+      id: uuid(),
+      attributes: {
+        token
+      }
+    };
+
+    return session;
+  }
+}
+```
+
+### Using the `@Authorize` decorator
+
+Now, for any processor you have in your API, for example, our BookProcessor, we can use `@Authorize` to reject execution if there's no user detected:
+
+```ts
+import { KnexProcessor, Operation, Authorize } from "@ebryn/jsonapi-ts";
+import { Book } from "./resources";
+
+export default class BookProcessor extends KnexProcessor<Book> {
+  // This operation will return an `Unauthorized` error if there's
+  // no user in the JSONAPI application instance.
+  @Authorize()
+  async get(op: Operation): Promise<Book[]> {
+    // You can use `this.app.user` to get user data.
+    console.log(`User ${this.app.user.id} is reading data`);
+    return super.get(op);
+  }
+}
+```
+
+### Using the `IfUser()` helper
+
+You might want to restrict an operation to a specific subset of users who match a certain criteria. For that purpose, you can augment the `@Authorize` decorator with the `IfUser()` helper:
+
+```ts
+import { KnexProcessor, Operation, Authorize, IfUser } from "@ebryn/jsonapi-ts";
+import { Book } from "./resources";
+
+export default class BookProcessor extends KnexProcessor<Book> {
+  // This operation will return an `Unauthorized` error if there's
+  // no user with the role "librarian" in the JSONAPI application
+  // instance.
+  @Authorize(IfUser("role", "librarian"))
+  async get(op: Operation): Promise<Book[]> {
+    return super.get(op);
+  }
+}
+```
+
+The `IfUser()` helper syntax is as follows:
+
+```ts
+IfUser(attributeName: string, attributeValue: string | number | boolean);
+```
+
+### Front-end requirements
+
+In order for authorization to work, whichever app is consuming the JSONAPI exposed via HTTP will need to send the token created with the `SessionProcessor` in an `Authorization` header, like this:
+
+```
+Authorization: Bearer JWT_HASH_GOES_HERE
+```
