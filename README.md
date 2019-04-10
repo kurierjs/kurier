@@ -29,7 +29,9 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [The `OperationProcessor` class](#the-operationprocessor-class)
   - [How does an operation gets executed?](#how-does-an-operation-gets-executed)
   - [Controlling errors while executing an operation](#controlling-errors-while-executing-an-operation)
-  - [Extending the OperationProcessor class](#extending-the-operationprocessor-class)
+  - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
+  - [The `KnexProcessor` class](#the-knexprocessor-class)
+  - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
 
 ## Features
 
@@ -696,3 +698,41 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
   }
 }
 ```
+
+### The `KnexProcessor` class
+
+This processor is a fully-implemented, database-driven extension of the `OperationProcessor` class seen before. It takes care of creating the necessary SQL queries to resolve any given operation.
+
+It maps operations to queries like this:
+
+| Operation | SQL command                                          |
+| --------- | ---------------------------------------------------- |
+| `get`     | `SELECT`, supporting `WHERE`, `ORDER BY` and `LIMIT` |
+| `add`     | `INSERT`, supporting `RETURNING`                     |
+| `update`  | `UPDATE`, supporting `WHERE`                         |
+| `remove`  | `DELETE`, supporting `WHERE`                         |
+|           |                                                      |
+
+### Extending the `KnexProcessor` class
+
+Like the `OperationProcessor` class, the `KnexProcessor` can be extended to support custom operations. Suppose we want to count how many books an author has. We could implement a `count()` method.
+
+```ts
+import { KnexProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { Book, BookCount } from "./resources";
+
+export default class BookProcessor extends KnexProcessor<Book> {
+  async count(op: Operation): Promise<BookCount> {
+    return {
+      type: "bookCount",
+      attributes: {
+        count: (await super.get(op)).length
+      }
+    } as BookCount;
+  }
+}
+```
+
+The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor and then do other actions around it.
+
+> ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
