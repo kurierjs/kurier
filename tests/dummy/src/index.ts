@@ -11,7 +11,8 @@ const knexConfig = {
   connection: {
     filename: "./tests/dummy/db/dev.sqlite3"
   },
-  useNullAsDefault: true
+  useNullAsDefault: true,
+  debug: true
 };
 
 const app = new Application({
