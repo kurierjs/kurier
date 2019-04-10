@@ -4,6 +4,32 @@
 
 This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https://jsonapi.org/format/1.1/) + the [Operations proposal spec](https://github.com/json-api/json-api/blob/999e6df77b28549d6c37b163b73c8e9102400020/_format/1.1/index.md#operations).
 
+## Table of contents
+
+- [Features](#features)
+- [Getting started](#getting-started)
+- [Data flow](#data-flow)
+- [Resources](#resources)
+  - [What is a resource?](#what-is-a-resource)
+  - [Declaring a resource](#declaring-a-resource)
+  - [Accepted attribute types](#accepted-attribute-types)
+- [Operations](#operations)
+  - [What is an operation?](#what-is-an-operation)
+  - [The `get` operation](#the-get-operation)
+  - [The `add` operation](#the-add-operation)
+  - [The `update` operation](#the-update-operation)
+  - [The `remove` operation](#the-remove-operation)
+- [Transport layers](#transport-layers)
+  - [jsonApiKoa](#jsonapikoa)
+    - [Usage](#usage)
+    - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
+    - [Request/response mapping](#requestresponse-mapping)
+- [Processors](#processors)
+  - [What is a processor?](#what-is-a-processor)
+  - [The `OperationProcessor` class](#the-operationprocessor-class)
+  - [How does an operation gets executed?](#how-does-an-operation-gets-executed)
+  - [Controlling errors while executing an operation](#controlling-errors-while-executing-an-operation)
+
 ## Features
 
 - **Operation-driven API:** JSONAPI is transport-layer independent, so it can be used for HTTP, WebSockets or any transport protocol of your choice.
@@ -531,3 +557,88 @@ class OperationProcessor<ResourceT> {
 ```
 
 Also, the `OperationProcessor` exposes an `app` property that allows access to the [JSONAPI application](#The-JSONAPI-application) instance.
+
+### How does an operation gets executed?
+
+Any operation is the result of a call to a method named `executeOperations`, which lives in the JSONAPI application instance.
+
+By default, the `OperationProcessor` only offers the methods' signature for every operation, but does not implement any of them. So, for example, for a `get` operation to actually do something, you should extend from this class and write some code that in its return value, returns a list of resources of a given type.
+
+Let's assume for example your data source is the filesystem. For each `type`, you have a subdirectory in a `data` directory, and for each resource, you have a JSON file with a filename of any UUID value.
+
+You could implement a generic `ReadOnlyProcessor` with something like this:
+
+```ts
+import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { readDirSync } from "fs";
+import { resolve as resolvePath, basename } from "path";
+
+export default class ReadOnlyProcessor<ResourceT> extends OperationProcessor<
+  ResourceT
+> {
+  async get(op: Operation): Promise<ResourceT[]> {
+    const files = readDirSync(resolvePath(__dirname, `data/${op.ref.type}`));
+    return files.map(file => ({
+      type: op.ref.type,
+      id: basename(file),
+      attributes: JSON.parse(fs.readFileSync(file))
+    }));
+  }
+}
+```
+
+### Controlling errors while executing an operation
+
+What happens if in the previous example something goes wrong? For example, a record in our super filesystem-based storage does not contain valid JSON? We can create an error response using try/catch and `JsonApiErrors`:
+
+```ts
+import {
+  OperationProcessor,
+  Operation,
+  JsonApiErrors
+} from "@ebryn/jsonapi-ts";
+import { readDirSync } from "fs";
+import { resolve as resolvePath, basename } from "path";
+
+export default class ReadOnlyProcessor<ResourceT> extends OperationProcessor<
+  ResourceT
+> {
+  async get(op: Operation): Promise<ResourceT[]> {
+    const files = readDirSync(resolvePath(__dirname, `data/${op.ref.type}`));
+    return files.map(file => {
+      try {
+        const attributes = JSON.parse(fs.readFileSync(file));
+        return {
+          type: op.ref.type,
+          id: basename(file),
+          attributes
+        };
+      } catch {
+        throw JsonApiErrors.UnhandledError();
+      }
+    });
+  }
+}
+```
+
+You can also create an error by using the `JsonApiError` type:
+
+```ts
+// Assumes you've imported HttpStatusCodes and JsonApiError
+// from @ebryn/jsonapi-ts.
+
+throw {
+  // At the very least, you must declare a status and a code.
+  status: HttpStatusCode.UnprocessableEntity,
+  code: "invalid_json_in_record"
+} as JsonApiError;
+```
+
+The full JsonApiError type supports the following properties:
+
+- `id`: A unique identifier to this error response. Useful for tracking down a problem via logs.
+- `title`: A human-readable, brief summary of what went wrong.
+- `detail`: A human-readable, expanded information about the specifics of the error.
+- `source`: A reference to locate the code block that triggered the error.
+  - `pointer`: An expression to point towards the point of failure. It can be anything useful for a developer to track down the problem. Common examples are `filename.ext:line:col` or `filename.ext:methodName()`.
+  - `parameter`: If the failure occured at a specific method and it's triggered due to a bad parameter value, you can set here which parameter was badly set.
