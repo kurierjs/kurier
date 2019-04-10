@@ -1,6 +1,6 @@
 import Application from "../application";
 import Resource from "../resource";
-import { HasId, Operation } from "../types";
+import { HasId, Operation, EagerLoadedData } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 
@@ -30,7 +30,7 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this.convertToResources(op, result, eagerLoadedData);
   }
 
-  async eagerLoad(op: Operation, result: any) {
+  async eagerLoad(op: Operation, result: ResourceT | ResourceT[] | void) {
     return {};
   }
 
@@ -38,7 +38,7 @@ export default class OperationProcessor<ResourceT = Resource> {
     op: Operation,
     resourceClass: typeof Resource,
     record: HasId,
-    eagerLoadedData: any
+    eagerLoadedData: EagerLoadedData
   ) {
     const typeFields = op.params.fields && op.params.fields[resourceClass.type];
 
@@ -55,7 +55,7 @@ export default class OperationProcessor<ResourceT = Resource> {
     op: Operation,
     resourceClass: typeof Resource,
     record: HasId,
-    eagerLoadedData: any
+    eagerLoadedData: EagerLoadedData
   ) {
     const attributeKeys =
       (op.params.fields && op.params.fields[resourceClass.type]) ||
@@ -64,7 +64,11 @@ export default class OperationProcessor<ResourceT = Resource> {
     return pick(record, attributeKeys);
   }
 
-  async getRelationships(op: Operation, record: HasId, eagerLoadedData: any) {
+  async getRelationships(
+    op: Operation,
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
+  ) {
     const relationships = pick(this.relationships, op.params.include);
 
     return promiseHashMap(relationships, key => {
@@ -72,7 +76,11 @@ export default class OperationProcessor<ResourceT = Resource> {
     });
   }
 
-  async convertToResources(op: Operation, records: HasId[] | HasId, eagerLoadedData: any) {
+  async convertToResources(
+    op: Operation,
+    records: HasId[] | HasId,
+    eagerLoadedData: EagerLoadedData
+  ) {
     if (Array.isArray(records)) {
       return Promise.all(
         records.map(record => {
