@@ -642,3 +642,56 @@ The full JsonApiError type supports the following properties:
 - `source`: A reference to locate the code block that triggered the error.
   - `pointer`: An expression to point towards the point of failure. It can be anything useful for a developer to track down the problem. Common examples are `filename.ext:line:col` or `filename.ext:methodName()`.
   - `parameter`: If the failure occured at a specific method and it's triggered due to a bad parameter value, you can set here which parameter was badly set.
+
+### Extending the `OperationProcessor` class
+
+Our ReadOnlyProcessor class is a fair example of how to extend the OperationProcessor in a generic way. What if we want to build a resource-specific, `OperationProcessor`-derived processor?
+
+Let's assume we have a `Moment` resource:
+
+```ts
+import { Resource } from "@ebryn/jsonapi-ts";
+
+export default class Moment extends Resource {
+  static schema = {
+    attributes: {
+      date: string,
+      time: string
+    }
+  };
+}
+```
+
+All you need to do is extend the Processor, set the generic type to `Moment`, and bind the processor to the resource:
+
+```ts
+import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { Moment } from "./resources";
+
+export default class MomentProcessor extends OperationProcessor<Moment> {
+  // This binds the processor to the resource. This way the JSONAPI
+  // application knows how to resolve operations for the `Moment`
+  // resource.
+  public resourceClass = Moment;
+
+  // Notice that the return type is `Moment` and not a generic.
+  async get(op: Operation): Promise<Moment[]> {
+    const now = new Date();
+    const id = now.valueOf();
+    const [date] = now.toJSON().split("T");
+    const [, time] = now
+      .toJSON()
+      .split("T")
+      .replace(/Z/g, "");
+
+    return {
+      type: "moment",
+      id,
+      attributes: {
+        date,
+        time
+      }
+    };
+  }
+}
+```
