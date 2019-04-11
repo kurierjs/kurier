@@ -1,6 +1,14 @@
+import flatten = require("flatten");
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
-import { Operation, OperationResponse } from "./types";
+import {
+  Operation,
+  OperationResponse,
+  ResourceRelationshipData,
+  Links
+} from "./types";
+import pick from "./utils/pick";
+import unpick from "./utils/unpick";
 
 export default class Application {
   namespace: string;
@@ -74,17 +82,84 @@ export default class Application {
     return new ResourceProcessor(this);
   }
 
-  async resourceFor(
-    resourceType: string
-  ): Promise<typeof Resource> {
+  async resourceFor(resourceType: string): Promise<typeof Resource> {
     return this.types.find(({ type }) => type && type === resourceType);
   }
 
-  buildOperationResponse(
+  async buildOperationResponse(
     data: Resource | Resource[] | void
-  ): OperationResponse {
+  ): Promise<OperationResponse> {
+    const included = flatten(await this.extractIncludedResources(data));
+
     return {
-      data: data || null
+      included,
+      data: this.serializeResources(data)
     };
+  }
+
+  serializeResources(data: Resource | Resource[] | void) {
+    if (!data) {
+      return null;
+    }
+
+    if (Array.isArray(data)) {
+      return data.map(record => this.serializeResources(record));
+    }
+
+    Object.keys(data.relationships).forEach(relationshipName => {
+      data.relationships[relationshipName] = {
+        data: this.serializeRelationship((data.relationships[
+          relationshipName
+        ] as unknown) as Resource | Resource[]),
+        links: {} as Links
+      };
+    });
+
+    return data;
+  }
+
+  serializeRelationship(relationships: Resource | Resource[]) {
+    if (Array.isArray(relationships)) {
+      return relationships.map(relationship =>
+        this.serializeRelationship(relationship)
+      );
+    }
+
+    return pick(relationships, ["id", "type"]);
+  }
+
+  async extractIncludedResources(data: Resource | Resource[] | void) {
+    if (!data) {
+      return null;
+    }
+
+    if (Array.isArray(data)) {
+      return Promise.all(
+        data.map(record => this.extractIncludedResources(record))
+      );
+    }
+
+    const resourceClass = await this.resourceFor(data.type);
+    const schemaRelationships = resourceClass.schema.relationships;
+
+    Object.keys(data.relationships).forEach(relationshipName => {
+      data.relationships[relationshipName]["type"] = schemaRelationships[
+        relationshipName
+      ].type().type;
+    });
+
+    return Promise.all(
+      Object.values(data.relationships).map(async relatedResource => {
+        const relatedResourceClass = await this.resourceFor(
+          relatedResource["type"]
+        );
+        const resource = relatedResource[0] || relatedResource;
+
+        return new relatedResourceClass({
+          id: resource["id"],
+          attributes: unpick(resource, ["id", "type"])
+        });
+      })
+    );
   }
 }

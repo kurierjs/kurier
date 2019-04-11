@@ -5,7 +5,13 @@ import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
-import { JsonApiDocument, JsonApiError, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
+import {
+  JsonApiDocument,
+  JsonApiError,
+  JsonApiErrorsDocument,
+  Operation,
+  OperationResponse
+} from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 
@@ -147,7 +153,7 @@ function convertOperationResponseToHttpResponse(
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(ctx.method)) {
-    return { data: operation.data };
+    return { data: operation.data, included: operation.included };
   }
 }
 
