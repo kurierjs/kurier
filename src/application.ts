@@ -40,7 +40,7 @@ export default class Application {
 
   async executeOperation(
     op: Operation,
-    processor: OperationProcessor
+    processor: OperationProcessor<Resource>
   ): Promise<OperationResponse> {
     const result = await processor.execute(op);
     return this.buildOperationResponse(result);
@@ -52,7 +52,7 @@ export default class Application {
 
   async processorFor(
     resourceType: string
-  ): Promise<OperationProcessor | undefined> {
+  ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
 
     const processors = await Promise.all(
@@ -67,7 +67,7 @@ export default class Application {
       return new processor(this);
     }
 
-    class ResourceProcessor extends this.defaultProcessor {
+    class ResourceProcessor extends this.defaultProcessor<Resource> {
       static resourceClass = resourceClass;
     }
 

@@ -4,7 +4,7 @@ import { HasId, Operation, EagerLoadedData } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 
-export default class OperationProcessor<ResourceT = Resource> {
+export default class OperationProcessor<ResourceT extends Resource> {
   static resourceClass: typeof Resource;
 
   static async shouldHandle(resourceType: string): Promise<boolean> {
@@ -25,12 +25,16 @@ export default class OperationProcessor<ResourceT = Resource> {
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
     const result = this[action] && (await this[action].call(this, op));
-    const eagerLoadedData = await this.eagerLoad(op, result);
+    let eagerLoadedData = {};
+
+    if (result !== undefined) {
+      eagerLoadedData = await this.eagerLoad(op, result);
+    }
 
     return this.convertToResources(op, result, eagerLoadedData);
   }
 
-  async eagerLoad(op: Operation, result: ResourceT | ResourceT[] | void) {
+  async eagerLoad(op: Operation, result: ResourceT | ResourceT[]) {
     return {};
   }
 
@@ -112,7 +116,7 @@ export default class OperationProcessor<ResourceT = Resource> {
     return this.app.resourceFor(resourceType);
   }
 
-  async processorFor(resourceType: string): Promise<OperationProcessor> {
+  async processorFor(resourceType: string): Promise<OperationProcessor<Resource>> {
     return this.app.processorFor(resourceType);
   }
 
