@@ -89,7 +89,9 @@ export default class Application {
   async buildOperationResponse(
     data: Resource | Resource[] | void
   ): Promise<OperationResponse> {
-    const included = flatten(await this.extractIncludedResources(data));
+    const included = flatten(await this.extractIncludedResources(data)).filter(
+      Boolean
+    );
 
     return {
       included,
@@ -107,12 +109,16 @@ export default class Application {
     }
 
     Object.keys(data.relationships).forEach(relationshipName => {
-      data.relationships[relationshipName] = {
-        data: this.serializeRelationship((data.relationships[
-          relationshipName
-        ] as unknown) as Resource | Resource[]),
-        links: {} as Links
-      };
+      const relationships = this.serializeRelationship((data.relationships[
+        relationshipName
+      ] as unknown) as Resource | Resource[]);
+
+      if (relationships.length) {
+        data.relationships[relationshipName] = {
+          data: relationships,
+          links: {} as Links
+        };
+      }
     });
 
     return data;
@@ -143,17 +149,50 @@ export default class Application {
     const schemaRelationships = resourceClass.schema.relationships;
 
     Object.keys(data.relationships).forEach(relationshipName => {
-      data.relationships[relationshipName]["type"] = schemaRelationships[
-        relationshipName
-      ].type().type;
+      if (Array.isArray(data.relationships[relationshipName])) {
+        data.relationships[relationshipName] = (data.relationships[
+          relationshipName
+        ] as any).map(rel => {
+          rel["type"] = schemaRelationships[relationshipName].type().type;
+          return rel;
+        });
+      } else {
+        data.relationships[relationshipName]["type"] = schemaRelationships[
+          relationshipName
+        ].type().type;
+      }
     });
 
     return Promise.all(
       Object.values(data.relationships).map(async relatedResource => {
+        if (Array.isArray(relatedResource)) {
+          return Promise.all(
+            relatedResource.map(async relResource => {
+              const relatedResourceClass = await this.resourceFor(
+                relResource["type"]
+              );
+              const resource = relResource[0] || relResource;
+
+              if (!resource["id"]) {
+                return;
+              }
+
+              return new relatedResourceClass({
+                id: resource["id"],
+                attributes: unpick(resource, ["id", "type"])
+              });
+            })
+          );
+        }
+
         const relatedResourceClass = await this.resourceFor(
           relatedResource["type"]
         );
         const resource = relatedResource[0] || relatedResource;
+
+        if (!resource["id"]) {
+          return;
+        }
 
         return new relatedResourceClass({
           id: resource["id"],
