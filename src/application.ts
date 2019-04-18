@@ -9,6 +9,7 @@ import {
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
+import { finished } from "stream";
 
 export default class Application {
   namespace: string;
@@ -89,14 +90,17 @@ export default class Application {
   async buildOperationResponse(
     data: Resource | Resource[] | void
   ): Promise<OperationResponse> {
-    const included = flatten(await this.extractIncludedResources(data)).filter(
-      Boolean
-    );
+    const included = flatten(await this.extractIncludedResources(data))
+    const uniqueIncluded = Array.from(new Set(included
+      .map((item: Resource) => `${item.type}_${item.id}`)))
+      .map(uniqueTypeId => included
+        .find((item: Resource) => (`${item.type}_${item.id}` === uniqueTypeId)))
 
-    return {
-      included,
-      data: this.serializeResources(data)
-    };
+
+
+    return included.length ?
+      { included: uniqueIncluded, data: this.serializeResources(data) } :
+      { data: this.serializeResources(data) };
   }
 
   serializeResources(data: Resource | Resource[] | void) {
@@ -118,6 +122,8 @@ export default class Application {
           data: relationships,
           links: {} as Links
         };
+      } else {
+        data.relationships[relationshipName] = relationships;
       }
     });
 
@@ -150,12 +156,11 @@ export default class Application {
 
     Object.keys(data.relationships).forEach(relationshipName => {
       if (Array.isArray(data.relationships[relationshipName])) {
-        data.relationships[relationshipName] = (data.relationships[
-          relationshipName
-        ] as any).map(rel => {
-          rel["type"] = schemaRelationships[relationshipName].type().type;
-          return rel;
-        });
+        data.relationships[relationshipName] =
+          (data.relationships[relationshipName] as any).map(rel => {
+            rel["type"] = schemaRelationships[relationshipName].type().type;
+            return rel;
+          });
       } else {
         data.relationships[relationshipName]["type"] = schemaRelationships[
           relationshipName
@@ -163,7 +168,7 @@ export default class Application {
       }
     });
 
-    return Promise.all(
+    const rawInclude = await Promise.all(
       Object.values(data.relationships).map(async relatedResource => {
         if (Array.isArray(relatedResource)) {
           return Promise.all(
@@ -200,5 +205,10 @@ export default class Application {
         });
       })
     );
+    const validIncluded = flatten(rawInclude.filter(Boolean));
+    return Array.from(
+      new Set(validIncluded.map((item: Resource) => `${item.type}_${item.id}`))
+    ).map(uniqueTypeId =>
+      validIncluded.find((item: Resource) => (`${item.type}_${item.id}` === uniqueTypeId)));
   }
 }
