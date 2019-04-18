@@ -4,7 +4,6 @@ import Resource from "./resource";
 import {
   Operation,
   OperationResponse,
-  ResourceRelationshipData,
   Links
 } from "./types";
 import pick from "./utils/pick";
@@ -92,11 +91,16 @@ export default class Application {
     const included = flatten(await this.extractIncludedResources(data)).filter(
       Boolean
     );
+    const uniqueIncluded =
+      [...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))]
+        .map(type_id =>
+          included.find((item: Resource) => (`${item.type}_${item.id}` === type_id))
+        );
 
-    return {
-      included,
-      data: this.serializeResources(data)
-    };
+
+    return included.length ?
+      { included: uniqueIncluded, data: this.serializeResources(data) } :
+      { data: this.serializeResources(data) };
   }
 
   serializeResources(data: Resource | Resource[] | void) {
@@ -118,6 +122,8 @@ export default class Application {
           data: relationships,
           links: {} as Links
         };
+      } else {
+        data.relationships[relationshipName] = relationships;
       }
     });
 
@@ -134,6 +140,7 @@ export default class Application {
     return pick(relationships, ["id", "type"]);
   }
 
+  // TODO: remove type any for data.relationships[relationshipName]
   async extractIncludedResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
@@ -150,12 +157,11 @@ export default class Application {
 
     Object.keys(data.relationships).forEach(relationshipName => {
       if (Array.isArray(data.relationships[relationshipName])) {
-        data.relationships[relationshipName] = (data.relationships[
-          relationshipName
-        ] as any).map(rel => {
-          rel["type"] = schemaRelationships[relationshipName].type().type;
-          return rel;
-        });
+        data.relationships[relationshipName] =
+          (data.relationships[relationshipName] as any).map(rel => {
+            rel["type"] = schemaRelationships[relationshipName].type().type;
+            return rel;
+          });
       } else {
         data.relationships[relationshipName]["type"] = schemaRelationships[
           relationshipName
