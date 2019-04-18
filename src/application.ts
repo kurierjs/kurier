@@ -4,12 +4,10 @@ import Resource from "./resource";
 import {
   Operation,
   OperationResponse,
-  ResourceRelationshipData,
   Links
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
-import { finished } from "stream";
 
 export default class Application {
   namespace: string;
@@ -90,12 +88,14 @@ export default class Application {
   async buildOperationResponse(
     data: Resource | Resource[] | void
   ): Promise<OperationResponse> {
-    const included = flatten(await this.extractIncludedResources(data))
-    const uniqueIncluded = Array.from(new Set(included
-      .map((item: Resource) => `${item.type}_${item.id}`)))
-      .map(uniqueTypeId => included
-        .find((item: Resource) => (`${item.type}_${item.id}` === uniqueTypeId)))
-
+    const included = flatten(await this.extractIncludedResources(data)).filter(
+      Boolean
+    );
+    const uniqueIncluded = Array.from(
+      new Set(included.map((item: Resource) => `${item.type}_${item.id}`)))
+      .map(type_id =>
+        included.find((item: Resource) => (`${item.type}_${item.id}` === type_id))
+      );
 
 
     return included.length ?
@@ -140,6 +140,7 @@ export default class Application {
     return pick(relationships, ["id", "type"]);
   }
 
+  // TODO: remove type any for data.relationships[relationshipName]
   async extractIncludedResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
@@ -168,7 +169,7 @@ export default class Application {
       }
     });
 
-    const rawInclude = await Promise.all(
+    return Promise.all(
       Object.values(data.relationships).map(async relatedResource => {
         if (Array.isArray(relatedResource)) {
           return Promise.all(
@@ -205,10 +206,5 @@ export default class Application {
         });
       })
     );
-    const validIncluded = flatten(rawInclude.filter(Boolean));
-    return Array.from(
-      new Set(validIncluded.map((item: Resource) => `${item.type}_${item.id}`))
-    ).map(uniqueTypeId =>
-      validIncluded.find((item: Resource) => (`${item.type}_${item.id}` === uniqueTypeId)));
   }
 }
