@@ -91,11 +91,11 @@ export default class Application {
     const included = flatten(await this.extractIncludedResources(data)).filter(
       Boolean
     );
-    const uniqueIncluded = Array.from(
-      new Set(included.map((item: Resource) => `${item.type}_${item.id}`)))
-      .map(type_id =>
-        included.find((item: Resource) => (`${item.type}_${item.id}` === type_id))
-      );
+    const uniqueIncluded =
+      [...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))]
+        .map(type_id =>
+          included.find((item: Resource) => (`${item.type}_${item.id}` === type_id))
+        );
 
 
     return included.length ?
