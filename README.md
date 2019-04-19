@@ -812,7 +812,7 @@ When requesting to create a `Session`, we'll need the username and password the
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class Session extends Resource {
-  static schema= {
+  static schema = {
     attributes: {
       username: String,
       password: String,
