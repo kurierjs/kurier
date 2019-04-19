@@ -4,15 +4,13 @@ import User from "./user";
 export default class Comment extends Resource {
   static schema = {
     attributes: {
-      body: String,
-      author_Id: Number
+      body: String
     },
-
     relationships: {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: 'author_id'
+        foreignKeyName: "author_id"
       }
     }
   };
