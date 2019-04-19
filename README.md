@@ -77,11 +77,12 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
    import { Resource } from "@ebryn/jsonapi-ts";
 
    export default class Author extends Resource {
-     static schema: {
+     static schema = {
        attributes: {
          firstName: String,
          lastName: String
-       }
+       },
+       relationships: {}
      };
    }
    ```
@@ -189,7 +190,7 @@ export default class Book extends Resource {
 
   // Every field we declare in a resource is contained in a *schema*.
   // A schema comprises attributes and relationships.
-  static schema: {
+  static schema = {
     attributes: {
       // An attribute has a name and a primitive type.
       // Accepted types are String, Number and Boolean.
@@ -667,13 +668,12 @@ Let's assume we have a `Moment` resource:
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class Moment extends Resource {
-  static schema: {
+  static schema = {
     attributes: {
-      date: string,
-      time: string
+      date: String,
+      time: String
     },
-    type:string,
-    id:string
+    relationships: {}
   };
 }
 ```
@@ -775,10 +775,11 @@ A minimal, bare-bones declaration of an `User` resource could look something lik
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class User extends Resource {
-  static schema: {
+  static schema = {
     attributes: {
-      name: string;
-    }
+      name: String
+    },
+    relationships: {}
   }
 }
 ```
@@ -811,12 +812,13 @@ When requesting to create a `Session`, we'll need the username and password the
 import { Resource } from "@ebryn/jsonapi-ts";
 
 export default class Session extends Resource {
-  static schema: {
+  static schema= {
     attributes: {
-      username: string,
-      password: string,
-      token?: string;
-    }
+      username: String,
+      password: String,
+      token?: String;
+    },
+    relationships: {}
   }
 }
 ```
