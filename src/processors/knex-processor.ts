@@ -28,9 +28,9 @@ const operators = {
 
 const getOperator = (paramValue: string): string =>
   operators[
-    Object.keys(operators).find(
-      operator => paramValue.indexOf(`${operator}:`) === 0
-    )
+  Object.keys(operators).find(
+    operator => paramValue.indexOf(`${operator}:`) === 0
+  )
   ];
 
 const getWhereMethod = (value: string, operator: string) => {
@@ -63,8 +63,7 @@ const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
 
   const relationshipsKeys = Object.entries(relationships)
     .filter(([key, value]) => value.belongsTo)
-    .map(([key]) => `${key}Id`);
-
+    .map(([key, value]) => value.foreignKeyName || `${key}Id`);
   const typeFields = (fields[type] || []).filter((key: string) =>
     Object.keys(attributes).includes(key)
   );
@@ -78,7 +77,7 @@ const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
 
 export default class KnexProcessor<
   ResourceT extends Resource
-> extends OperationProcessor<ResourceT> {
+  > extends OperationProcessor<ResourceT> {
   protected knex: Knex;
 
   constructor(app: Application) {
@@ -248,7 +247,7 @@ export default class KnexProcessor<
     const query = relationProcessor.getQuery();
     const foreignTableName = relationProcessor.tableName;
     const sqlOperator = Array.isArray(result) ? "in" : "=";
-    const queryIn : string | string[] = Array.isArray(result) ? result.map((a: Resource) => a.id) : result.id;
+    const queryIn: string | string[] = Array.isArray(result) ? result.map((a: Resource) => a.id) : result.id;
 
     if (relationship.belongsTo) {
       const foreignKey =
@@ -267,15 +266,15 @@ export default class KnexProcessor<
     if (relationship.hasMany) {
       const foreignKey =
         relationship.foreignKeyName || `${relationship.type().type}Id`;
-        return query
-          .join(
-            this.tableName,
-            `${foreignTableName}.${foreignKey}`,
-            "=",
-            `${this.tableName}.id`
-          )
-          .where(`${this.tableName}.id`, sqlOperator, queryIn)
-          .select(`${foreignTableName}.*`);
+      return query
+        .join(
+          this.tableName,
+          `${foreignTableName}.${foreignKey}`,
+          "=",
+          `${this.tableName}.id`
+        )
+        .where(`${this.tableName}.id`, sqlOperator, queryIn)
+        .select(`${foreignTableName}.*`);
     }
   }
 
@@ -304,7 +303,7 @@ export default class KnexProcessor<
       );
     }
 
-    if (relationship.belongsTo) {
+    if (relationship.hasMany) {
       const foreignKey =
         relationship.foreignKeyName || `${relationship.type().type}Id`;
 
