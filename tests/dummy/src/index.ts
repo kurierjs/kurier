@@ -5,6 +5,7 @@ import ArticleProcessor from "./processors/article";
 import UserProcessor from "./processors/user";
 import Article from "./resources/article";
 import User from "./resources/user";
+import Comment from "./resources/comment";
 
 const knexConfig = {
   client: "sqlite3",
@@ -17,7 +18,7 @@ const knexConfig = {
 
 const app = new Application({
   namespace: "api",
-  types: [User, Article],
+  types: [User, Article, Comment],
   processors: [ArticleProcessor, UserProcessor],
   defaultProcessor: KnexProcessor
 });
