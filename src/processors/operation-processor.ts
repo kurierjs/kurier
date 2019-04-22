@@ -61,19 +61,9 @@ export default class OperationProcessor<ResourceT extends Resource> {
     record: HasId,
     eagerLoadedData: EagerLoadedData
   ) {
-    const relationshipKeys = Object.keys(resourceClass.schema.relationships)
-      .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
-      .map(
-        relationshipName =>
-          resourceClass.schema.relationships[relationshipName].foreignKeyName ||
-          `${resourceClass.schema.relationships[relationshipName]}Id`
-      );
-    const schemaKeys = !op.params.include
-      ? Object.keys(resourceClass.schema.attributes).concat(relationshipKeys)
-      : Object.keys(resourceClass.schema.attributes);
-
     const attributeKeys =
-      (op.params.fields && op.params.fields[resourceClass.type]) || schemaKeys;
+      (op.params.fields && op.params.fields[resourceClass.type]) ||
+      Object.keys(resourceClass.schema.attributes);
     return pick(record, attributeKeys);
   }
 
@@ -87,6 +77,26 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return promiseHashMap(relationships, key => {
       return relationships[key].call(this, record);
     });
+  }
+
+  async getRelationshipAttributes(
+    op: Operation,
+    resourceClass: typeof Resource,
+    record: HasId,
+    eagerLoadedData: EagerLoadedData
+  ) {
+    if (op.params.include) {
+      return {};
+    }
+
+    const relationshipKeys = Object.keys(resourceClass.schema.relationships)
+      .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
+      .map(
+        relationshipName =>
+          resourceClass.schema.relationships[relationshipName].foreignKeyName ||
+          `${resourceClass.schema.relationships[relationshipName]}Id`
+      );
+    return pick(record, relationshipKeys);
   }
 
   async convertToResources(
@@ -104,11 +114,16 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
     const record = { ...records };
     const resourceClass = await this.resourceFor(op.ref.type);
-
-    const [attributes, computedAttributes, relationships] = await Promise.all([
+    const [
+      attributes,
+      computedAttributes,
+      relationships,
+      relationshipAttributes
+    ] = await Promise.all([
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
-      this.getRelationships(op, record, eagerLoadedData)
+      this.getRelationships(op, record, eagerLoadedData),
+      this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData)
     ]);
 
     return new resourceClass({
@@ -116,6 +131,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
       id: record.id,
       attributes: {
         ...attributes,
+        ...relationshipAttributes,
         ...computedAttributes
       }
     });
