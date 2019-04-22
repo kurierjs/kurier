@@ -113,7 +113,10 @@ export default class Application {
     }
 
     if (!Object.entries(data.relationships).length) {
-      const schemaRelationships = (await this.resourceFor(data.type)).schema.relationships;
+
+      const resourceSchema = (await this.resourceFor(data.type)).schema;
+      const schemaRelationships = resourceSchema.relationships;
+
       const relationshipsFound = Object.keys(schemaRelationships)
         .filter(relName => schemaRelationships[relName].belongsTo)
         .filter(
@@ -142,7 +145,11 @@ export default class Application {
 
       data.attributes = unpick(
         data.attributes,
-        relationshipsFound.map(relationship => relationship.key)
+        relationshipsFound
+          .map(relationship => relationship.key)
+          .filter(relationshipKey =>
+            !Object.keys(resourceSchema.attributes).includes(relationshipKey)
+          )
       );
     }
 
