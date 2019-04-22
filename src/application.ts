@@ -155,7 +155,7 @@ export default class Application {
     const resourceClass = await this.resourceFor(data.type);
     const schemaRelationships = resourceClass.schema.relationships;
 
-    Object.keys(data.relationships).forEach(relationshipName => {
+    Object.keys(data.relationships).filter(relationshipName => data.relationships[relationshipName]).forEach(relationshipName => {
       if (Array.isArray(data.relationships[relationshipName])) {
         data.relationships[relationshipName] =
           (data.relationships[relationshipName] as any).map(rel => {
@@ -170,7 +170,7 @@ export default class Application {
     });
 
     return Promise.all(
-      Object.values(data.relationships).map(async relatedResource => {
+      Object.values(data.relationships).filter(relationship => relationship).map(async relatedResource => {
         if (Array.isArray(relatedResource)) {
           return Promise.all(
             relatedResource.map(async relResource => {
