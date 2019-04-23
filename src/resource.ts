@@ -14,7 +14,7 @@ export default class Resource {
   id?: string;
   type: string;
   attributes: ResourceAttributes;
-  relationships: ResourceRelationships | ResourceRelationships[];
+  relationships: ResourceRelationships;
 
   constructor({
     id,

@@ -5,7 +5,8 @@ import {
   Operation,
   OperationResponse,
   Links,
-  ResourceRelationships
+  ResourceRelationships,
+  ResourceRelationship
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
@@ -139,7 +140,7 @@ export default class Application {
 
     return pick(relationships, ["id", "type"]);
   }
-
+  // TODO: remove type any for data.relationships[relationshipName]
   async extractIncludedResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
@@ -156,8 +157,8 @@ export default class Application {
 
     Object.keys(data.relationships).forEach(relationshipName => {
       if (Array.isArray(data.relationships[relationshipName])) {
-        data.relationships[relationshipName] = <ResourceRelationships[]>(
-          data.relationships[relationshipName].map(rel => {
+        data.relationships[relationshipName] =
+          (data.relationships[relationshipName] as any).map(rel => {
             const relatedResourceClass = schemaRelationships[
               relationshipName
             ].type();
@@ -173,9 +174,9 @@ export default class Application {
             }
 
             rel["type"] = relatedResourceClass.type;
+            rel.links = {};
             return rel;
-          })
-        );
+          });
       } else {
 
         const relatedResourceClass = schemaRelationships[relationshipName].type();
