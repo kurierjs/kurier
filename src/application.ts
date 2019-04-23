@@ -170,7 +170,7 @@ export default class Application {
     });
 
     return Promise.all(
-      Object.values(data.relationships).filter(relationship => relationship).map(async relatedResource => {
+      Object.values(data.relationships).filter(Boolean).map(async relatedResource => {
         if (Array.isArray(relatedResource)) {
           return Promise.all(
             relatedResource.map(async relResource => {
