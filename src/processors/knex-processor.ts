@@ -255,12 +255,12 @@ export default class KnexProcessor<
       return query
         .join(
           this.tableName,
-          `base${foreignTableName}.id`,
+          `belonging_${foreignTableName}.id`,
           "=",
           `${this.tableName}.${foreignKey}`
         )
         .where(`${this.tableName}.id`, sqlOperator, queryIn)
-        .select(`base${foreignTableName}.*`).from(`${foreignTableName} as base${foreignTableName}`);
+        .select(`belonging_${foreignTableName}.*`).from(`${foreignTableName} as belonging_${foreignTableName}`);
     }
 
     if (relationship.hasMany) {
