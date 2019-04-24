@@ -18,8 +18,18 @@ export type OperationDecorator = (
 
 // Generic types for JSONAPI document structure.
 
+export type AttributeValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | boolean[]
+  | object
+  | object[];
+
 export type ResourceAttributes = {
-  [key: string]: string | number | boolean;
+  [key: string]: AttributeValue;
 };
 
 export type ResourceRelationships = {
@@ -38,7 +48,7 @@ export type ResourceRelationshipData = {
 };
 
 export type Meta = {
-  [key: string]: string | number | boolean | Meta;
+  [key: string]: AttributeValue;
 };
 
 export type JsonApiDocument<
@@ -90,17 +100,17 @@ export type Link = {
 
 export type Operation = {
   op: string;
-  data: Resource;
-  included: Resource[];
+  data?: Resource;
+  included?: Resource[];
   ref: {
     type: string;
-    id: string | undefined;
-    lid: string;
-    relationship: string;
+    id?: string | undefined;
+    lid?: string;
+    relationship?: string;
   };
-  params: JsonApiParams;
-  links: Links;
-  meta: Meta;
+  params?: JsonApiParams;
+  links?: Links;
+  meta?: Meta;
 };
 
 export type OperationResponse = {
@@ -115,7 +125,7 @@ export type KnexRecord = {
 
 export type AttributeValueMatch = {
   attribute: string;
-  value: string | number | boolean | string[] | number[];
+  value: AttributeValue;
 };
 
 export type ResourceSchema = {
@@ -124,7 +134,12 @@ export type ResourceSchema = {
 };
 
 export type ResourceSchemaAttributes = {
-  [key: string]: StringConstructor | NumberConstructor | BooleanConstructor;
+  [key: string]:
+    | StringConstructor
+    | NumberConstructor
+    | BooleanConstructor
+    | ArrayConstructor
+    | ObjectConstructor;
 };
 
 export type ResourceSchemaRelationships = {
