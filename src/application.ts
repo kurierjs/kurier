@@ -101,17 +101,58 @@ export default class Application {
 
 
     return included.length ?
-      { included: uniqueIncluded, data: this.serializeResources(data) } :
-      { data: this.serializeResources(data) };
+      { included: uniqueIncluded, data: await this.serializeResources(data) } :
+      { data: await this.serializeResources(data) };
   }
 
-  serializeResources(data: Resource | Resource[] | void) {
+  async serializeResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
     }
 
     if (Array.isArray(data)) {
-      return data.map(record => this.serializeResources(record));
+      return Promise.all(data.map(record => this.serializeResources(record)));
+    }
+
+    if (!Object.entries(data.relationships).length) {
+
+      const resourceSchema = (await this.resourceFor(data.type)).schema;
+      const schemaRelationships = resourceSchema.relationships;
+
+      const relationshipsFound = Object.keys(schemaRelationships)
+        .filter(relName => schemaRelationships[relName].belongsTo)
+        .filter(
+          relName =>
+            data.attributes[
+            schemaRelationships[relName].foreignKeyName ||
+            `${schemaRelationships[relName]}Id`
+            ]
+        )
+        .map(
+          relationshipName => ({
+            name: relationshipName,
+            key:
+              schemaRelationships[relationshipName].foreignKeyName ||
+              `${schemaRelationships[relationshipName]}Id`
+          }));
+
+      data.relationships = relationshipsFound
+        .reduce((relationships, relationship) => ({
+          ...relationships,
+          [relationship.name]: {
+            id: data.attributes[relationship.key],
+            type: schemaRelationships[relationship.name].type().type
+          }
+        }), {});
+
+      data.attributes = unpick(
+        data.attributes,
+        relationshipsFound
+          .map(relationship => relationship.key)
+          .filter(relationshipKey =>
+            !Object.keys(resourceSchema.attributes).includes(relationshipKey)
+          )
+      );
     }
     Object.keys(data.relationships).forEach(relationshipName => {
       const relationships = this.serializeRelationship((data.relationships[
