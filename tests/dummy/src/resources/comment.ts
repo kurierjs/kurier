@@ -4,7 +4,8 @@ import User from "./user";
 export default class Comment extends Resource {
   static schema = {
     attributes: {
-      body: String
+      body: String,
+      type: String
     },
     relationships: {
       author: {
