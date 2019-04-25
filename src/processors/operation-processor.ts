@@ -85,10 +85,6 @@ export default class OperationProcessor<ResourceT extends Resource> {
     record: HasId,
     eagerLoadedData: EagerLoadedData
   ) {
-    if (op.params.include) {
-      return {};
-    }
-
     const relationshipKeys = Object.keys(resourceClass.schema.relationships)
       .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
       .map(
