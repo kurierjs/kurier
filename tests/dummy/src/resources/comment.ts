@@ -5,6 +5,7 @@ export default class Comment extends Resource {
   static schema = {
     attributes: {
       body: String,
+      type: String
     },
     relationships: {
       author: {
