@@ -157,15 +157,9 @@ export default class Application {
       const relationships = this.serializeRelationship((data.relationships[
         relationshipName
       ] as unknown) as Resource | Resource[]);
-
-      if (relationships.length) {
-        data.relationships[relationshipName] = {
-          data: relationships,
-          links: {} as Links
-        };
-      } else {
-        data.relationships[relationshipName] = relationships;
-      }
+      data.relationships[relationshipName] = {
+        data: relationships
+      };
     });
 
     return data;
@@ -177,7 +171,9 @@ export default class Application {
         this.serializeRelationship(relationship)
       );
     }
-
+    if (!relationships.id) {
+      return null;
+    }
     return pick(relationships, ["id", "type"]);
   }
   // TODO: remove type any for data.relationships[relationshipName]
