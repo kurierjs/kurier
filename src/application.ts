@@ -124,14 +124,15 @@ export default class Application {
           data.attributes.hasOwnProperty(
             schemaRelationships[relName].foreignKeyName
           ) ||
-          data.attributes.hasOwnProperty(`${schemaRelationships[relName]}Id`)
+          data.attributes.hasOwnProperty(
+            `${schemaRelationships[relName].type().type}Id`
+          )
       )
-
       .map(relationshipName => ({
         name: relationshipName,
         key:
           schemaRelationships[relationshipName].foreignKeyName ||
-          `${schemaRelationships[relationshipName]}Id`
+          `${schemaRelationships[relationshipName].type().type}Id`
       }));
 
     data.relationships = relationshipsFound.reduce(
