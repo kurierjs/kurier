@@ -1,13 +1,7 @@
 import flatten = require("flatten");
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
-import {
-  Operation,
-  OperationResponse,
-  Links,
-  ResourceRelationships,
-  ResourceRelationship
-} from "./types";
+import { Operation, OperationResponse } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
 
@@ -132,6 +126,7 @@ export default class Application {
           ) ||
           data.attributes.hasOwnProperty(`${schemaRelationships[relName]}Id`)
       )
+
       .map(relationshipName => ({
         name: relationshipName,
         key:
@@ -147,6 +142,7 @@ export default class Application {
           type: schemaRelationships[relationship.name].type().type
         }
       }),
+
       data.relationships as any
     );
 
@@ -205,6 +201,7 @@ export default class Application {
         if (Array.isArray(data.relationships[relationshipName])) {
           data.relationships[relationshipName] = (data.relationships[relationshipName] as any).map(resource => {
             const relatedResourceClass = schemaRelationships[relationshipName].type();
+
 
             if (resource["id"]) {
               includedData.push(
