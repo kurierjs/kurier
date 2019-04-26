@@ -4,9 +4,7 @@ import Resource from "./resource";
 import {
   Operation,
   OperationResponse,
-  Links,
-  ResourceRelationships,
-  ResourceRelationship
+  ResourceRelationshipData
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
@@ -51,12 +49,34 @@ export default class Application {
     op: Operation,
     processor: OperationProcessor<Resource>
   ): Promise<OperationResponse> {
-    const result = await processor.execute(op);
+    const result = await processor.execute(await this.deserializeResource(op));
     return this.buildOperationResponse(result);
   }
 
   async createTransaction(ops: Promise<OperationResponse>[]) {
     return await Promise.all(ops);
+  }
+
+  async deserializeResource(op: Operation) {
+    const resourceClass = await this.resourceFor(op.ref.type);
+    const schemaRelationships = resourceClass.schema.relationships;
+    if (op.data && op.data.attributes) {
+      op.data.attributes = Object.keys(schemaRelationships)
+        .filter(
+          relName =>
+            schemaRelationships[relName].belongsTo &&
+            op.data.relationships.hasOwnProperty(relName)
+        )
+        .reduce(
+          (relationAttributes, relName) => ({
+            ...relationAttributes,
+            [schemaRelationships[relName].foreignKeyName || `${schemaRelationships[relName].type().type}Id`]:
+              (<ResourceRelationshipData>op.data.relationships[relName].data).id
+          }),
+          op.data.attributes
+        );
+    }
+    return op;
   }
 
   async processorFor(
