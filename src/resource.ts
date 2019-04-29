@@ -7,12 +7,14 @@ export default class Resource {
   }
 
   static schema: ResourceSchema = {
+    primaryKeyName: "id",
     attributes: {},
     relationships: {}
   };
 
   id?: string;
   type: string;
+  primaryKeyName: string;
   attributes: ResourceAttributes;
   relationships: ResourceRelationships;
 

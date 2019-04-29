@@ -59,8 +59,7 @@ const buildSortClause = (sort: string[]) => {
 
 const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
   const type = resourceClass.type;
-  const { attributes, relationships } = resourceClass.schema;
-
+  const { attributes, relationships, primaryKeyName } = resourceClass.schema;
   const relationshipsKeys = Object.entries(relationships)
     .filter(([key, value]) => value.belongsTo)
     .map(([key, value]) => value.foreignKeyName || `${key}Id`);
@@ -72,7 +71,7 @@ const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
     ? typeFields
     : Object.keys(attributes);
 
-  return [...attributesKeys, ...relationshipsKeys, "id"];
+  return [...attributesKeys, ...relationshipsKeys, primaryKeyName || "id"];
 };
 
 export default class KnexProcessor<
@@ -118,9 +117,10 @@ export default class KnexProcessor<
 
   async remove(op: Operation): Promise<void> {
     const tableName = this.typeToTableName(op.ref.type);
+    const primaryKeyName = this.resourceClass.schema.primaryKeyName || "id";
 
     const record = await this.getQuery()
-      .where({ id: op.ref.id })
+      .where({ [primaryKeyName]: op.ref.id })
       .first();
 
     if (!record) {
@@ -128,16 +128,17 @@ export default class KnexProcessor<
     }
 
     return await this.getQuery()
-      .where({ id: op.ref.id })
+      .where({ [primaryKeyName]: op.ref.id })
       .del()
       .then(() => undefined);
   }
 
   async update(op: Operation): Promise<HasId> {
     const { id, type } = op.ref;
+    const primaryKeyName = this.resourceClass.schema.primaryKeyName || "id";
 
     const updated = await this.getQuery()
-      .where({ id })
+      .where({ [primaryKeyName]: id })
       .first()
       .update(op.data.attributes);
 
@@ -146,18 +147,18 @@ export default class KnexProcessor<
     }
 
     return await this.getQuery()
-      .where({ id })
+      .where({ [primaryKeyName]: id })
       .select(getColumns(this.resourceClass))
       .first();
   }
 
   async add(op: Operation): Promise<HasId> {
     const { type } = op.ref;
-
-    const ids = await this.getQuery().insert(op.data.attributes, "id");
+    const primaryKeyName = this.resourceClass.schema.primaryKeyName || "id";
+    const ids = await this.getQuery().insert(op.data.attributes, primaryKeyName);
 
     return await this.getQuery()
-      .whereIn("id", ids)
+      .whereIn(primaryKeyName, ids)
       .select(getColumns(this.resourceClass))
       .first();
   }

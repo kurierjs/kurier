@@ -124,7 +124,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
     return new resourceClass({
       relationships,
-      id: record.id,
+      id: record[resourceClass.schema.primaryKeyName || "id"],
       attributes: {
         ...attributes,
         ...relationshipAttributes,

@@ -129,6 +129,7 @@ export type AttributeValueMatch = {
 };
 
 export type ResourceSchema = {
+  primaryKeyName?: string;
   attributes: ResourceSchemaAttributes;
   relationships: ResourceSchemaRelationships;
 };
