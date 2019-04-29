@@ -104,13 +104,12 @@ export default class Application {
     if (!data) {
       return null;
     }
+    const arraify = val => (Array.isArray(val) ? val : [val]);
 
-    if (Array.isArray(data)) {
-      const resource = await this.resourceFor(data[0].type);
-      return data.map(record => this.serializeResource(record, resource));
-    }
-    const resource = await this.resourceFor(data.type);
-    return this.serializeResource(data, resource);
+    const resource = await this.resourceFor(data[0].type);
+    return arraify(data).map(record =>
+      this.serializeResource(record, resource)
+    );
   }
 
   serializeResource(data: Resource, resource: typeof Resource): Resource {
