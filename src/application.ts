@@ -58,24 +58,27 @@ export default class Application {
   }
 
   async deserializeResource(op: Operation) {
+    if (!op.data || !op.data.attributes) {
+      return op;
+    }
+
     const resourceClass = await this.resourceFor(op.ref.type);
     const schemaRelationships = resourceClass.schema.relationships;
-    if (op.data && op.data.attributes) {
-      op.data.attributes = Object.keys(schemaRelationships)
-        .filter(
-          relName =>
-            schemaRelationships[relName].belongsTo &&
-            op.data.relationships.hasOwnProperty(relName)
-        )
-        .reduce(
-          (relationAttributes, relName) => ({
-            ...relationAttributes,
-            [schemaRelationships[relName].foreignKeyName || `${schemaRelationships[relName].type().type}Id`]:
-              (<ResourceRelationshipData>op.data.relationships[relName].data).id
-          }),
-          op.data.attributes
-        );
-    }
+    op.data.attributes = Object.keys(schemaRelationships)
+      .filter(
+        relName =>
+          schemaRelationships[relName].belongsTo &&
+          op.data.relationships.hasOwnProperty(relName)
+      )
+      .reduce(
+        (relationAttributes, relName) => ({
+          ...relationAttributes,
+          [schemaRelationships[relName].foreignKeyName || `${schemaRelationships[relName].type().type}Id`]:
+            (<ResourceRelationshipData>op.data.relationships[relName].data).id
+        }),
+        op.data.attributes
+      );
+
     return op;
   }
 
