@@ -13,6 +13,7 @@ import { camelize, pluralize } from "../utils/string";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
+import ApplicationInstance from "../application-instance";
 
 const operators = {
   eq: "=",
@@ -28,9 +29,9 @@ const operators = {
 
 const getOperator = (paramValue: string): string =>
   operators[
-  Object.keys(operators).find(
-    operator => paramValue.indexOf(`${operator}:`) === 0
-  )
+    Object.keys(operators).find(
+      operator => paramValue.indexOf(`${operator}:`) === 0
+    )
   ];
 
 const getWhereMethod = (value: string, operator: string) => {
@@ -77,12 +78,12 @@ const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
 
 export default class KnexProcessor<
   ResourceT extends Resource
-  > extends OperationProcessor<ResourceT> {
+> extends OperationProcessor<ResourceT> {
   protected knex: Knex;
 
-  constructor(app: Application) {
-    super(app);
-    this.knex = app.services.knex;
+  constructor(appInstance: ApplicationInstance) {
+    super(appInstance);
+    this.knex = appInstance.app.services.knex;
   }
 
   getQuery(): Knex.QueryBuilder {
@@ -247,7 +248,9 @@ export default class KnexProcessor<
     const query = relationProcessor.getQuery();
     const foreignTableName = relationProcessor.tableName;
     const sqlOperator = Array.isArray(result) ? "in" : "=";
-    const queryIn: string | string[] = Array.isArray(result) ? result.map((a: Resource) => a.id) : result.id;
+    const queryIn: string | string[] = Array.isArray(result)
+      ? result.map((a: Resource) => a.id)
+      : result.id;
 
     if (relationship.belongsTo) {
       const foreignKey =
@@ -260,7 +263,8 @@ export default class KnexProcessor<
           `${this.tableName}.${foreignKey}`
         )
         .where(`${this.tableName}.id`, sqlOperator, queryIn)
-        .select(`belonging_${foreignTableName}.*`).from(`${foreignTableName} as belonging_${foreignTableName}`);
+        .select(`belonging_${foreignTableName}.*`)
+        .from(`${foreignTableName} as belonging_${foreignTableName}`);
     }
 
     if (relationship.hasMany) {

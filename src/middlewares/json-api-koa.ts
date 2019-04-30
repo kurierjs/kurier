@@ -14,6 +14,7 @@ import {
 } from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
+import ApplicationInstance from "../application-instance";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -28,24 +29,26 @@ export default function jsonApiKoa(
   ...middlewares: Middleware[]
 ) {
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
-    await authenticate(app, ctx);
+    const appInstance = new ApplicationInstance(app);
 
-    const data = urlData(app, ctx);
+    await authenticate(appInstance, ctx);
+
+    const data = urlData(appInstance, ctx);
 
     if (ctx.method === "PATCH" && data.resource === "bulk") {
-      await handleBulkEndpoint(app, ctx);
+      await handleBulkEndpoint(appInstance, ctx);
       return await next();
     }
 
     ctx.urlData = data;
 
-    return await handleJsonApiEndpoint(app, ctx).then(() => next());
+    return await handleJsonApiEndpoint(appInstance, ctx).then(() => next());
   };
 
   return compose([koaBody({ json: true }), ...middlewares, jsonApiKoa]);
 }
 
-async function authenticate(app: Application, ctx: Context) {
+async function authenticate(appInstance: ApplicationInstance, ctx: Context) {
   const authHeader = ctx.request.headers.authorization;
   let currentUser = null;
 
@@ -65,21 +68,21 @@ async function authenticate(app: Application, ctx: Context) {
       params: {}
     } as Operation;
 
-    const processor = await app.processorFor(op.ref.type);
+    const processor = await appInstance.app.processorFor(op.ref.type);
 
     if (processor) {
-      const user = await app.executeOperation(op, processor);
+      const user = await appInstance.app.executeOperation(op, processor);
       currentUser = user.data[0];
     }
   }
 
-  app.user = currentUser;
+  appInstance.user = currentUser;
 }
 
-function urlData(app: Application, ctx: Context) {
+function urlData(appInstance: ApplicationInstance, ctx: Context) {
   const urlRegexp = new RegExp(
     `^(\/+)?((?<namespace>${escapeStringRegexp(
-      app.namespace
+      appInstance.app.namespace
     )})(\/+|$))?(?<resource>[^\\s\/?]+)?(\/+)?((?<id>[^\\s\/?]+)?(\/+)?\(?<relationships>relationships)?(\/+)?)?` +
       "(?<relationship>[^\\s/?]+)?(/+)?$"
   );
@@ -95,23 +98,32 @@ function urlData(app: Application, ctx: Context) {
   };
 }
 
-async function handleBulkEndpoint(app: Application, ctx: Context) {
-  const operations = await app.executeOperations(
+async function handleBulkEndpoint(
+  appInstance: ApplicationInstance,
+  ctx: Context
+) {
+  const operations = await appInstance.app.executeOperations(
     ctx.request.body.operations || []
   );
 
   ctx.body = { operations };
 }
 
-async function handleJsonApiEndpoint(app: Application, ctx: Context) {
+async function handleJsonApiEndpoint(
+  appInstance: ApplicationInstance,
+  ctx: Context
+) {
   const op: Operation = convertHttpRequestToOperation(ctx);
   if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
-  const processor = await app.processorFor(op.ref.type);
+  const processor = await appInstance.app.processorFor(op.ref.type);
   if (!processor) return;
 
   try {
-    const result: OperationResponse = await app.executeOperation(op, processor);
+    const result: OperationResponse = await appInstance.app.executeOperation(
+      op,
+      processor
+    );
 
     ctx.body = convertOperationResponseToHttpResponse(ctx, result);
     ctx.status = STATUS_MAPPING[ctx.method];
