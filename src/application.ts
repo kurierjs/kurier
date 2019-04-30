@@ -33,12 +33,12 @@ export default class Application {
   }
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
-    let applicationInstance = new ApplicationInstance(this);
+    const applicationInstance = new ApplicationInstance(this);
 
     return await this.createTransaction(
       ops
         .map(async op => {
-          const processor = await this.processorFor(op.ref.type, applicationInstance);
+          const processor = await applicationInstance.processorFor(op.ref.type);
 
           if (processor) {
             return this.executeOperation(op, processor);
@@ -73,21 +73,19 @@ export default class Application {
           schemaRelationships[relName].belongsTo &&
           op.data.relationships.hasOwnProperty(relName)
       )
-      .reduce(
-        (relationAttributes, relName) => {
-          let key = schemaRelationships[relName].foreignKeyName ||
-            `${schemaRelationships[relName].type().type}Id`;
-          let value = (<
-              ResourceRelationshipData
-            >op.data.relationships[relName].data).id;
+      .reduce((relationAttributes, relName) => {
+        let key =
+          schemaRelationships[relName].foreignKeyName ||
+          `${schemaRelationships[relName].type().type}Id`;
+        let value = (<ResourceRelationshipData>(
+          op.data.relationships[relName].data
+        )).id;
 
-          return {
-            ...relationAttributes,
-            [key]: value
-          }
-        },
-        op.data.attributes
-      );
+        return {
+          ...relationAttributes,
+          [key]: value
+        };
+      }, op.data.attributes);
 
     return op;
   }
