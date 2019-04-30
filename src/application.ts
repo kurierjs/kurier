@@ -116,28 +116,33 @@ export default class Application {
     const included = flatten(await this.extractIncludedResources(data)).filter(
       Boolean
     );
-    const uniqueIncluded =
-      [...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))]
-        .map(type_id =>
-          included.find((item: Resource) => (`${item.type}_${item.id}` === type_id))
-        );
+    const uniqueIncluded = [
+      ...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))
+    ].map(typeId =>
+      included.find((item: Resource) => `${item.type}_${item.id}` === typeId)
+    );
 
+    const serializedResources = await this.serializeResources(data);
 
-    return included.length ?
-      { included: uniqueIncluded, data: await this.serializeResources(data) } :
-      { data: await this.serializeResources(data) };
+    return included.length
+      ? { included: uniqueIncluded, data: serializedResources }
+      : { data: serializedResources };
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
     }
+    const arraify = val => (Array.isArray(val) ? val : [val]);
 
-    if (Array.isArray(data)) {
-      return Promise.all(data.map(record => this.serializeResources(record)));
-    }
+    const resource = await this.resourceFor(data[0].type);
+    return arraify(data).map(record =>
+      this.serializeResource(record, resource)
+    );
+  }
 
-    const resourceSchema = (await this.resourceFor(data.type)).schema;
+  serializeResource(data: Resource, resource: typeof Resource): Resource {
+    const resourceSchema = resource.schema;
     const schemaRelationships = resourceSchema.relationships;
 
     const relationshipsFound = Object.keys(schemaRelationships)
@@ -147,23 +152,26 @@ export default class Application {
           data.attributes.hasOwnProperty(
             schemaRelationships[relName].foreignKeyName
           ) ||
-          data.attributes.hasOwnProperty(`${schemaRelationships[relName]}Id`)
+          data.attributes.hasOwnProperty(
+            `${schemaRelationships[relName].type().type}Id`
+          )
       )
-      .map(
-        relationshipName => ({
-          name: relationshipName,
-          key:
-            schemaRelationships[relationshipName].foreignKeyName ||
-            `${schemaRelationships[relationshipName]}Id`
-        }));
+      .map(relationshipName => ({
+        name: relationshipName,
+        key:
+          schemaRelationships[relationshipName].foreignKeyName ||
+          `${schemaRelationships[relationshipName].type().type}Id`
+      }));
 
-    data.relationships = relationshipsFound.reduce((relationships, relationship) => ({
-      ...relationships,
-      [relationship.name]: {
-        id: data.attributes[relationship.key],
-        type: schemaRelationships[relationship.name].type().type
-      }
-    }),
+    data.relationships = relationshipsFound.reduce(
+      (relationships, relationship) => ({
+        ...relationships,
+        [relationship.name]: {
+          id: data.attributes[relationship.key],
+          type: schemaRelationships[relationship.name].type().type
+        }
+      }),
+
       data.relationships as any
     );
 
@@ -199,7 +207,9 @@ export default class Application {
     }
     return pick(relationships, ["id", "type"]);
   }
+
   // TODO: remove type any for data.relationships[relationshipName]
+  // TODO: improve this function, there's repeated code that I don't like
   async extractIncludedResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
@@ -214,42 +224,48 @@ export default class Application {
     const schemaRelationships = (await this.resourceFor(data.type)).schema.relationships;
     const includedData: Resource[] = [];
 
-    Object.keys(data.relationships).filter(relationshipName => data.relationships[relationshipName]).forEach(relationshipName => {
-      if (Array.isArray(data.relationships[relationshipName])) {
-        data.relationships[relationshipName] =
-          (data.relationships[relationshipName] as any).map(rel => {
+    Object.keys(data.relationships)
+      .filter(relationshipName => data.relationships[relationshipName])
+      .forEach(relationshipName => {
+        if (Array.isArray(data.relationships[relationshipName])) {
+          data.relationships[relationshipName] = (data.relationships[relationshipName] as any).map(resource => {
             const relatedResourceClass = schemaRelationships[relationshipName].type();
-            const resource = rel[0] || rel;
+
 
             if (resource["id"]) {
               includedData.push(
-                new relatedResourceClass({
-                  id: resource["id"],
-                  attributes: unpick(resource, ["id"])
-                })
+                this.serializeResource(
+                  new relatedResourceClass({
+                    id: resource["id"],
+                    attributes: unpick(resource, ["id"])
+                  }),
+                  relatedResourceClass
+                )
               );
             }
 
-            rel["type"] = relatedResourceClass.type;
-            rel.links = {};
-            return rel;
+            resource["type"] = relatedResourceClass.type;
+            return resource;
           });
-      } else {
-        const relatedResourceClass = schemaRelationships[relationshipName].type();
+        } else {
+          const resource = data.relationships[relationshipName];
+          const relatedResourceClass = schemaRelationships[relationshipName].type();
 
-        if (data.relationships[relationshipName]["id"]) {
-          includedData.push(
-            new relatedResourceClass({
-              id: data.relationships[relationshipName]["id"],
-              attributes: unpick(data.relationships[relationshipName], ["id"])
-            })
-          );
+          if (resource["id"]) {
+            includedData.push(
+              this.serializeResource(
+                new relatedResourceClass({
+                  id: resource["id"],
+                  attributes: unpick(resource, ["id"])
+                }),
+                relatedResourceClass
+              )
+            );
+          }
+
+          resource["type"] = relatedResourceClass.type;
         }
-
-        data.relationships[relationshipName]["type"] =
-          relatedResourceClass.type;
-      }
-    });
+      });
 
     return includedData;
   }
