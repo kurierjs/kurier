@@ -1,8 +1,8 @@
-import Application from "../application";
 import Resource from "../resource";
 import { HasId, Operation, EagerLoadedData } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
+import ApplicationInstance from "../application-instance";
 
 export default class OperationProcessor<ResourceT extends Resource> {
   static resourceClass: typeof Resource;
@@ -20,7 +20,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(protected app: Application) { }
+  constructor(protected appInstance: ApplicationInstance) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
@@ -134,11 +134,13 @@ export default class OperationProcessor<ResourceT extends Resource> {
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {
-    return this.app.resourceFor(resourceType);
+    return this.appInstance.app.resourceFor(resourceType);
   }
 
-  async processorFor(resourceType: string): Promise<OperationProcessor<Resource>> {
-    return this.app.processorFor(resourceType);
+  async processorFor(
+    resourceType: string
+  ): Promise<OperationProcessor<Resource>> {
+    return this.appInstance.processorFor(resourceType);
   }
 
   async get(op: Operation): Promise<HasId[]> {

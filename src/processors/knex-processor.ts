@@ -13,6 +13,7 @@ import { camelize, pluralize } from "../utils/string";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
+import ApplicationInstance from "../application-instance";
 
 const operators = {
   eq: "=",
@@ -79,9 +80,9 @@ export default class KnexProcessor<
   > extends OperationProcessor<ResourceT> {
   protected knex: Knex;
 
-  constructor(app: Application) {
-    super(app);
-    this.knex = app.services.knex;
+  constructor(appInstance: ApplicationInstance) {
+    super(appInstance);
+    this.knex = appInstance.app.services.knex;
   }
 
   getQuery(): Knex.QueryBuilder {
@@ -259,6 +260,7 @@ export default class KnexProcessor<
       ? result.map((a: Resource) => a[primaryKey])
       : result[primaryKey];
 
+
     if (relationship.belongsTo) {
       const belongingPrimaryKey =
         relationship.type().schema.primaryKeyName || "id";
@@ -319,3 +321,4 @@ export default class KnexProcessor<
       );
     }
   }
+}

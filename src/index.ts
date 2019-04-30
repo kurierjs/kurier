@@ -1,4 +1,5 @@
 import Application from "./application";
+import ApplicationInstance from "./application-instance";
 import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
 import IfUser from "./decorators/if-user";
@@ -13,6 +14,7 @@ export {
   Resource,
   jsonApiKoa,
   Application,
+  ApplicationInstance,
   KnexProcessor,
   JsonApiErrors,
   OperationProcessor,
