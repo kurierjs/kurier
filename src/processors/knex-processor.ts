@@ -104,8 +104,11 @@ export default class KnexProcessor<
   async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id, type } = ref;
+    const primaryKey = this.resourceClass.schema.primaryKeyName || "id";
+    const filters = params
+      ? { [primaryKey]: id, ...(params.filter || {}) }
+      : { [primaryKey]: id };
 
-    const filters = params ? { id, ...(params.filter || {}) } : { id };
 
     const records: KnexRecord[] = await this.getQuery()
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
@@ -190,7 +193,7 @@ export default class KnexProcessor<
         value,
         operator,
         method: getWhereMethod(value, operator),
-        column: camelize(key)
+        column: key === this.resourceClass.schema.primaryKeyName ? key : camelize(key)
       });
     });
 
@@ -245,23 +248,33 @@ export default class KnexProcessor<
     const relationProcessor: KnexProcessor<Resource> = (await this.processorFor(
       relationship.type().type
     )) as KnexProcessor<Resource>;
+
     const query = relationProcessor.getQuery();
     const foreignTableName = relationProcessor.tableName;
     const sqlOperator = Array.isArray(result) ? "in" : "=";
-    const queryIn: string | string[] = Array.isArray(result) ? result.map((a: Resource) => a.id) : result.id;
+
+    const primaryKey = this.resourceClass.schema.primaryKeyName || "id";
+
+    const queryIn: string | string[] = Array.isArray(result)
+      ? result.map((a: Resource) => a[primaryKey])
+      : result[primaryKey];
 
     if (relationship.belongsTo) {
+      const belongingPrimaryKey =
+        relationship.type().schema.primaryKeyName || "id";
       const foreignKey =
         relationship.foreignKeyName || `${relationship.type().type}Id`;
+
       return query
         .join(
           this.tableName,
-          `belonging_${foreignTableName}.id`,
+          `belonging_${foreignTableName}.${belongingPrimaryKey}`,
           "=",
           `${this.tableName}.${foreignKey}`
         )
-        .where(`${this.tableName}.id`, sqlOperator, queryIn)
-        .select(`belonging_${foreignTableName}.*`).from(`${foreignTableName} as belonging_${foreignTableName}`);
+        .where(`${this.tableName}.${primaryKey}`, sqlOperator, queryIn)
+        .select(`belonging_${foreignTableName}.*`)
+        .from(`${foreignTableName} as belonging_${foreignTableName}`);
     }
 
     if (relationship.hasMany) {
@@ -272,9 +285,9 @@ export default class KnexProcessor<
           this.tableName,
           `${foreignTableName}.${foreignKey}`,
           "=",
-          `${this.tableName}.id`
+          `${this.tableName}.${primaryKey}`
         )
-        .where(`${this.tableName}.id`, sqlOperator, queryIn)
+        .where(`${this.tableName}.${primaryKey}`, sqlOperator, queryIn)
         .select(`${foreignTableName}.*`);
     }
   }
