@@ -33,10 +33,12 @@ export default class Application {
   }
 
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
+    let applicationInstance = new ApplicationInstance(this);
+
     return await this.createTransaction(
       ops
         .map(async op => {
-          const processor = await this.processorFor(op.ref.type);
+          const processor = await this.processorFor(op.ref.type, applicationInstance);
 
           if (processor) {
             return this.executeOperation(op, processor);
@@ -72,13 +74,18 @@ export default class Application {
           op.data.relationships.hasOwnProperty(relName)
       )
       .reduce(
-        (relationAttributes, relName) => ({
-          ...relationAttributes,
-          [schemaRelationships[relName].foreignKeyName ||
-          `${schemaRelationships[relName].type().type}Id`]: (<
-            ResourceRelationshipData
-          >op.data.relationships[relName].data).id
-        }),
+        (relationAttributes, relName) => {
+          let key = schemaRelationships[relName].foreignKeyName ||
+            `${schemaRelationships[relName].type().type}Id`;
+          let value = (<
+              ResourceRelationshipData
+            >op.data.relationships[relName].data).id;
+
+          return {
+            ...relationAttributes,
+            [key]: value
+          }
+        },
         op.data.attributes
       );
 
@@ -86,7 +93,8 @@ export default class Application {
   }
 
   async processorFor(
-    resourceType: string
+    resourceType: string,
+    applicationInstance: ApplicationInstance
   ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
 
@@ -96,17 +104,17 @@ export default class Application {
       )
     );
 
-    const processor = processors.find(p => p !== false);
+    const ProcessorClass = processors.find(p => p !== false);
 
-    if (processor) {
-      return new processor(new ApplicationInstance(this));
+    if (ProcessorClass) {
+      return new ProcessorClass(applicationInstance);
     }
 
     class ResourceProcessor extends this.defaultProcessor<Resource> {
       static resourceClass = resourceClass;
     }
 
-    return new ResourceProcessor(new ApplicationInstance(this));
+    return new ResourceProcessor(applicationInstance);
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {
