@@ -3,6 +3,7 @@ import User from "./user";
 
 export default class Comment extends Resource {
   static schema = {
+    primaryKeyName: "_id",
     attributes: {
       body: String,
       type: String
