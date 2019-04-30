@@ -298,19 +298,14 @@ export default class KnexProcessor<
     record: HasId,
     eagerLoadedData: EagerLoadedData
   ): Promise<KnexRecord | KnexRecord[] | void> {
-    const relationProcessor: KnexProcessor<Resource> = (await this.processorFor(
-      relationship.type().type
-    )) as KnexProcessor<Resource>;
-    const query = relationProcessor.getQuery();
+    if (!eagerLoadedData[key]) {
+      return;
+    }
+
+    const foreignKey =
+      relationship.foreignKeyName || `${relationship.type().type}Id`;
 
     if (relationship.belongsTo) {
-      const foreignKey =
-        relationship.foreignKeyName || `${relationship.type().type}Id`;
-
-      if (!eagerLoadedData[key]) {
-        return;
-      }
-
       return eagerLoadedData[key].find(
         (eagerLoadedRecord: KnexRecord) =>
           eagerLoadedRecord.id === record[foreignKey]
@@ -318,17 +313,9 @@ export default class KnexProcessor<
     }
 
     if (relationship.hasMany) {
-      const foreignKey =
-        relationship.foreignKeyName || `${relationship.type().type}Id`;
-
-      if (!eagerLoadedData[key]) {
-        return;
-      }
-
       return eagerLoadedData[key].filter(
         (eagerLoadedRecord: KnexRecord) =>
           record.id === eagerLoadedRecord[foreignKey]
       );
     }
   }
-}
