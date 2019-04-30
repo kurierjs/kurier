@@ -140,7 +140,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   async processorFor(
     resourceType: string
   ): Promise<OperationProcessor<Resource>> {
-    return this.appInstance.app.processorFor(resourceType);
+    return this.appInstance.processorFor(resourceType);
   }
 
   async get(op: Operation): Promise<HasId[]> {
