@@ -72,6 +72,7 @@ export default class Application {
       .filter(
         relName =>
           schemaRelationships[relName].belongsTo &&
+          op.data.relationships &&
           op.data.relationships.hasOwnProperty(relName)
       )
       .reduce((relationAttributes, relName) => {
