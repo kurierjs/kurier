@@ -1,6 +1,12 @@
 import * as Knex from "knex";
 import * as Koa from "koa";
-import { Application, jsonApiKoa, KnexProcessor } from "./jsonapi-ts";
+import { Server } from "ws";
+import {
+  Application,
+  jsonApiKoa,
+  KnexProcessor,
+  jsonApiWebSocket
+} from "./jsonapi-ts";
 import ArticleProcessor from "./processors/article";
 import UserProcessor from "./processors/user";
 import Article from "./resources/article";
@@ -26,8 +32,14 @@ const app = new Application({
 app.services.knex = Knex(knexConfig);
 
 const koa = new Koa();
-
 koa.use(jsonApiKoa(app));
-koa.listen(3000);
+
+const server = koa.listen(3000);
+
+const ws = new Server({
+  server
+});
+
+jsonApiWebSocket(ws, app);
 
 console.log("Server up on port 3000");
