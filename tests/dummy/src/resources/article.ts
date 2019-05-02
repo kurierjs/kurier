@@ -18,12 +18,12 @@ export default class Article extends Resource {
       votes: {
         type: () => Vote,
         hasMany: true,
-        foreignKeyName: 'article_id',
-        comments: {
-          type: () => Comment,
-          hasMany: true,
-          foreignKeyName: 'author_id'
-        }
+        foreignKeyName: 'article_id'
+      },
+      comments: {
+        type: () => Comment,
+        hasMany: true,
+        foreignKeyName: 'author_id'
       }
     }
   }
