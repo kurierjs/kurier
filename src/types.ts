@@ -11,6 +11,8 @@ export enum HttpStatusCode {
   InternalServerError = 500
 }
 
+export const DEFAULT_PRIMARY_KEY = "id";
+
 export type OperationDecorator = (
   operationCallback: Function,
   ...middlewareArguments: any[]
@@ -130,6 +132,7 @@ export type AttributeValueMatch = {
 };
 
 export type ResourceSchema = {
+  primaryKeyName?: string;
   attributes: ResourceSchemaAttributes;
   relationships: ResourceSchemaRelationships;
 };
