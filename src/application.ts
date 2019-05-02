@@ -4,7 +4,8 @@ import Resource from "./resource";
 import {
   Operation,
   OperationResponse,
-  ResourceRelationshipData
+  ResourceRelationshipData,
+  DEFAULT_PRIMARY_KEY
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
@@ -53,6 +54,7 @@ export default class Application {
     processor: OperationProcessor<Resource>
   ): Promise<OperationResponse> {
     const result = await processor.execute(await this.deserializeResource(op));
+    console.log('result', result)
     return this.buildOperationResponse(result);
   }
 
@@ -74,10 +76,8 @@ export default class Application {
           op.data.relationships.hasOwnProperty(relName)
       )
       .reduce((relationAttributes, relName) => {
-        let key =
-          schemaRelationships[relName].foreignKeyName ||
-          `${schemaRelationships[relName].type().type}Id`;
-        let value = (<ResourceRelationshipData>(
+        const key = schemaRelationships[relName].foreignKeyName || `${relName}Id`;
+        const value = (<ResourceRelationshipData>(
           op.data.relationships[relName].data
         )).id;
 
@@ -86,7 +86,6 @@ export default class Application {
           [key]: value
         };
       }, op.data.attributes);
-
     return op;
   }
 
@@ -150,23 +149,17 @@ export default class Application {
   serializeResource(data: Resource, resource: typeof Resource): Resource {
     const resourceSchema = resource.schema;
     const schemaRelationships = resourceSchema.relationships;
-
     const relationshipsFound = Object.keys(schemaRelationships)
       .filter(relName => schemaRelationships[relName].belongsTo)
       .filter(
         relName =>
           data.attributes.hasOwnProperty(
             schemaRelationships[relName].foreignKeyName
-          ) ||
-          data.attributes.hasOwnProperty(
-            `${schemaRelationships[relName].type().type}Id`
-          )
+          ) || data.attributes.hasOwnProperty(`${relName}Id`)
       )
-      .map(relationshipName => ({
-        name: relationshipName,
-        key:
-          schemaRelationships[relationshipName].foreignKeyName ||
-          `${schemaRelationships[relationshipName].type().type}Id`
+      .map(relName => ({
+        name: relName,
+        key: schemaRelationships[relName].foreignKeyName || `${relName}Id`
       }));
 
     data.relationships = relationshipsFound.reduce(
@@ -189,13 +182,18 @@ export default class Application {
             !Object.keys(resourceSchema.attributes).includes(relationshipKey)
         )
     );
+    Object.keys(data.relationships).forEach(relName => {
+      const fkName = schemaRelationships[relName].belongsTo
+        ? "id"
+        : schemaRelationships[relName].type().schema.primaryKeyName ||
+        DEFAULT_PRIMARY_KEY;
 
-    Object.keys(data.relationships).forEach(relationshipName => {
-      const relationships = this.serializeRelationship((data.relationships[
-        relationshipName
-      ] as unknown) as Resource | Resource[], schemaRelationships[relationshipName].type().schema.primaryKeyName);
-      data.relationships[relationshipName] = {
-        data: relationships
+      const relationship = this.serializeRelationship(
+        (data.relationships[relName] as unknown) as Resource | Resource[],
+        fkName
+      );
+      data.relationships[relName] = {
+        data: relationship
       };
     });
 
@@ -204,7 +202,7 @@ export default class Application {
 
   serializeRelationship(
     relationships: Resource | Resource[],
-    primaryKeyName: string = "id"
+    primaryKeyName: string
   ) {
     if (Array.isArray(relationships)) {
       return relationships.map(relationship =>
@@ -225,7 +223,7 @@ export default class Application {
     if (!data) {
       return null;
     }
-
+    console.log('data', data)
     if (Array.isArray(data)) {
       return Promise.all(
         data.map(record => this.extractIncludedResources(record))
@@ -235,7 +233,6 @@ export default class Application {
     const schemaRelationships = (await this.resourceFor(data.type)).schema
       .relationships;
     const includedData: Resource[] = [];
-
     Object.keys(data.relationships)
       .filter(relationshipName => data.relationships[relationshipName])
       .forEach(relationshipName => {
@@ -243,11 +240,10 @@ export default class Application {
           data.relationships[relationshipName] = (data.relationships[relationshipName] as any).map(rel => {
             const relatedResourceClass = schemaRelationships[relationshipName].type();
             const resource = rel[0] || rel;
-            const pkName = relatedResourceClass.schema.primaryKeyName || "id";
+            const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
             if (resource[pkName]) {
               includedData.push(
-
                 this.serializeResource(
                   new relatedResourceClass({
                     id: resource[pkName],
@@ -266,7 +262,7 @@ export default class Application {
           const relatedResourceClass = schemaRelationships[
             relationshipName
           ].type();
-          const pkName = relatedResourceClass.schema.primaryKeyName || "id";
+          const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
           if (resource[pkName]) {
             includedData.push(
