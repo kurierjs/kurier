@@ -11,6 +11,8 @@ export enum HttpStatusCode {
   InternalServerError = 500
 }
 
+export const DEFAULT_PRIMARY_KEY = "id";
+
 export type OperationDecorator = (
   operationCallback: Function,
   ...middlewareArguments: any[]
