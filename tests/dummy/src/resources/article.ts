@@ -12,8 +12,7 @@ export default class Article extends Resource {
     relationships: {
       author: {
         type: () => User,
-        belongsTo: true,
-        foreignKeyName: 'authorId'
+        belongsTo: true
       },
       votes: {
         type: () => Vote,
