@@ -54,11 +54,12 @@ export type Meta = {
 export type JsonApiDocument<
   ResourceT = Resource,
   RelatedResourcesT = Resource
-  > = {
-    data: ResourceT | ResourceT[];
-    meta?: Meta;
-    included?: RelatedResourcesT[];
-  };
+> = {
+  data: ResourceT | ResourceT[];
+  meta?: Meta;
+  operations?: Operation[];
+  included?: RelatedResourcesT[];
+};
 
 export type JsonApiErrorsDocument = {
   errors: JsonApiError[];
@@ -135,11 +136,11 @@ export type ResourceSchema = {
 
 export type ResourceSchemaAttributes = {
   [key: string]:
-  | StringConstructor
-  | NumberConstructor
-  | BooleanConstructor
-  | ArrayConstructor
-  | ObjectConstructor;
+    | StringConstructor
+    | NumberConstructor
+    | BooleanConstructor
+    | ArrayConstructor
+    | ObjectConstructor;
 };
 
 export type ResourceSchemaRelationships = {
