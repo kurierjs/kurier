@@ -54,7 +54,6 @@ export default class Application {
     processor: OperationProcessor<Resource>
   ): Promise<OperationResponse> {
     const result = await processor.execute(await this.deserializeResource(op));
-    console.log('result', result)
     return this.buildOperationResponse(result);
   }
 
@@ -223,7 +222,6 @@ export default class Application {
     if (!data) {
       return null;
     }
-    console.log('data', data)
     if (Array.isArray(data)) {
       return Promise.all(
         data.map(record => this.extractIncludedResources(record))
