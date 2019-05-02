@@ -1,5 +1,6 @@
 import { Resource } from "../jsonapi-ts";
 import User from "./user";
+import Vote from "./vote";
 import Comment from "./comment";
 
 export default class Article extends Resource {
@@ -11,8 +12,12 @@ export default class Article extends Resource {
     relationships: {
       author: {
         type: () => User,
-        belongsTo: true,
-        foreignKeyName: 'authorId'
+        belongsTo: true
+      },
+      votes: {
+        type: () => Vote,
+        hasMany: true,
+        foreignKeyName: 'article_id'
       },
       comments: {
         type: () => Comment,
@@ -20,5 +25,5 @@ export default class Article extends Resource {
         foreignKeyName: 'author_id'
       }
     }
-  };
+  }
 }

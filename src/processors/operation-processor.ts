@@ -20,7 +20,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(protected appInstance: ApplicationInstance) {}
+  constructor(protected appInstance: ApplicationInstance) { }
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
@@ -88,9 +88,9 @@ export default class OperationProcessor<ResourceT extends Resource> {
     const relationshipKeys = Object.keys(resourceClass.schema.relationships)
       .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
       .map(
-        relationshipName =>
-          resourceClass.schema.relationships[relationshipName].foreignKeyName ||
-          `${resourceClass.schema.relationships[relationshipName]}Id`
+        relName =>
+          resourceClass.schema.relationships[relName].foreignKeyName ||
+          `${relName}Id`
       );
     return pick(record, relationshipKeys);
   }
@@ -124,7 +124,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
     return new resourceClass({
       relationships,
-      id: record.id,
+      id: record[resourceClass.schema.primaryKeyName || "id"],
       attributes: {
         ...attributes,
         ...relationshipAttributes,
