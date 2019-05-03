@@ -183,8 +183,8 @@ export default class KnexProcessor<
     );
 
     Object.keys(filters).forEach(key => {
-      let value = filters[key];
-      const operator = getOperator(filters[key]) || "=";
+      let value = String(filters[key]);
+      const operator = getOperator(value) || "=";
 
       if (value.substring(value.indexOf(":") + 1)) {
         value = value.substring(value.indexOf(":") + 1);
