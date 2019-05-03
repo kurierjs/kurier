@@ -1,4 +1,7 @@
 import flatten = require("flatten");
+
+import * as Knex from "knex";
+
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import {
@@ -36,17 +39,33 @@ export default class Application {
   async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
     const applicationInstance = new ApplicationInstance(this);
 
-    return await this.createTransaction(
-      ops
-        .map(async op => {
-          const processor = await applicationInstance.processorFor(op.ref.type);
+    applicationInstance.transaction = await this.createTransaction();
 
-          if (processor) {
-            return this.executeOperation(op, processor);
-          }
-        })
-        .filter(Boolean)
-    );
+    console.log("TRANSACTION: ", applicationInstance.transaction);
+
+    try {
+      const result = await Promise.all(
+        ops
+          .map(async op => {
+            const processor = await applicationInstance.processorFor(
+              op.ref.type
+            );
+
+            if (processor) {
+              return this.executeOperation(op, processor);
+            }
+          })
+          .filter(Boolean)
+      );
+
+      await applicationInstance.transaction.commit();
+
+      return result;
+    } catch (error) {
+      await applicationInstance.transaction.rollback(error);
+    } finally {
+      applicationInstance.transaction = null;
+    }
   }
 
   async executeOperation(
@@ -57,8 +76,18 @@ export default class Application {
     return this.buildOperationResponse(result);
   }
 
-  async createTransaction(ops: Promise<OperationResponse>[]) {
-    return await Promise.all(ops);
+  async createTransaction(): Promise<Knex.Transaction | undefined> {
+    const { knex }: { knex?: Knex } = this.services;
+
+    if (!knex) {
+      return;
+    }
+
+    return new Promise(resolve =>
+      knex.transaction((trx: Knex.Transaction) => {
+        resolve(trx);
+      })
+    );
   }
 
   async deserializeResource(op: Operation) {
@@ -76,7 +105,8 @@ export default class Application {
           op.data.relationships.hasOwnProperty(relName)
       )
       .reduce((relationAttributes, relName) => {
-        const key = schemaRelationships[relName].foreignKeyName || `${relName}Id`;
+        const key =
+          schemaRelationships[relName].foreignKeyName || `${relName}Id`;
         const value = (<ResourceRelationshipData>(
           op.data.relationships[relName].data
         )).id;
@@ -186,7 +216,7 @@ export default class Application {
       const fkName = schemaRelationships[relName].belongsTo
         ? "id"
         : schemaRelationships[relName].type().schema.primaryKeyName ||
-        DEFAULT_PRIMARY_KEY;
+          DEFAULT_PRIMARY_KEY;
 
       const relationship = this.serializeRelationship(
         (data.relationships[relName] as unknown) as Resource | Resource[],
@@ -236,10 +266,15 @@ export default class Application {
       .filter(relationshipName => data.relationships[relationshipName])
       .forEach(relationshipName => {
         if (Array.isArray(data.relationships[relationshipName])) {
-          data.relationships[relationshipName] = (data.relationships[relationshipName] as any).map(rel => {
-            const relatedResourceClass = schemaRelationships[relationshipName].type();
+          data.relationships[relationshipName] = (data.relationships[
+            relationshipName
+          ] as any).map(rel => {
+            const relatedResourceClass = schemaRelationships[
+              relationshipName
+            ].type();
             const resource = rel[0] || rel;
-            const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+            const pkName =
+              relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
             if (resource[pkName]) {
               includedData.push(
@@ -261,7 +296,8 @@ export default class Application {
           const relatedResourceClass = schemaRelationships[
             relationshipName
           ].type();
-          const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+          const pkName =
+            relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
           if (resource[pkName]) {
             includedData.push(
