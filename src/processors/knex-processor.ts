@@ -29,9 +29,9 @@ const operators = {
 
 const getOperator = (paramValue: string): string =>
   operators[
-  Object.keys(operators).find(
-    operator => paramValue.indexOf(`${operator}:`) === 0
-  )
+    Object.keys(operators).find(
+      operator => paramValue.indexOf(`${operator}:`) === 0
+    )
   ];
 
 const getWhereMethod = (value: string, operator: string) => {
@@ -81,12 +81,12 @@ const getColumns = (resourceClass: typeof Resource, fields = {}): string[] => {
 
 export default class KnexProcessor<
   ResourceT extends Resource
-  > extends OperationProcessor<ResourceT> {
-  protected knex: Knex;
+> extends OperationProcessor<ResourceT> {
+  protected knex: Knex.Transaction;
 
   constructor(appInstance: ApplicationInstance) {
     super(appInstance);
-    this.knex = appInstance.app.services.knex;
+    this.knex = appInstance.transaction;
   }
 
   getQuery(): Knex.QueryBuilder {
@@ -107,11 +107,11 @@ export default class KnexProcessor<
   async get(op: Operation): Promise<HasId[]> {
     const { params, ref } = op;
     const { id } = ref;
-    const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const primaryKey =
+      this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const filters = params
       ? { [primaryKey]: id, ...(params.filter || {}) }
       : { [primaryKey]: id };
-
 
     const records: KnexRecord[] = await this.getQuery()
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
@@ -122,7 +122,8 @@ export default class KnexProcessor<
   }
 
   async remove(op: Operation): Promise<void> {
-    const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const primaryKeyName =
+      this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
     const record = await this.getQuery()
       .where({ [primaryKeyName]: op.ref.id })
@@ -140,7 +141,8 @@ export default class KnexProcessor<
 
   async update(op: Operation): Promise<HasId> {
     const { id } = op.ref;
-    const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const primaryKeyName =
+      this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
     const updated = await this.getQuery()
       .where({ [primaryKeyName]: id })
@@ -158,8 +160,12 @@ export default class KnexProcessor<
   }
 
   async add(op: Operation): Promise<HasId> {
-    const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const ids = await this.getQuery().insert(op.data.attributes, primaryKeyName);
+    const primaryKeyName =
+      this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const ids = await this.getQuery().insert(
+      op.data.attributes,
+      primaryKeyName
+    );
 
     return await this.getQuery()
       .whereIn(primaryKeyName, ids)
@@ -194,7 +200,8 @@ export default class KnexProcessor<
         value,
         operator,
         method: getWhereMethod(value, operator),
-        column: key === this.resourceClass.schema.primaryKeyName ? key : camelize(key)
+        column:
+          key === this.resourceClass.schema.primaryKeyName ? key : camelize(key)
       });
     });
 
@@ -304,7 +311,8 @@ export default class KnexProcessor<
     const foreignKeyName = relationship.foreignKeyName || `${key}Id`;
 
     if (relationship.belongsTo) {
-      const primaryKeyName = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+      const primaryKeyName =
+        relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
       return eagerLoadedData[key].find(
         (eagerLoadedRecord: KnexRecord) =>
           eagerLoadedRecord[primaryKeyName] === record[foreignKeyName]
@@ -312,7 +320,8 @@ export default class KnexProcessor<
     }
 
     if (relationship.hasMany) {
-      const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+      const primaryKeyName =
+        this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
       return eagerLoadedData[key].filter(
         (eagerLoadedRecord: KnexRecord) =>
           record[primaryKeyName] === eagerLoadedRecord[foreignKeyName]
