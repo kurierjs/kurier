@@ -9,19 +9,20 @@ export default class VoteProcessor<
   static resourceClass = Vote;
 
   private async signAndTimestamp(op: Operation): Promise<Operation> {
-    console.log("appInstance", this.appInstance.app);
-    console.log("user user", this.appInstance.user);
-
-    const opWithTimeStamps = signAndTimestampOperation(
+    return signAndTimestampOperation(
       op,
       await this.resourceFor(op.ref.type),
       (this.appInstance.user as unknown) as User
     );
-    return op;
   }
 
   @Authorize()
   public async add(op: Operation): Promise<HasId> {
     return super.add(await this.signAndTimestamp(op));
+  }
+
+  @Authorize()
+  public async update(op: Operation): Promise<HasId> {
+    return super.update(await this.signAndTimestamp(op));
   }
 }
