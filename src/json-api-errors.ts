@@ -23,6 +23,11 @@ const jsonApiErrors: {
   RecordNotExists: (): JsonApiError => ({
     status: HttpStatusCode.NotFound,
     code: "not_found"
+  }),
+
+  InvalidToken: (): JsonApiError => ({
+    status: HttpStatusCode.UnprocessableEntity,
+    code: "invalid_token"
   })
 };
 
