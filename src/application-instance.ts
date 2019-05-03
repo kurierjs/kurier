@@ -1,4 +1,5 @@
 import { decode } from "jsonwebtoken";
+import * as Knex from "knex";
 
 import Application from "./application";
 import Resource from "./resource";
@@ -8,6 +9,7 @@ import jsonApiErrors from "./json-api-errors";
 
 export default class ApplicationInstance {
   public user: typeof Resource;
+  public transaction: Knex.Transaction;
 
   constructor(public app: Application) {}
 
