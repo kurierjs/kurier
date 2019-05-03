@@ -41,8 +41,6 @@ export default class Application {
 
     applicationInstance.transaction = await this.createTransaction();
 
-    console.log("TRANSACTION: ", applicationInstance.transaction);
-
     try {
       const result = await Promise.all(
         ops
