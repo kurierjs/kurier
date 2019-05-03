@@ -98,14 +98,10 @@ async function handleJsonApiEndpoint(
   const op: Operation = convertHttpRequestToOperation(ctx);
   if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
-  const processor = await appInstance.processorFor(op.ref.type);
-  if (!processor) return;
-
   try {
-    const result: OperationResponse = await appInstance.app.executeOperation(
-      op,
-      processor
-    );
+    const [
+      result
+    ]: OperationResponse[] = await appInstance.app.executeOperations([op]);
 
     ctx.body = convertOperationResponseToHttpResponse(ctx, result);
     ctx.status = STATUS_MAPPING[ctx.method];
