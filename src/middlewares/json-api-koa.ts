@@ -1,8 +1,8 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { decode } from "jsonwebtoken";
 import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
+
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
 import {
@@ -15,6 +15,7 @@ import {
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 import ApplicationInstance from "../application-instance";
+import Resource from "../resource";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -50,30 +51,11 @@ export default function jsonApiKoa(
 
 async function authenticate(appInstance: ApplicationInstance, ctx: Context) {
   const authHeader = ctx.request.headers.authorization;
-  let currentUser = null;
+  let currentUser: typeof Resource;
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const [, token] = authHeader.split(" ");
-    const tokenPayload = decode(token);
-    const userId = tokenPayload["id"];
-
-    if (!userId) return;
-
-    const op = {
-      op: "identify",
-      ref: {
-        type: "user",
-        id: userId
-      },
-      params: {}
-    } as Operation;
-
-    const processor = await appInstance.processorFor(op.ref.type);
-
-    if (processor) {
-      const user = await appInstance.app.executeOperation(op, processor);
-      currentUser = user.data[0];
-    }
+    currentUser = await appInstance.getUserFromToken(token);
   }
 
   appInstance.user = currentUser;
