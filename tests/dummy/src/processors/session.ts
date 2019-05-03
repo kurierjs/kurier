@@ -9,34 +9,38 @@ export default class SessionProcessor<
   public static resourceClass = Session;
 
   public async add(op: Operation): Promise<HasId> {
-    const user = await this.knex("users")
-      .where({ username: op.data.attributes.username })
+    const userFromDB = await this.knex("users")
+      .where({ email: op.data.attributes.email })
       .first();
 
-    const isLoggedIn = user && user.password === op.data.attributes;
+    const isLoggedIn =
+      userFromDB && userFromDB.password === op.data.attributes.password;
 
     if (!isLoggedIn) {
       throw JsonApiErrors.AccessDenied();
     }
 
-    const { id, password, ...publicUser } = user;
+    const { id, password, ...publicUser } = userFromDB;
 
-    const secureData = {
-      type: "user",
-      id: String(user.id),
-      attributes: {
-        ...publicUser
+    const token = sign(
+      {
+        id,
+        type: "user",
+        attributes: {
+          ...publicUser
+        }
+      },
+      "session_key_test",
+      {
+        subject: String(id),
+        expiresIn: "1d"
       }
-    };
-    const token = sign(secureData, process.env.SESSION_KEY, {
-      subject: secureData.id,
-      expiresIn: "1d"
-    });
+    );
 
     const session = {
       token,
       id: uuid(),
-      userId: user.id
+      userId: userFromDB.id
     };
 
     return session;

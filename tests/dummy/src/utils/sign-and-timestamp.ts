@@ -7,22 +7,22 @@ export default function signAndTimestampOperation(
   user: User
 ) {
   if (op.op === "add") {
-    if ("createdByUserId" in resourceType.schema.attributes) {
-      op.data.attributes.createdByUserId = user.id;
+    if ("created_by" in resourceType.schema.attributes) {
+      op.data.attributes.created_by = user.id;
     }
 
-    if ("createdOn" in resourceType.schema.attributes) {
-      op.data.attributes.createdOn = new Date().toJSON();
+    if ("created_on" in resourceType.schema.attributes) {
+      op.data.attributes.created_on = new Date().toJSON();
     }
   }
 
   if (op.op === "update") {
-    if ("updatedByUserId" in resourceType.schema.attributes) {
-      op.data.attributes.updatedByUserId = user.id;
+    if ("updated_by" in resourceType.schema.attributes) {
+      op.data.attributes.updated_by = user.id;
     }
 
-    if ("updatedOn" in resourceType.schema.attributes) {
-      op.data.attributes.updatedOn = new Date().toJSON();
+    if ("updated_on" in resourceType.schema.attributes) {
+      op.data.attributes.updated_on = new Date().toJSON();
     }
   }
 
