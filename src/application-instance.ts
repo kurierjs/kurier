@@ -11,7 +11,7 @@ export default class ApplicationInstance {
   public user: typeof Resource;
   public transaction: Knex.Transaction;
 
-  constructor(public app: Application) {}
+  constructor(public app: Application) { }
 
   async processorFor(
     resourceType: string
@@ -44,8 +44,11 @@ export default class ApplicationInstance {
     if (!processor) {
       return;
     }
-
     const user = await this.app.executeOperation(op, processor);
+    if (!user.data) {
+      throw jsonApiErrors.InvalidToken();
+    }
+
     return user.data[0];
   }
 }

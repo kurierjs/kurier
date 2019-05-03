@@ -6,7 +6,11 @@ export default class Vote extends Resource {
   static schema = {
     primaryKeyName: "_Id",
     attributes: {
-      points: Number
+      points: Number,
+      created_on: String,
+      updated_on: String,
+      updated_by: Number,
+      created_by: Number
     },
 
     relationships: {

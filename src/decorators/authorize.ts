@@ -8,7 +8,7 @@ function authorizeMiddleware(
   conditions: AttributeValueMatch[]
 ) {
   return function() {
-    if (!this.app.user) {
+    if (!this.appInstance.user) {
       throw JsonApiErrors.Unauthorized();
     }
 
@@ -22,8 +22,8 @@ function authorizeMiddleware(
           value: string | string[] | number | number[] | boolean;
         }) =>
           Array.isArray(value)
-            ? value.includes(this.app.user.attributes[attribute])
-            : value === this.app.user.attibutes[attribute]
+            ? value.includes(this.appInstance.user.attributes[attribute])
+            : value === this.appInstance.user.attributes[attribute]
       )
     ) {
       throw JsonApiErrors.AccessDenied();

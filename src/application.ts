@@ -13,6 +13,7 @@ import {
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
 import ApplicationInstance from "./application-instance";
+import jsonApiErrors from "./json-api-errors";
 
 export default class Application {
   namespace: string;
@@ -166,9 +167,10 @@ export default class Application {
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
-    if (!data) {
+    if (!data || (Array.isArray(data) && !data.length)) {
       return null;
     }
+
     const dataArrayed = Array.isArray(data) ? data : [data];
     const resource = await this.resourceFor(dataArrayed[0].type);
     return dataArrayed.map(record => this.serializeResource(record, resource));

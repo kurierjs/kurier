@@ -1,8 +1,12 @@
-import { KnexProcessor } from "../jsonapi-ts";
+import { KnexProcessor, Operation } from "../jsonapi-ts";
 import User from "../resources/user";
 
 export default class UserProcessor<ResourceT extends User> extends KnexProcessor<ResourceT> {
   static resourceClass = User;
+
+  async identify(op: Operation): Promise<any> {
+    return super.get({ ...op, params: {} });
+  }
 
   attributes = {
     async friends() {
