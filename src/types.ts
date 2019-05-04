@@ -1,4 +1,7 @@
+import * as Knex from "knex";
+
 import Resource from "./resource";
+import Password from "./attribute-types/password";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -137,13 +140,16 @@ export type ResourceSchema = {
   relationships: ResourceSchemaRelationships;
 };
 
+export type PasswordConstructor = typeof Password;
+
 export type ResourceSchemaAttributes = {
   [key: string]:
     | StringConstructor
     | NumberConstructor
     | BooleanConstructor
     | ArrayConstructor
-    | ObjectConstructor;
+    | ObjectConstructor
+    | PasswordConstructor;
 };
 
 export type ResourceSchemaRelationships = {
@@ -163,3 +169,12 @@ export interface HasId {
 }
 
 export type EagerLoadedData = { [key: string]: KnexRecord[] | undefined };
+
+export type ApplicationServices = {
+  knex?: Knex;
+  login?: (
+    op: Operation,
+    userDataSource: ResourceAttributes
+  ) => Promise<boolean>;
+  password?: (op: Operation) => Promise<ResourceAttributes>;
+} & { [key: string]: any };
