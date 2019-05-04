@@ -29,7 +29,10 @@ export default function jsonApiWebSocket(
         }
 
         // Execute and reply.
-        const response = await appInstance.app.executeOperations(operations);
+        const response = await appInstance.app.executeOperations(
+          operations,
+          appInstance
+        );
 
         connection.send(
           JSON.stringify({
