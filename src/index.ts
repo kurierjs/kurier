@@ -8,12 +8,7 @@ import jsonApiKoa from "./middlewares/json-api-koa";
 import jsonApiWebSocket from "./middlewares/json-api-websocket";
 import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
-import UserProcessor from "./processors/user-processor";
-import SessionProcessor from "./processors/session-processor";
 import Resource from "./resource";
-import User from "./resources/user";
-import Session from "./resources/session";
-import Password from "./attribute-types/password";
 
 export {
   // Core objects
@@ -28,13 +23,7 @@ export {
   // Decorators API
   decorateWith,
   Authorize,
-  IfUser,
-  // Auth module
-  UserProcessor,
-  SessionProcessor,
-  User,
-  Session,
-  Password
+  IfUser
 };
 
 export * from "./types";

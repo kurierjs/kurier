@@ -1,23 +1,20 @@
+
 import { Resource } from "../jsonapi-ts";
-import User from "./user";
-import Password from "../../../../src/attribute-types/password";
+import User from './user';
 
 export default class Session extends Resource {
-  static get type() {
-    return "session";
-  }
+  static get type() { return 'session'; }
 
   static schema = {
     attributes: {
       token: String,
-      username: String,
-      password: Password
+      user: String
     },
     relationships: {
       user: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "userId"
+        foreignKeyName: 'userId'
       }
     }
   };

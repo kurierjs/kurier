@@ -8,19 +8,20 @@ import {
   Operation,
   OperationResponse,
   ResourceRelationshipData,
-  DEFAULT_PRIMARY_KEY,
-  ApplicationServices
+  DEFAULT_PRIMARY_KEY
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
 import ApplicationInstance from "./application-instance";
+import jsonApiErrors from "./json-api-errors";
 
 export default class Application {
   namespace: string;
   types: typeof Resource[];
   processors: typeof OperationProcessor[];
   defaultProcessor: typeof OperationProcessor;
-  services: ApplicationServices;
+  user: Resource;
+  services: { [key: string]: any };
 
   constructor(settings: {
     namespace?: string;
@@ -32,14 +33,13 @@ export default class Application {
     this.namespace = settings.namespace || "";
     this.types = settings.types || [];
     this.processors = settings.processors || [];
-    this.services = settings.services || ({} as ApplicationServices);
+    this.services = settings.services || {};
     this.defaultProcessor = settings.defaultProcessor || OperationProcessor;
   }
 
-  async executeOperations(
-    ops: Operation[],
-    applicationInstance = new ApplicationInstance(this)
-  ): Promise<OperationResponse[]> {
+  async executeOperations(ops: Operation[]): Promise<OperationResponse[]> {
+    const applicationInstance = new ApplicationInstance(this);
+
     applicationInstance.transaction = await this.createTransaction();
 
     try {
@@ -62,7 +62,6 @@ export default class Application {
       return result;
     } catch (error) {
       await applicationInstance.transaction.rollback(error);
-      throw error;
     } finally {
       applicationInstance.transaction = null;
     }
@@ -131,7 +130,6 @@ export default class Application {
       )
     );
 
-    // tslint:disable-next-line
     const ProcessorClass = processors.find(p => p !== false);
 
     if (ProcessorClass) {

@@ -6,13 +6,12 @@ import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
 import { Operation } from "./types";
 import jsonApiErrors from "./json-api-errors";
-import User from "./resources/user";
 
 export default class ApplicationInstance {
-  public user: User;
+  public user: typeof Resource;
   public transaction: Knex.Transaction;
 
-  constructor(public app: Application) {}
+  constructor(public app: Application) { }
 
   async processorFor(
     resourceType: string
@@ -20,7 +19,7 @@ export default class ApplicationInstance {
     return this.app.processorFor(resourceType, this);
   }
 
-  async getUserFromToken(token: string): Promise<User | undefined> {
+  async getUserFromToken(token: string): Promise<typeof Resource | undefined> {
     const tokenPayload = decode(token);
 
     if (!tokenPayload) {
@@ -40,8 +39,12 @@ export default class ApplicationInstance {
       params: {}
     } as Operation;
 
-    const [user] = await this.app.executeOperations([op]);
+    const processor = await this.processorFor(op.ref.type);
 
+    if (!processor) {
+      return;
+    }
+    const user = await this.app.executeOperation(op, processor);
     if (!user.data) {
       throw jsonApiErrors.InvalidToken();
     }

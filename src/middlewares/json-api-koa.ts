@@ -16,7 +16,6 @@ import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 import ApplicationInstance from "../application-instance";
 import Resource from "../resource";
-import User from "../resources/user";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -52,7 +51,7 @@ export default function jsonApiKoa(
 
 async function authenticate(appInstance: ApplicationInstance, ctx: Context) {
   const authHeader = ctx.request.headers.authorization;
-  let currentUser: User;
+  let currentUser: typeof Resource;
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const [, token] = authHeader.split(" ");
@@ -102,10 +101,7 @@ async function handleJsonApiEndpoint(
   try {
     const [
       result
-    ]: OperationResponse[] = await appInstance.app.executeOperations(
-      [op],
-      appInstance
-    );
+    ]: OperationResponse[] = await appInstance.app.executeOperations([op]);
 
     ctx.body = convertOperationResponseToHttpResponse(ctx, result);
     ctx.status = STATUS_MAPPING[ctx.method];
