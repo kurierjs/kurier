@@ -18,6 +18,7 @@ import User from "./resources/user";
 import Comment from "./resources/comment";
 import Vote from "./resources/vote";
 import VoteProcessor from "./processors/vote";
+import hash from "./utils/hash";
 
 const knexConfig = {
   client: "sqlite3",
@@ -44,9 +45,12 @@ app.services.knex = Knex(knexConfig);
 app.services.login = async (op: Operation, user: ResourceAttributes) => {
   return (
     op.data.attributes.email === user.email &&
-    op.data.attributes.password === user.password
+    hash(op.data.attributes.password, process.env.SESSION_KEY) === user.password
   );
 };
+app.services.password = async (op: Operation) => ({
+  password: hash(op.data.attributes.password, process.env.SESSION_KEY)
+});
 
 const koa = new Koa();
 koa.use(jsonApiKoa(app));

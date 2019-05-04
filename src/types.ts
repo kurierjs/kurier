@@ -176,4 +176,5 @@ export type ApplicationServices = {
     op: Operation,
     userDataSource: ResourceAttributes
   ) => Promise<boolean>;
+  password?: (op: Operation) => Promise<ResourceAttributes>;
 } & { [key: string]: any };
