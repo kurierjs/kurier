@@ -1,11 +1,12 @@
-import { Resource } from "../jsonapi-ts";
+import { Resource, User as JsonApiUser } from "../jsonapi-ts";
 import Article from "./article";
 import Comment from "./comment";
 import Vote from "./vote";
 
-export default class User extends Resource {
+export default class User extends JsonApiUser {
   static schema = {
     attributes: {
+      username: String,
       email: String
     },
 
@@ -23,7 +24,7 @@ export default class User extends Resource {
       votes: {
         type: () => Vote,
         hasMany: true,
-        foreignKeyName: 'user_id'
+        foreignKeyName: "user_id"
       }
     }
   };
