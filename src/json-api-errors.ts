@@ -28,6 +28,11 @@ const jsonApiErrors: {
   InvalidToken: (): JsonApiError => ({
     status: HttpStatusCode.UnprocessableEntity,
     code: "invalid_token"
+  }),
+
+  InvalidData: (): JsonApiError => ({
+    status: HttpStatusCode.UnprocessableEntity,
+    code: "invalid_data"
   })
 };
 
