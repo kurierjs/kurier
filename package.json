@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "run:dummy": "tsnd tests/dummy/src/",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
@@ -34,19 +34,36 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.12",
     "@types/jsonwebtoken": "^8.3.0",
     "@types/knex": "^0.15.1",
     "@types/koa": "^2.0.48",
     "@types/pluralize": "^0.0.29",
     "@types/ws": "^6.0.1",
     "axios": "^0.18.0",
+    "jest": "^24.8.0",
     "prettier": "^1.15.3",
     "sqlite3": "^4.0.6",
+    "ts-jest": "^24.0.2",
     "ts-node-dev": "^1.0.0-pre.32",
     "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "tslint-config-prettier": "^1.17.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.4"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.test.json"
+      }
+    }
   }
 }
