@@ -8,9 +8,7 @@
     "declaration": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src/**/*"]
 }

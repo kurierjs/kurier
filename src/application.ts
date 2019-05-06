@@ -46,9 +46,7 @@ export default class Application {
       const result = await Promise.all(
         ops
           .map(async op => {
-            const processor = await applicationInstance.processorFor(
-              op.ref.type
-            );
+            const processor = await applicationInstance.processorFor(op.ref.type);
 
             if (processor) {
               return this.executeOperation(op, processor);
@@ -68,10 +66,7 @@ export default class Application {
     }
   }
 
-  async executeOperation(
-    op: Operation,
-    processor: OperationProcessor<Resource>
-  ): Promise<OperationResponse> {
+  async executeOperation(op: Operation, processor: OperationProcessor<Resource>): Promise<OperationResponse> {
     const result = await processor.execute(await this.deserializeResource(op));
     return this.buildOperationResponse(result);
   }
@@ -105,11 +100,8 @@ export default class Application {
           op.data.relationships.hasOwnProperty(relName)
       )
       .reduce((relationAttributes, relName) => {
-        const key =
-          schemaRelationships[relName].foreignKeyName || `${relName}Id`;
-        const value = (<ResourceRelationshipData>(
-          op.data.relationships[relName].data
-        )).id;
+        const key = schemaRelationships[relName].foreignKeyName || `${relName}Id`;
+        const value = (<ResourceRelationshipData>op.data.relationships[relName].data).id;
 
         return {
           ...relationAttributes,
@@ -126,9 +118,7 @@ export default class Application {
     const resourceClass = await this.resourceFor(resourceType);
 
     const processors = await Promise.all(
-      this.processors.map(async processor =>
-        (await processor.shouldHandle(resourceType)) ? processor : false
-      )
+      this.processors.map(async processor => ((await processor.shouldHandle(resourceType)) ? processor : false))
     );
 
     // tslint:disable-next-line
@@ -149,23 +139,15 @@ export default class Application {
     return this.types.find(({ type }) => type && type === resourceType);
   }
 
-  async buildOperationResponse(
-    data: Resource | Resource[] | void
-  ): Promise<OperationResponse> {
-    const included = flatten(await this.extractIncludedResources(data)).filter(
-      Boolean
-    );
-    const uniqueIncluded = [
-      ...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))
-    ].map(typeId =>
+  async buildOperationResponse(data: Resource | Resource[] | void): Promise<OperationResponse> {
+    const included = flatten(await this.extractIncludedResources(data)).filter(Boolean);
+    const uniqueIncluded = [...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))].map(typeId =>
       included.find((item: Resource) => `${item.type}_${item.id}` === typeId)
     );
 
     const serializedResources = await this.serializeResources(data);
 
-    return included.length
-      ? { included: uniqueIncluded, data: serializedResources }
-      : { data: serializedResources };
+    return included.length ? { included: uniqueIncluded, data: serializedResources } : { data: serializedResources };
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
@@ -185,9 +167,8 @@ export default class Application {
       .filter(relName => schemaRelationships[relName].belongsTo)
       .filter(
         relName =>
-          data.attributes.hasOwnProperty(
-            schemaRelationships[relName].foreignKeyName
-          ) || data.attributes.hasOwnProperty(`${relName}Id`)
+          data.attributes.hasOwnProperty(schemaRelationships[relName].foreignKeyName) ||
+          data.attributes.hasOwnProperty(`${relName}Id`)
       )
       .map(relName => ({
         name: relName,
@@ -209,16 +190,12 @@ export default class Application {
       data.attributes,
       relationshipsFound
         .map(relationship => relationship.key)
-        .filter(
-          relationshipKey =>
-            !Object.keys(resourceSchema.attributes).includes(relationshipKey)
-        )
+        .filter(relationshipKey => !Object.keys(resourceSchema.attributes).includes(relationshipKey))
     );
     Object.keys(data.relationships).forEach(relName => {
       const fkName = schemaRelationships[relName].belongsTo
         ? "id"
-        : schemaRelationships[relName].type().schema.primaryKeyName ||
-          DEFAULT_PRIMARY_KEY;
+        : schemaRelationships[relName].type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
       const relationship = this.serializeRelationship(
         (data.relationships[relName] as unknown) as Resource | Resource[],
@@ -232,14 +209,9 @@ export default class Application {
     return data;
   }
 
-  serializeRelationship(
-    relationships: Resource | Resource[],
-    primaryKeyName: string
-  ) {
+  serializeRelationship(relationships: Resource | Resource[], primaryKeyName: string) {
     if (Array.isArray(relationships)) {
-      return relationships.map(relationship =>
-        this.serializeRelationship(relationship, primaryKeyName)
-      );
+      return relationships.map(relationship => this.serializeRelationship(relationship, primaryKeyName));
     }
     relationships.id = relationships[primaryKeyName];
     if (!relationships.id) {
@@ -256,27 +228,19 @@ export default class Application {
       return null;
     }
     if (Array.isArray(data)) {
-      return Promise.all(
-        data.map(record => this.extractIncludedResources(record))
-      );
+      return Promise.all(data.map(record => this.extractIncludedResources(record)));
     }
 
-    const schemaRelationships = (await this.resourceFor(data.type)).schema
-      .relationships;
+    const schemaRelationships = (await this.resourceFor(data.type)).schema.relationships;
     const includedData: Resource[] = [];
     Object.keys(data.relationships)
       .filter(relationshipName => data.relationships[relationshipName])
       .forEach(relationshipName => {
         if (Array.isArray(data.relationships[relationshipName])) {
-          data.relationships[relationshipName] = (data.relationships[
-            relationshipName
-          ] as any).map(rel => {
-            const relatedResourceClass = schemaRelationships[
-              relationshipName
-            ].type();
+          data.relationships[relationshipName] = (data.relationships[relationshipName] as any).map(rel => {
+            const relatedResourceClass = schemaRelationships[relationshipName].type();
             const resource = rel[0] || rel;
-            const pkName =
-              relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+            const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
             if (resource[pkName]) {
               includedData.push(
@@ -295,11 +259,8 @@ export default class Application {
           });
         } else {
           const resource = data.relationships[relationshipName];
-          const relatedResourceClass = schemaRelationships[
-            relationshipName
-          ].type();
-          const pkName =
-            relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+          const relatedResourceClass = schemaRelationships[relationshipName].type();
+          const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
           if (resource[pkName]) {
             includedData.push(

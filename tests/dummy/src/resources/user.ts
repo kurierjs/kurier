@@ -1,4 +1,4 @@
-import { Resource, User as JsonApiUser } from "../jsonapi-ts";
+import { User as JsonApiUser, Password } from "../jsonapi-ts";
 import Article from "./article";
 import Comment from "./comment";
 import Vote from "./vote";
@@ -7,7 +7,8 @@ export default class User extends JsonApiUser {
   static schema = {
     attributes: {
       username: String,
-      email: String
+      email: String,
+      password: Password
     },
 
     relationships: {
