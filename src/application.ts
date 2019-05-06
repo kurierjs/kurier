@@ -9,17 +9,21 @@ import {
   OperationResponse,
   ResourceRelationshipData,
   DEFAULT_PRIMARY_KEY,
-  ApplicationServices
+  ApplicationServices,
+  IJsonApiSerializer
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
+
 import ApplicationInstance from "./application-instance";
+import JsonApiSerializer from "./serializers/serializer";
 
 export default class Application {
   namespace: string;
   types: typeof Resource[];
   processors: typeof OperationProcessor[];
   defaultProcessor: typeof OperationProcessor;
+  serializer: IJsonApiSerializer;
   services: ApplicationServices;
 
   constructor(settings: {
@@ -27,6 +31,7 @@ export default class Application {
     types?: typeof Resource[];
     processors?: typeof OperationProcessor[];
     defaultProcessor?: typeof OperationProcessor;
+    serializer?: typeof JsonApiSerializer;
     services?: {};
   }) {
     this.namespace = settings.namespace || "";
@@ -34,6 +39,8 @@ export default class Application {
     this.processors = settings.processors || [];
     this.services = settings.services || ({} as ApplicationServices);
     this.defaultProcessor = settings.defaultProcessor || OperationProcessor;
+
+    this.serializer = new (settings.serializer || JsonApiSerializer)();
   }
 
   async executeOperations(
