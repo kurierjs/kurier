@@ -79,7 +79,7 @@ export type JsonApiParams = {
   include?: string[];
   sort?: string[];
   filter?: { [key: string]: string };
-  page?: { [key: string]: string[] };
+  page?: { [key: string]: number };
   fields?: { [key: string]: string[] };
 };
 
@@ -166,6 +166,10 @@ export type ApplicationServices = {
 } & { [key: string]: any };
 
 export interface IJsonApiSerializer {
-  attributeNameToColumnName(attributeName: string): string;
-  columnNameToAttributeName(columnName: string): string;
+  resourceTypeToTableName(resourceType: string): string;
+  attributeToColumn(attributeName: string): string;
+  columnToAttribute(columnName: string): string;
+  relationshipToColumn(relationshipName: string, primaryKeyName: string): string;
+  columnToRelationship(columnName: string, primaryKeyName: string): string;
+  foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
 }
