@@ -3,10 +3,7 @@ import { AttributeValueMatch } from "../types";
 
 import decorateWith from "./decorator";
 
-function authorizeMiddleware(
-  operation: Function,
-  conditions: AttributeValueMatch[]
-) {
+function authorizeMiddleware(operation: Function, conditions: AttributeValueMatch[]) {
   return function() {
     if (!this.appInstance.user) {
       throw JsonApiErrors.Unauthorized();
@@ -14,13 +11,7 @@ function authorizeMiddleware(
 
     if (
       !conditions.every(
-        ({
-          attribute,
-          value
-        }: {
-          attribute: string;
-          value: string | string[] | number | number[] | boolean;
-        }) =>
+        ({ attribute, value }: { attribute: string; value: string | string[] | number | number[] | boolean }) =>
           Array.isArray(value)
             ? value.includes(this.appInstance.user.attributes[attribute])
             : value === this.appInstance.user.attributes[attribute]

@@ -10,10 +10,7 @@ export function getArgument<T>(argsList: any[], match: (arg: any) => boolean) {
   return argsList.find(arg => arg && match(arg)) as T;
 }
 
-export default function decorateWith(
-  decorator: OperationDecorator,
-  ...decoratorArgs: any[]
-) {
+export default function decorateWith(decorator: OperationDecorator, ...decoratorArgs: any[]) {
   return (
     target: OperationProcessor<any> | Function,
     propertyKey?: string,
@@ -31,23 +28,16 @@ export default function decorateWith(
         .filter(isOperation)
         .map(member => ({
           methodName: member,
-          descriptor: Object.getOwnPropertyDescriptor(
-            controller.prototype,
-            member
-          ) as PropertyDescriptor
+          descriptor: Object.getOwnPropertyDescriptor(controller.prototype, member) as PropertyDescriptor
         }));
 
       controllerMethods.forEach(controllerMethod => {
         const originalFunction = controllerMethod.descriptor.value;
 
-        Object.defineProperty(
-          controller.prototype,
-          controllerMethod.methodName,
-          {
-            ...controllerMethod.descriptor,
-            value: decorator(originalFunction, ...decoratorArgs)
-          }
-        );
+        Object.defineProperty(controller.prototype, controllerMethod.methodName, {
+          ...controllerMethod.descriptor,
+          value: decorator(originalFunction, ...decoratorArgs)
+        });
       });
     }
   };

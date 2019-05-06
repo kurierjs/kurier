@@ -28,9 +28,7 @@ export function parse(url: string): JsonApiParams {
       if (paramValue !== "") {
         const value = parseValueForKey(paramKey, paramValue);
 
-        params[paramKey] = JSON_API_OBJECT_KEYS.includes(paramKey)
-          ? { ...(value as any) }
-          : value;
+        params[paramKey] = JSON_API_OBJECT_KEYS.includes(paramKey) ? { ...(value as any) } : value;
       }
     }
   }

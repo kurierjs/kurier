@@ -32,12 +32,7 @@ const knexConfig = {
 const app = new Application({
   namespace: "api",
   types: [User, Article, Comment, Vote, Session],
-  processors: [
-    ArticleProcessor,
-    UserProcessor,
-    SessionProcessor,
-    VoteProcessor
-  ],
+  processors: [ArticleProcessor, UserProcessor, SessionProcessor, VoteProcessor],
   defaultProcessor: KnexProcessor
 });
 

@@ -1,9 +1,7 @@
 import { HttpStatusCode, JsonApiError } from "./types";
 
 const jsonApiErrors: {
-  [key: string]: (args?: {
-    [key: string]: string | number | boolean;
-  }) => JsonApiError;
+  [key: string]: (args?: { [key: string]: string | number | boolean }) => JsonApiError;
 } = {
   UnhandledError: (): JsonApiError => ({
     status: HttpStatusCode.InternalServerError,

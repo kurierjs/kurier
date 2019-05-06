@@ -14,9 +14,7 @@ export default class ApplicationInstance {
 
   constructor(public app: Application) {}
 
-  async processorFor(
-    resourceType: string
-  ): Promise<OperationProcessor<Resource> | undefined> {
+  async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
     return this.app.processorFor(resourceType, this);
   }
 

@@ -3,9 +3,7 @@ import { sign } from "jsonwebtoken";
 import Session from "../resources/Session";
 import { v4 as uuid } from "uuid";
 
-export default class SessionProcessor<
-  ResourceT extends Session
-  > extends KnexProcessor<ResourceT> {
+export default class SessionProcessor<ResourceT extends Session> extends KnexProcessor<ResourceT> {
   public static resourceClass = Session;
 
   public async add(op: Operation): Promise<HasId> {
@@ -13,8 +11,7 @@ export default class SessionProcessor<
       .where({ email: op.data.attributes.email })
       .first();
 
-    const isLoggedIn =
-      userFromDB && userFromDB.password === op.data.attributes.password;
+    const isLoggedIn = userFromDB && userFromDB.password === op.data.attributes.password;
 
     if (!isLoggedIn) {
       throw JsonApiErrors.AccessDenied();

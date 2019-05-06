@@ -23,15 +23,7 @@ export type OperationDecorator = (
 
 // Generic types for JSONAPI document structure.
 
-export type AttributeValue =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | object
-  | object[];
+export type AttributeValue = string | number | boolean | string[] | number[] | boolean[] | object | object[];
 
 export type ResourceAttributes = {
   [key: string]: AttributeValue;
@@ -56,10 +48,7 @@ export type Meta = {
   [key: string]: AttributeValue;
 };
 
-export type JsonApiDocument<
-  ResourceT = Resource,
-  RelatedResourcesT = Resource
-> = {
+export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> = {
   data: ResourceT | ResourceT[];
   meta?: Meta;
   operations?: Operation[];
@@ -172,9 +161,11 @@ export type EagerLoadedData = { [key: string]: KnexRecord[] | undefined };
 
 export type ApplicationServices = {
   knex?: Knex;
-  login?: (
-    op: Operation,
-    userDataSource: ResourceAttributes
-  ) => Promise<boolean>;
+  login?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
   password?: (op: Operation) => Promise<ResourceAttributes>;
 } & { [key: string]: any };
+
+export interface IJsonApiSerializer {
+  attributeNameToColumnName(attributeName: string): string;
+  columnNameToAttributeName(columnName: string): string;
+}

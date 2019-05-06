@@ -6,17 +6,12 @@ import { randomBytes } from "crypto";
 import { sign } from "jsonwebtoken";
 import Password from "../attribute-types/password";
 
-export default class SessionProcessor<T extends Session> extends KnexProcessor<
-  T
-> {
+export default class SessionProcessor<T extends Session> extends KnexProcessor<T> {
   public static resourceClass = Session;
 
   public async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)
-      .filter(
-        attribute =>
-          this.resourceClass.schema.attributes[attribute] !== Password
-      )
+      .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
       .map(attribute => ({ [attribute]: op.data.attributes[attribute] }))
       .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
 

@@ -5,17 +5,10 @@ import * as compose from "koa-compose";
 
 import Application from "../application";
 import JsonApiErrors from "../json-api-errors";
-import {
-  JsonApiDocument,
-  JsonApiError,
-  JsonApiErrorsDocument,
-  Operation,
-  OperationResponse
-} from "../types";
+import { JsonApiDocument, JsonApiError, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 import ApplicationInstance from "../application-instance";
-import Resource from "../resource";
 import User from "../resources/user";
 
 const STATUS_MAPPING = {
@@ -26,10 +19,7 @@ const STATUS_MAPPING = {
   DELETE: 204
 };
 
-export default function jsonApiKoa(
-  app: Application,
-  ...middlewares: Middleware[]
-) {
+export default function jsonApiKoa(app: Application, ...middlewares: Middleware[]) {
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     const appInstance = new ApplicationInstance(app);
 
@@ -70,8 +60,7 @@ function urlData(appInstance: ApplicationInstance, ctx: Context) {
       "(?<relationship>[^\\s/?]+)?(/+)?$"
   );
 
-  const { resource, id, relationships, relationship } =
-    (ctx.path.match(urlRegexp) || {})["groups"] || ({} as any);
+  const { resource, id, relationships, relationship } = (ctx.path.match(urlRegexp) || {})["groups"] || ({} as any);
 
   return {
     id,
@@ -81,31 +70,18 @@ function urlData(appInstance: ApplicationInstance, ctx: Context) {
   };
 }
 
-async function handleBulkEndpoint(
-  appInstance: ApplicationInstance,
-  ctx: Context
-) {
-  const operations = await appInstance.app.executeOperations(
-    ctx.request.body.operations || []
-  );
+async function handleBulkEndpoint(appInstance: ApplicationInstance, ctx: Context) {
+  const operations = await appInstance.app.executeOperations(ctx.request.body.operations || []);
 
   ctx.body = { operations };
 }
 
-async function handleJsonApiEndpoint(
-  appInstance: ApplicationInstance,
-  ctx: Context
-) {
+async function handleJsonApiEndpoint(appInstance: ApplicationInstance, ctx: Context) {
   const op: Operation = convertHttpRequestToOperation(ctx);
   if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
   try {
-    const [
-      result
-    ]: OperationResponse[] = await appInstance.app.executeOperations(
-      [op],
-      appInstance
-    );
+    const [result]: OperationResponse[] = await appInstance.app.executeOperations([op], appInstance);
 
     ctx.body = convertOperationResponseToHttpResponse(ctx, result);
     ctx.status = STATUS_MAPPING[ctx.method];
@@ -140,10 +116,7 @@ function convertHttpRequestToOperation(ctx: Context): Operation {
   } as Operation;
 }
 
-function convertOperationResponseToHttpResponse(
-  ctx: Context,
-  operation: OperationResponse
-): JsonApiDocument {
+function convertOperationResponseToHttpResponse(ctx: Context, operation: OperationResponse): JsonApiDocument {
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(ctx.method)) {
@@ -151,8 +124,6 @@ function convertOperationResponseToHttpResponse(
   }
 }
 
-function convertJsonApiErrorToHttpResponse(
-  error: JsonApiError
-): JsonApiErrorsDocument {
+function convertJsonApiErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument {
   return { errors: [error] };
 }

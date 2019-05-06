@@ -15,10 +15,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
 
   async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)
-      .filter(
-        attribute =>
-          this.resourceClass.schema.attributes[attribute] !== Password
-      )
+      .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
       .map(attribute => ({ [attribute]: op.data.attributes[attribute] }))
       .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
 
@@ -41,8 +38,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
 
   @Authorize()
   async get(op: Operation): Promise<HasId[]> {
-    const isRequestingSelfData =
-      String(op.ref.id) === String(this.appInstance.user.id);
+    const isRequestingSelfData = String(op.ref.id) === String(this.appInstance.user.id);
 
     if (isRequestingSelfData) {
       return super.get({ ...op, params: {} });
