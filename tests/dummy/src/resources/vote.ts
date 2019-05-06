@@ -7,10 +7,10 @@ export default class Vote extends Resource {
     primaryKeyName: "_Id",
     attributes: {
       points: Number,
-      created_on: String,
-      updated_on: String,
-      updated_by: Number,
-      created_by: Number
+      createdOn: String,
+      updatedOn: String,
+      updatedBy: Number,
+      createdBy: Number
     },
 
     relationships: {
