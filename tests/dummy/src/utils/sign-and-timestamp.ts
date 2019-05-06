@@ -3,22 +3,22 @@ import User from "../resources/user";
 
 export default function signAndTimestampOperation(op: Operation, resourceType: typeof Resource, user: User) {
   if (op.op === "add") {
-    if ("created_by" in resourceType.schema.attributes) {
-      op.data.attributes.created_by = user.id;
+    if ("createdBy" in resourceType.schema.attributes) {
+      op.data.attributes.createdBy = user.id;
     }
 
-    if ("created_on" in resourceType.schema.attributes) {
-      op.data.attributes.created_on = new Date().toJSON();
+    if ("createdOn" in resourceType.schema.attributes) {
+      op.data.attributes.createdOn = new Date().toJSON();
     }
   }
 
   if (op.op === "update") {
-    if ("updated_by" in resourceType.schema.attributes) {
-      op.data.attributes.updated_by = user.id;
+    if ("updatedBy" in resourceType.schema.attributes) {
+      op.data.attributes.updatedBy = user.id;
     }
 
-    if ("updated_on" in resourceType.schema.attributes) {
-      op.data.attributes.updated_on = new Date().toJSON();
+    if ("updatedOn" in resourceType.schema.attributes) {
+      op.data.attributes.updatedOn = new Date().toJSON();
     }
   }
 

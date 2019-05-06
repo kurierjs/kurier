@@ -14,6 +14,7 @@ import Resource from "./resource";
 import User from "./resources/user";
 import Session from "./resources/session";
 import Password from "./attribute-types/password";
+import JsonApiSerializer from "./serializers/serializer";
 
 export {
   // Core objects
@@ -25,6 +26,7 @@ export {
   KnexProcessor,
   JsonApiErrors,
   OperationProcessor,
+  JsonApiSerializer,
   // Decorators API
   decorateWith,
   Authorize,
