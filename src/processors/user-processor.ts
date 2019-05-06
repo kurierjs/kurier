@@ -4,7 +4,6 @@ import { Operation, HasId } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
 import Password from "../attribute-types/password";
-import { randomBytes } from "crypto";
 
 export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   public static resourceClass = User;
@@ -41,7 +40,17 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
     const isRequestingSelfData = String(op.ref.id) === String(this.appInstance.user.id);
 
     if (isRequestingSelfData) {
-      return super.get({ ...op, params: {} });
+      return super.get({
+        ...op,
+        params: {
+          fields: {
+            ...op.params.fields,
+            user: (op.params.fields && op.params.fields["user"] ? op.params.fields["user"] : [])
+              .concat(Object.keys(this.resourceClass.schema.attributes))
+              .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
+          }
+        }
+      });
     }
 
     throw jsonApiErrors.AccessDenied();
