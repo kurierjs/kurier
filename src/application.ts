@@ -91,13 +91,14 @@ export default class Application {
       })
     );
   }
-
+  // TODO: test create/update resources
   async deserializeResource(op: Operation) {
     if (!op.data || !op.data.attributes) {
       return op;
     }
 
     const resourceClass = await this.resourceFor(op.ref.type);
+    const primaryKey = resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const schemaRelationships = resourceClass.schema.relationships;
     op.data.attributes = Object.keys(schemaRelationships)
       .filter(
@@ -107,7 +108,7 @@ export default class Application {
           op.data.relationships.hasOwnProperty(relName)
       )
       .reduce((relationAttributes, relName) => {
-        const key = schemaRelationships[relName].foreignKeyName || `${relName}Id`;
+        const key = schemaRelationships[relName].foreignKeyName || this.serializer.relationshipToColumn(relName, primaryKey);
         const value = (<ResourceRelationshipData>op.data.relationships[relName].data).id;
 
         return {
@@ -199,7 +200,7 @@ export default class Application {
         .map(relationship => relationship.key)
         .filter(relationshipKey => !Object.keys(resourceSchema.attributes).includes(relationshipKey))
     );
-    Object.keys(data.relationships).forEach(relName => {
+    Object.keys(data.relationships).filter(relName => data.relationships[relName]).forEach(relName => {
       const fkName = schemaRelationships[relName].belongsTo
         ? "id"
         : schemaRelationships[relName].type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
@@ -220,7 +221,7 @@ export default class Application {
     if (Array.isArray(relationships)) {
       return relationships.map(relationship => this.serializeRelationship(relationship, primaryKeyName));
     }
-    relationships.id = relationships[primaryKeyName];
+    relationships.id = relationships[primaryKeyName || DEFAULT_PRIMARY_KEY];
     if (!relationships.id) {
       return null;
     }

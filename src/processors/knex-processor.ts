@@ -60,7 +60,9 @@ const getColumns = (resourceClass: typeof Resource, serializer: IJsonApiSerializ
   const { attributes, relationships, primaryKeyName } = schema;
   const relationshipsKeys = Object.entries(relationships)
     .filter(([, value]) => value.belongsTo)
-    .map(([key, value]) => value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName));
+    .map(([key, value]) =>
+      value.foreignKeyName ||
+      serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY));
   const typeFields = (fields[type] || []).filter((key: string) => Object.keys(attributes).includes(key));
 
   const attributesKeys: string[] = typeFields.length ? typeFields : Object.keys(attributes);
@@ -257,6 +259,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     record: HasId,
     eagerLoadedData: EagerLoadedData
   ): Promise<KnexRecord | KnexRecord[] | void> {
+    console.log('eagerLoadedData', eagerLoadedData)
     if (!eagerLoadedData[key]) {
       return;
     }
