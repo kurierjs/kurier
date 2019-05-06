@@ -1,5 +1,4 @@
 import Resource from "../resource";
-import Password from "../attribute-types/password";
 
 export default class User extends Resource {
   public static get type() {
@@ -7,10 +6,7 @@ export default class User extends Resource {
   }
 
   public static schema = {
-    attributes: {
-      username: String,
-      password: Password
-    },
+    attributes: {},
     relationships: {}
   };
 }

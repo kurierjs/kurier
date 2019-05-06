@@ -7,7 +7,6 @@ import {
   KnexProcessor,
   jsonApiWebSocket,
   Operation,
-  UserProcessor,
   SessionProcessor,
   Session,
   ResourceAttributes
@@ -19,6 +18,7 @@ import Comment from "./resources/comment";
 import Vote from "./resources/vote";
 import VoteProcessor from "./processors/vote";
 import hash from "./utils/hash";
+import UserProcessor from "./processors/user";
 
 const knexConfig = {
   client: "sqlite3",
