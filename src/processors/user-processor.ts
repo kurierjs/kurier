@@ -37,22 +37,16 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
 
   @Authorize()
   async get(op: Operation): Promise<HasId[]> {
-    const isRequestingSelfData = String(op.ref.id) === String(this.appInstance.user.id);
-
-    if (isRequestingSelfData) {
-      return super.get({
-        ...op,
-        params: {
-          fields: {
-            ...op.params.fields,
-            user: (op.params.fields && op.params.fields["user"] ? op.params.fields["user"] : [])
-              .concat(Object.keys(this.resourceClass.schema.attributes))
-              .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
-          }
+    return super.get({
+      ...op,
+      params: {
+        fields: {
+          ...op.params.fields,
+          user: (op.params.fields && op.params.fields["user"] ? op.params.fields["user"] : [])
+            .concat(Object.keys(this.resourceClass.schema.attributes))
+            .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
         }
-      });
-    }
-
-    throw jsonApiErrors.AccessDenied();
+      }
+    });
   }
 }
