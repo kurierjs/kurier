@@ -37,7 +37,7 @@ export default class SessionProcessor<ResourceT extends Session> extends KnexPro
     const session = {
       token,
       id: uuid(),
-      userId: userFromDB.id
+      user_id: userFromDB.id
     };
 
     return session;

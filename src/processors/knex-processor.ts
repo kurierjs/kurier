@@ -60,7 +60,10 @@ const getColumns = (resourceClass: typeof Resource, serializer: IJsonApiSerializ
   const { attributes, relationships, primaryKeyName } = schema;
   const relationshipsKeys = Object.entries(relationships)
     .filter(([, value]) => value.belongsTo)
-    .map(([key, value]) => value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName));
+    .map(
+      ([key, value]) =>
+        value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)
+    );
   const typeFields = (fields[type] || []).filter((key: string) => Object.keys(attributes).includes(key));
 
   const attributesKeys: string[] = typeFields.length ? typeFields : Object.keys(attributes);
@@ -127,10 +130,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const { id } = op.ref;
     const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
+    const dataToUpdate = Object.keys(op.data.attributes)
+      .map(attribute => ({
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
+      }))
+      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+
     const updated = await this.getQuery()
       .where({ [primaryKeyName]: id })
       .first()
-      .update(op.data.attributes);
+      .update(dataToUpdate);
 
     if (!updated) {
       throw JsonApiErrors.RecordNotExists();
@@ -144,7 +153,14 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   async add(op: Operation): Promise<HasId> {
     const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const ids = await this.getQuery().insert(op.data.attributes, primaryKeyName);
+
+    const dataToInsert = Object.keys(op.data.attributes)
+      .map(attribute => ({
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
+      }))
+      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+
+    const ids = await this.getQuery().insert(dataToInsert, primaryKeyName);
 
     return await this.getQuery()
       .whereIn(primaryKeyName, ids)
@@ -260,19 +276,21 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     if (!eagerLoadedData[key]) {
       return;
     }
-    const primaryKeyName = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const relatedPrimaryKey = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const thisPrimaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+
     const foreignKeyName =
-      relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, primaryKeyName);
+      relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, relatedPrimaryKey);
 
     if (relationship.belongsTo) {
       return eagerLoadedData[key].find(
-        (eagerLoadedRecord: KnexRecord) => eagerLoadedRecord[primaryKeyName] === record[foreignKeyName]
+        (eagerLoadedRecord: KnexRecord) => eagerLoadedRecord[relatedPrimaryKey] === record[foreignKeyName]
       );
     }
 
     if (relationship.hasMany) {
       return eagerLoadedData[key].filter(
-        (eagerLoadedRecord: KnexRecord) => record[primaryKeyName] === eagerLoadedRecord[foreignKeyName]
+        (eagerLoadedRecord: KnexRecord) => record[thisPrimaryKey] === eagerLoadedRecord[foreignKeyName]
       );
     }
   }

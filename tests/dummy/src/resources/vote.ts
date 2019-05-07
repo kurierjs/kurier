@@ -14,10 +14,9 @@ export default class Vote extends Resource {
     },
 
     relationships: {
-      author: {
+      user: {
         type: () => User,
-        belongsTo: true,
-        foreignKeyName: "user_id"
+        belongsTo: true
       },
       article: {
         type: () => Article,

@@ -8,7 +8,7 @@
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
     "test": "jest",
-    "run:dummy": "tsnd tests/dummy/src/",
+    "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy/src/",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
   "repository": {

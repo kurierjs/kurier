@@ -53,7 +53,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
 
     const session = {
       token,
-      userId,
+      user_id: userId,
       id: randomBytes(16).toString("hex")
     };
 

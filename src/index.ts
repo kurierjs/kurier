@@ -40,3 +40,4 @@ export {
 };
 
 export * from "./types";
+export * from "./utils/string";

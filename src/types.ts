@@ -172,4 +172,6 @@ export interface IJsonApiSerializer {
   relationshipToColumn(relationshipName: string, primaryKeyName: string): string;
   columnToRelationship(columnName: string, primaryKeyName: string): string;
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
+  serializeResource(resource: Resource, resourceType: typeof Resource): Resource;
+  serializeRelationship(relationships: Resource | Resource[], primaryKeyName?: string): ResourceRelationshipData[];
 }

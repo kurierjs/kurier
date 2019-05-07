@@ -73,7 +73,12 @@ export default class OperationProcessor<ResourceT extends Resource> {
   ) {
     const relationshipKeys = Object.keys(resourceClass.schema.relationships)
       .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
-      .map(relName => resourceClass.schema.relationships[relName].foreignKeyName || `${relName}Id`);
+      .map(relName =>
+        this.appInstance.app.serializer.relationshipToColumn(
+          relName,
+          resourceClass.schema.relationships[relName].type().schema.primaryKeyName
+        )
+      );
     return pick(record, relationshipKeys);
   }
 
