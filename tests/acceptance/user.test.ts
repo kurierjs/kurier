@@ -36,7 +36,7 @@ describe("Users", () => {
       const result = await request.get(`/users/${currentUser.id}`).set("Authorization", token);
 
       expect(result.status).toEqual(200);
-      const [requestResult] = result.body.data;
+      const requestResult = result.body.data;
       expect(requestResult).not.toBeUndefined();
       expect(requestResult.attributes.email).toEqual(currentUser.attributes.email);
       expect(requestResult.attributes.username).toEqual(currentUser.attributes.username);
