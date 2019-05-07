@@ -130,10 +130,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const { id } = op.ref;
     const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
+    const dataToUpdate = Object.keys(op.data.attributes)
+      .map(attribute => ({
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
+      }))
+      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+
     const updated = await this.getQuery()
       .where({ [primaryKeyName]: id })
       .first()
-      .update(op.data.attributes);
+      .update(dataToUpdate);
 
     if (!updated) {
       throw JsonApiErrors.RecordNotExists();
@@ -147,7 +153,14 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   async add(op: Operation): Promise<HasId> {
     const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const ids = await this.getQuery().insert(op.data.attributes, primaryKeyName);
+
+    const dataToInsert = Object.keys(op.data.attributes)
+      .map(attribute => ({
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
+      }))
+      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+
+    const ids = await this.getQuery().insert(dataToInsert, primaryKeyName);
 
     return await this.getQuery()
       .whereIn(primaryKeyName, ids)
