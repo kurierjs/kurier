@@ -13,7 +13,7 @@ const createTransaction = (connection, callback): Promise<Transaction> => {
   return new Promise(resolve =>
     connection
       .transaction(t => {
-        callback(t)
+        callback(t);
         return resolve(t);
       })
       .catch(e => {})
@@ -23,7 +23,6 @@ const createTransaction = (connection, callback): Promise<Transaction> => {
 beforeAll(async () => {
   migrationTransaction = await createTransaction(knex, () => {});
   await migrationTransaction.migrate.latest();
-  console.log('migrating up');
 
   app.services.login = async (op: Operation, user: ResourceAttributes) => {
     return op.data.attributes.email === user.email && op.data.attributes.password === user.password;
@@ -35,11 +34,10 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await migrationTransaction.rollback();
-  console.log('migrating down');
 });
 
 beforeEach(async () => {
-  context.transaction = await createTransaction(migrationTransaction, (t) => {
+  context.transaction = await createTransaction(migrationTransaction, t => {
     app.services.knex = t;
   });
 });
