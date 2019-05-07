@@ -17,7 +17,7 @@ export default class Comment extends Resource {
       parentComment: {
         type: () => Comment,
         belongsTo: true,
-        foreignKeyName: "parentCommentId"
+        foreignKeyName: "parent_comment_id"
       }
     }
   };
