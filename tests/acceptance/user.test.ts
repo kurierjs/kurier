@@ -21,17 +21,20 @@ describe("Users", () => {
 
   describe("GET", () => {
     it("Show users index", async () => {
-      const factoryData = factory.buildList(faker.random.number({ min: 3, max: 10 }));
-      await context.transaction.table("users").insert(factoryData, "*");
+      try {
+        const factoryData = factory.buildList(faker.random.number({ min: 3, max: 10 }));
+        await context.transaction.table("users").insert(factoryData);
 
-      const result = await request.get("/users").set("Authorization", token);
+        const result = await request.get("/users")
+          .set("Authorization", token)
 
-      expect(result.status).toEqual(403);
+        expect(result.status).toEqual(403);
+      } catch (error) {}
     });
 
     it("Gets user by id", async () => {
       const factoryData = factory.buildList(faker.random.number({ min: 3, max: 10 }));
-      await context.transaction.table("users").insert(factoryData, "*");
+      await context.transaction.table("users").insert(factoryData);
 
       const result = await request.get(`/users/${currentUser.id}`).set("Authorization", token);
 

@@ -7,11 +7,13 @@ import { Operation, ResourceAttributes } from "../src";
 
 const knex = app.services.knex;
 
-const createTransaction = (): Promise<Transaction> => {
+let migrationTransaction: Transaction;
+
+const createTransaction = (connection, callback): Promise<Transaction> => {
   return new Promise(resolve =>
-    knex
+    connection
       .transaction(t => {
-        app.services.knex = t;
+        callback(t)
         return resolve(t);
       })
       .catch(e => {})
@@ -19,9 +21,9 @@ const createTransaction = (): Promise<Transaction> => {
 };
 
 beforeAll(async () => {
-  await knexMigrate("up", {
-    config: knexfile[process.env.NODE_ENV || "development"]
-  });
+  migrationTransaction = await createTransaction(knex, () => {});
+  await migrationTransaction.migrate.latest();
+  console.log('migrating up');
 
   app.services.login = async (op: Operation, user: ResourceAttributes) => {
     return op.data.attributes.email === user.email && op.data.attributes.password === user.password;
@@ -32,13 +34,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await knexMigrate("rollback", {
-    config: knexfile[process.env.NODE_ENV || "development"]
-  });
+  await migrationTransaction.rollback();
+  console.log('migrating down');
 });
 
 beforeEach(async () => {
-  context.transaction = await createTransaction();
+  context.transaction = await createTransaction(migrationTransaction, (t) => {
+    app.services.knex = t;
+  });
 });
 
 afterEach(async () => {

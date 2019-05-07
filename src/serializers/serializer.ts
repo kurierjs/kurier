@@ -17,7 +17,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     return camelize(columnName);
   }
 
-  columnToRelationship(columnName: string, primaryKeyName: string): string {
+  columnToRelationship(columnName: string, primaryKeyName: string = "id"): string {
     return this.columnToAttribute(columnName.replace(`_${primaryKeyName}`, ""));
   }
 
