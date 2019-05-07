@@ -12,17 +12,17 @@ export default class User extends JsonApiUser {
     },
 
     relationships: {
-      articles: {
+      article: {
         type: () => Article,
         hasMany: true,
-        foreignKeyName: "authorId"
+        foreignKeyName: "author_id"
       },
-      comments: {
+      comment: {
         type: () => Comment,
         hasMany: true,
         foreignKeyName: "author_id"
       },
-      votes: {
+      vote: {
         type: () => Vote,
         hasMany: true,
         foreignKeyName: "user_id"

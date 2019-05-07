@@ -276,19 +276,21 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     if (!eagerLoadedData[key]) {
       return;
     }
-    const primaryKeyName = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const relatedPrimaryKey = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const thisPrimaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+
     const foreignKeyName =
-      relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, primaryKeyName);
+      relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, relatedPrimaryKey);
 
     if (relationship.belongsTo) {
       return eagerLoadedData[key].find(
-        (eagerLoadedRecord: KnexRecord) => eagerLoadedRecord[primaryKeyName] === record[foreignKeyName]
+        (eagerLoadedRecord: KnexRecord) => eagerLoadedRecord[relatedPrimaryKey] === record[foreignKeyName]
       );
     }
 
     if (relationship.hasMany) {
       return eagerLoadedData[key].filter(
-        (eagerLoadedRecord: KnexRecord) => record[primaryKeyName] === eagerLoadedRecord[foreignKeyName]
+        (eagerLoadedRecord: KnexRecord) => record[thisPrimaryKey] === eagerLoadedRecord[foreignKeyName]
       );
     }
   }
