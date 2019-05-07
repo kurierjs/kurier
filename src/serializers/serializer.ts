@@ -43,7 +43,9 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       )
       .map(relName => ({
         name: relName,
-        key: this.relationshipToColumn(relName, schemaRelationships[relName].type().schema.primaryKeyName)
+        key:
+          schemaRelationships[relName].foreignKeyName ||
+          this.relationshipToColumn(relName, schemaRelationships[relName].type().schema.primaryKeyName)
       }));
 
     data.relationships = relationshipsFound.reduce(
