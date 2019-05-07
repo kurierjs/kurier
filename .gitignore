@@ -2,3 +2,4 @@ node_modules/
 dist/
 *.log
 package-lock.json
+test.sqlite3

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
-    "test": "jest",
+    "test": "jest --runInBand",
     "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy/src/",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
@@ -26,7 +26,7 @@
     "escape-string-regexp": "^1.0.5",
     "flatten": "^1.0.2",
     "jsonwebtoken": "^8.4.0",
-    "knex": "~0.16.3",
+    "knex": "~0.16.5",
     "koa": "^2.6.2",
     "koa-body": "^4.0.7",
     "koa-compose": "^4.1.0",
@@ -34,16 +34,23 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
+    "@types/faker": "^4.1.5",
     "@types/jest": "^24.0.12",
     "@types/jsonwebtoken": "^8.3.0",
     "@types/knex": "^0.15.1",
     "@types/koa": "^2.0.48",
     "@types/pluralize": "^0.0.29",
+    "@types/supertest": "^2.0.7",
     "@types/ws": "^6.0.1",
     "axios": "^0.18.0",
+    "faker": "^4.1.0",
     "jest": "^24.8.0",
+    "knex-migrate": "^1.7.2",
     "prettier": "^1.15.3",
+    "rosie": "^2.0.1",
     "sqlite3": "^4.0.6",
+    "supertest": "^4.0.2",
+    "supertest-koa-agent": "^0.3.2",
     "ts-jest": "^24.0.2",
     "ts-node-dev": "^1.0.0-pre.32",
     "tslint": "^5.11.0",
@@ -53,17 +60,46 @@
     "typescript": "^3.4"
   },
   "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts)$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "tsconfig.test.json"
+    "projects": [
+      {
+        "displayName": "unit",
+        "moduleFileExtensions": [
+          "ts",
+          "js"
+        ],
+        "transform": {
+          "^.+\\.(ts)$": "ts-jest"
+        },
+        "globals": {
+          "ts-jest": {
+            "tsConfig": "tsconfig.test.json"
+          }
+        },
+        "testMatch": [
+          "<rootDir>/tests/unit/**/?(*.)+(spec|test).ts"
+        ]
+      },
+      {
+        "displayName": "acceptance",
+        "moduleFileExtensions": [
+          "ts",
+          "js"
+        ],
+        "setupFilesAfterEnv": [
+          "<rootDir>/tests/setup.ts"
+        ],
+        "transform": {
+          "^.+\\.(ts)$": "ts-jest"
+        },
+        "globals": {
+          "ts-jest": {
+            "tsConfig": "tsconfig.test.json"
+          }
+        },
+        "testMatch": [
+          "<rootDir>/tests/acceptance/**/?(*.)+(spec|test).ts"
+        ]
       }
-    }
+    ]
   }
 }
