@@ -66,6 +66,12 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         .filter(relationshipKey => !Object.keys(resourceSchema.attributes).includes(relationshipKey))
     );
 
+    data.attributes = Object.keys(data.attributes)
+      .map(attribute => ({
+        [this.columnToAttribute(attribute)]: data.attributes[attribute]
+      }))
+      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+
     Object.keys(data.relationships)
       .filter(relName => data.relationships[relName])
       .forEach(relName => {
