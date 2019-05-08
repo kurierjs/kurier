@@ -9,83 +9,61 @@ import JsonApiSessionProcessor from "../processors/session-processor";
 import Session from "../resources/session";
 
 export type UserManagementAddonOptions = AddonOptions & {
-  user: {
-    resource: typeof User;
-    idGenerator?: "numeric" | "uuid" | (() => string);
-    callbacks?: {
-      login: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
-      encryptPassword: (op: Operation) => Promise<ResourceAttributes>;
-    };
-  };
-  session?: {
-    requestParameterNames?: {
-      username?: string;
-      password?: string;
-    };
-  };
+  userResource: typeof User;
+  userEncryptPasswordCallback?: (op: Operation) => Promise<ResourceAttributes>;
+  userLoginCallback?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
+  userGenerateIdCallback?: () => Promise<string>;
+  usernameRequestParameter?: string;
+  passwordRequestParameter?: string;
 };
 
 const defaults: UserManagementAddonOptions = {
-  user: {
-    resource: User,
-    idGenerator: "numeric",
-    callbacks: {
-      login: async () => {
-        console.warn(
-          "WARNING: You're using the default login callback with UserManagementAddon." +
-            "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
-        );
-        return true;
-      },
-
-      encryptPassword: async (op: Operation) => {
-        console.warn(
-          "WARNING: You're using the default encryptPassword callback with UserManagementAddon." +
-            "Your password is NOT being encrypted. Implement this callback in your addon configuration."
-        );
-
-        return { password: op.data.attributes.password };
-      }
-    }
+  userResource: User,
+  userGenerateIdCallback: async () => Date.now().toString(),
+  userLoginCallback: async () => {
+    console.warn(
+      "WARNING: You're using the default login callback with UserManagementAddon." +
+        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+    );
+    return true;
   },
-  session: {
-    requestParameterNames: {
-      username: "username",
-      password: "password"
-    }
-  }
+
+  userEncryptPasswordCallback: async (op: Operation) => {
+    console.warn(
+      "WARNING: You're using the default encryptPassword callback with UserManagementAddon." +
+        "Your password is NOT being encrypted. Implement this callback in your addon configuration."
+    );
+
+    return { password: op.data.attributes.password };
+  },
+  usernameRequestParameter: "username",
+  passwordRequestParameter: "password"
 };
 
 export default class UserManagementAddon extends Addon {
-  constructor(protected readonly app: Application, protected readonly options: UserManagementAddonOptions = defaults) {
-    super(app, {});
-
-    this.options = {
-      user: {
-        ...defaults.user,
-        ...options.user
-      },
-      session: {
-        ...defaults.session,
-        ...options.session
-      }
-    };
+  constructor(public readonly app: Application, public readonly options?: UserManagementAddonOptions) {
+    super(app);
+    this.options = { ...defaults, ...options };
   }
 
   async install() {
     const sessionResourceType = this.createSessionResource();
 
-    this.app.types.push(this.options.user.resource, sessionResourceType);
+    this.app.types.push(this.options.userResource, sessionResourceType);
     this.app.processors.push(this.createUserProcessor(), this.createSessionProcessor(sessionResourceType));
   }
 
   private createUserProcessor() {
     return (options =>
       class UserProcessor<T extends User> extends JsonApiUserProcessor<T> {
-        public static resourceClass = options.user.resource;
+        public static resourceClass = options.userResource;
+
+        protected async generateId() {
+          return options.userGenerateIdCallback();
+        }
 
         protected async encryptPassword(op: Operation) {
-          return options.user.callbacks.encryptPassword(op);
+          return options.userEncryptPasswordCallback(op);
         }
       })(this.options);
   }
@@ -96,7 +74,7 @@ export default class UserManagementAddon extends Addon {
         public static resourceClass = sessionResourceType as typeof Session;
 
         protected async login(op: Operation, userDataSource: ResourceAttributes): Promise<boolean> {
-          return options.user.callbacks.login(op, userDataSource);
+          return options.userLoginCallback(op, userDataSource);
         }
       })(this.options);
   }
@@ -111,12 +89,12 @@ export default class UserManagementAddon extends Addon {
         public static schema = {
           attributes: {
             token: String,
-            [options.session.requestParameterNames.username]: String,
-            [options.session.requestParameterNames.password]: Password
+            [options.usernameRequestParameter]: String,
+            [options.passwordRequestParameter]: Password
           },
           relationships: {
             user: {
-              type: () => options.user.resource,
+              type: () => options.userResource,
               belongsTo: true
             }
           }
