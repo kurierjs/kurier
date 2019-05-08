@@ -21,10 +21,9 @@ const app = new Application({
 });
 
 app.use(UserManagementAddon, {
-  user: {
-    resource: User,
-    callbacks: { login, encryptPassword }
-  }
+  userResource: User,
+  userLoginCallback: login,
+  userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
 
 app.services.knex = Knex(knexConfig);
