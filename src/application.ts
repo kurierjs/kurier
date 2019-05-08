@@ -48,7 +48,7 @@ export default class Application {
     this.serializer = new (settings.serializer || JsonApiSerializer)();
   }
 
-  use(addon: typeof Addon, options: AddonOptions) {
+  use(addon: typeof Addon, options?: AddonOptions) {
     if (this.addons.find(installedAddon => installedAddon.addon === addon)) {
       return;
     }
