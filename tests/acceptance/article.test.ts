@@ -1,9 +1,9 @@
 import * as faker from "faker";
 import { SuperTest, Test } from "supertest";
 import * as agent from "supertest-koa-agent";
-import factory from "./factories/article";
-import context from "../transaction";
-import http from "../dummy/src/http";
+import factory from "@acceptance/factories/article";
+import context from "@acceptance/transaction";
+import http from "@dummy/http";
 
 const request = agent(http) as SuperTest<Test>;
 

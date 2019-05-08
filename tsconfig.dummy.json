@@ -8,7 +8,14 @@
     "declaration": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ebryn/jsonapi-ts/*": ["./src/*"],
+      "@acceptance/*": ["./tests/acceptance/*"],
+      "@dummy/*": ["./tests/dummy/src/*"],
+      "@unit/*": ["./tests/unit/*"]
+    }
   },
   "include": ["src/**/*", "tests/**/*"]
 }

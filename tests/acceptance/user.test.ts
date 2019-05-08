@@ -2,11 +2,11 @@ import * as faker from "faker";
 import { SuperTest, Test } from "supertest";
 import * as agent from "supertest-koa-agent";
 import factory from "./factories/user";
-import context from "../transaction";
-import http from "../dummy/src/http";
+import context from "./transaction";
+import http from "@dummy/http";
 import createUser from "./helpers/create-user";
 import createSessionToken from "./helpers/create-session-token";
-import User from "../dummy/src/resources/user";
+import User from "@dummy/resources/user";
 
 const request = agent(http) as SuperTest<Test>;
 

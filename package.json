@@ -58,48 +58,5 @@
     "tslint-config-prettier": "^1.17.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.4"
-  },
-  "jest": {
-    "projects": [
-      {
-        "displayName": "unit",
-        "moduleFileExtensions": [
-          "ts",
-          "js"
-        ],
-        "transform": {
-          "^.+\\.(ts)$": "ts-jest"
-        },
-        "globals": {
-          "ts-jest": {
-            "tsConfig": "tsconfig.test.json"
-          }
-        },
-        "testMatch": [
-          "<rootDir>/tests/unit/**/?(*.)+(spec|test).ts"
-        ]
-      },
-      {
-        "displayName": "acceptance",
-        "moduleFileExtensions": [
-          "ts",
-          "js"
-        ],
-        "setupFilesAfterEnv": [
-          "<rootDir>/tests/setup.ts"
-        ],
-        "transform": {
-          "^.+\\.(ts)$": "ts-jest"
-        },
-        "globals": {
-          "ts-jest": {
-            "tsConfig": "tsconfig.test.json"
-          }
-        },
-        "testMatch": [
-          "<rootDir>/tests/acceptance/**/?(*.)+(spec|test).ts"
-        ]
-      }
-    ]
   }
 }

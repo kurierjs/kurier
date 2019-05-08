@@ -1,4 +1,4 @@
-import app from "../../dummy/src/app";
+import app from "@dummy/app";
 
 export default async function createSessionToken(email: string, password: string): Promise<string> {
   const attributes = { email, password };

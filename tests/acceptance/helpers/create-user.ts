@@ -1,7 +1,6 @@
-import context from "../../transaction";
-import userFactory from "../factories/user";
-import app from "../../dummy/src/app";
-import User from "../../dummy/src/resources/user";
+import userFactory from "@acceptance/factories/user";
+import app from "@dummy/app";
+import User from "@dummy/resources/user";
 
 export default async function createUser(user = null): Promise<User> {
   let attributes = user;

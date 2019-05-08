@@ -1,3 +1,4 @@
 {
-  "jira-plugin.workingProject": ""
+  "jira-plugin.workingProject": "",
+  "tslint.configFile": "${workspaceFolder}/tsconfig.test.json"
 }

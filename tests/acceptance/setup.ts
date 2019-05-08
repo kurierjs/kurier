@@ -1,9 +1,7 @@
 import { Transaction } from "knex";
-import knexMigrate from "knex-migrate";
-import app from "./dummy/src/app";
-import context from "./transaction";
-import knexfile from "./dummy/src/knexfile";
-import { Operation, ResourceAttributes } from "../src";
+import app from "@dummy/app";
+import context from "@acceptance/transaction";
+import { Operation, ResourceAttributes } from "@ebryn/jsonapi-ts/index";
 
 const knex = app.services.knex;
 
