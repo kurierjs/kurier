@@ -15,6 +15,8 @@ import User from "./resources/user";
 import Session from "./resources/session";
 import Password from "./attribute-types/password";
 import JsonApiSerializer from "./serializers/serializer";
+import Addon from "./addon";
+import UserManagementAddon, { UserManagementAddonOptions } from "./addons/user-management";
 
 export {
   // Core objects
@@ -36,7 +38,11 @@ export {
   SessionProcessor,
   User,
   Session,
-  Password
+  Password,
+  // Addons
+  Addon,
+  UserManagementAddon,
+  UserManagementAddonOptions
 };
 
 export * from "./types";
