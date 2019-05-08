@@ -1,5 +1,5 @@
 import * as Knex from "knex";
-import { Application, KnexProcessor, Operation, SessionProcessor, Session, ResourceAttributes } from "./jsonapi-ts";
+import { Application, KnexProcessor, Operation, ResourceAttributes } from "./jsonapi-ts";
 import ArticleProcessor from "./processors/article";
 import Article from "./resources/article";
 import User from "./resources/user";
@@ -9,6 +9,8 @@ import VoteProcessor from "./processors/vote";
 import hash from "./utils/hash";
 import UserProcessor from "./processors/user";
 import knexfile from "./knexfile";
+import Session from "./resources/session";
+import SessionProcessor from "./processors/session";
 
 const knexConfig = knexfile[process.env.NODE_ENV || "development"];
 
