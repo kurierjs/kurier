@@ -32,6 +32,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await migrationTransaction.rollback();
+  await knex.destroy();
 });
 
 beforeEach(async () => {
