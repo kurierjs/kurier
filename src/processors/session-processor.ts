@@ -35,18 +35,25 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
       throw jsonApiErrors.AccessDenied();
     }
 
-    const userId = String(user.id);
+    const userPk = userType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const passwordFields = Object.keys(userType.schema.attributes).filter(
+      attribute => userType.schema.attributes[attribute] === Password
+    );
+    const userId = String(user[userPk]);
 
-    delete user.id;
+    [userPk, ...passwordFields].forEach(field => delete user[field]);
 
-    const secureData = {
-      type: userType.type,
-      id: userId,
-      attributes: {
-        ...user
+    const secureData = this.appInstance.app.serializer.serializeResource(
+      {
+        type: userType.type,
+        id: userId,
+        attributes: {
+          ...user
+        },
+        relationships: {}
       },
-      relationships: {}
-    };
+      userType
+    );
 
     const token = sign(secureData, process.env.SESSION_KEY, {
       subject: secureData.id,
