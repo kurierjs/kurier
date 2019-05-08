@@ -9,9 +9,7 @@ import {
   EagerLoadedData,
   DEFAULT_PRIMARY_KEY,
   IJsonApiSerializer,
-  ResourceSchema
 } from "../types";
-import { camelize, pluralize } from "../utils/string";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
@@ -46,18 +44,18 @@ const getWhereMethod = (value: string, operator: string) => {
   }
 };
 
-const buildSortClause = (sort: string[], schema: ResourceSchema) => {
+const buildSortClause = (sort: string[], resourceClass: typeof Resource, serializer: IJsonApiSerializer) => {
   return sort.map(criteria => {
-    const field = Object.entries(schema.relationships)
+    const direction = criteria.startsWith("-") ? "DESC" : "ASC";
+    const attributeName = criteria.startsWith("-") ? criteria.substr(1) : criteria;
+
+    const isCustomFK = Object.entries(resourceClass.schema.relationships)
       .filter(([, value]) => value.belongsTo)
       .map(([, value]) => value.foreignKeyName)
-      .includes(criteria);
+      .includes(attributeName);
+    const field = isCustomFK ? attributeName : serializer.attributeToColumn(attributeName);
 
-    if (criteria.startsWith("-")) {
-      return { field: this.appInstance.app.serializer.attributeToColumn(criteria.substr(1)), direction: "DESC" };
-    }
-
-    return { field: this.appInstance.app.serializer.attributeToColumn(criteria), direction: "ASC" };
+    return { field, direction };
   });
 };
 
@@ -210,7 +208,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   optionsBuilder(queryBuilder: Knex.QueryBuilder, op: Operation) {
     const { sort, page } = op.params;
     if (sort) {
-      buildSortClause(sort, this.resourceClass.schema).forEach(({ field, direction }) => {
+      buildSortClause(sort, this.resourceClass, this.appInstance.app.serializer).forEach(({ field, direction }) => {
         queryBuilder.orderBy(field, direction);
       });
     }
