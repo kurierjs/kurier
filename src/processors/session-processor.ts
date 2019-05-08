@@ -1,13 +1,22 @@
 import Session from "../resources/session";
 import KnexProcessor from "./knex-processor";
-import { Operation, HasId, DEFAULT_PRIMARY_KEY } from "../types";
+import { Operation, HasId, DEFAULT_PRIMARY_KEY, ResourceAttributes } from "../types";
 import jsonApiErrors from "../json-api-errors";
 import { randomBytes } from "crypto";
 import { sign } from "jsonwebtoken";
 import Password from "../attribute-types/password";
+import pick from "../utils/pick";
 
 export default class SessionProcessor<T extends Session> extends KnexProcessor<T> {
   public static resourceClass = Session;
+
+  protected async login(op: Operation, userDataSource: ResourceAttributes) {
+    console.warn(
+      "WARNING: You're using the default login callback with UserManagementAddon." +
+        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+    );
+    return true;
+  }
 
   public async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)
@@ -29,26 +38,26 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
       throw jsonApiErrors.AccessDenied();
     }
 
-    const isLoggedIn = await this.appInstance.app.services.login(op, user);
+    const isLoggedIn = await this.login(op, user);
 
     if (!isLoggedIn) {
       throw jsonApiErrors.AccessDenied();
     }
 
-    const userPk = userType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const passwordFields = Object.keys(userType.schema.attributes).filter(
-      attribute => userType.schema.attributes[attribute] === Password
+    const userId = user[userType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY];
+    const userAttributes = pick(
+      user,
+      Object.keys(userType.schema.attributes)
+        .filter(attribute => userType.schema.attributes[attribute] !== Password)
+        .map(attribute => this.appInstance.app.serializer.attributeToColumn(attribute))
     );
-    const userId = String(user[userPk]);
-
-    [userPk, ...passwordFields].forEach(field => delete user[field]);
 
     const secureData = this.appInstance.app.serializer.serializeResource(
       {
         type: userType.type,
         id: userId,
         attributes: {
-          ...user
+          ...userAttributes
         },
         relationships: {}
       },
@@ -56,7 +65,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     );
 
     const token = sign(secureData, process.env.SESSION_KEY, {
-      subject: secureData.id,
+      subject: String(userId),
       expiresIn: "1d"
     });
 
