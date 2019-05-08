@@ -128,12 +128,18 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   async update(op: Operation): Promise<HasId> {
     const { id } = op.ref;
-    const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const schema = this.resourceClass.schema;
+    const primaryKeyName = schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
     const dataToUpdate = Object.keys(op.data.attributes)
-      .map(attribute => ({
-        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
-      }))
+      .map(attribute => {
+        const attributeName = this.appInstance.app.serializer.attributeToColumn(attribute);
+        const value = schema.attributes[attribute] === Object || schema.attributes[attribute] === Array
+          ? JSON.stringify(op.data.attributes[attribute])
+          : op.data.attributes[attribute];
+
+        return { [attributeName]: value };
+      })
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
     const updated = await this.getQuery()
