@@ -8,7 +8,8 @@ import {
   ResourceSchemaRelationship,
   EagerLoadedData,
   DEFAULT_PRIMARY_KEY,
-  IJsonApiSerializer
+  IJsonApiSerializer,
+  ResourceSchema
 } from "../types";
 import { camelize, pluralize } from "../utils/string";
 import pick from "../utils/pick";
@@ -45,13 +46,18 @@ const getWhereMethod = (value: string, operator: string) => {
   }
 };
 
-const buildSortClause = (sort: string[]) => {
+const buildSortClause = (sort: string[], schema: ResourceSchema) => {
   return sort.map(criteria => {
+    const field = Object.entries(schema.relationships)
+      .filter(([, value]) => value.belongsTo)
+      .map(([, value]) => value.foreignKeyName)
+      .includes(criteria);
+
     if (criteria.startsWith("-")) {
-      return { field: camelize(criteria.substr(1)), direction: "DESC" };
+      return { field: this.appInstance.app.serializer.attributeToColumn(criteria.substr(1)), direction: "DESC" };
     }
 
-    return { field: camelize(criteria), direction: "ASC" };
+    return { field: this.appInstance.app.serializer.attributeToColumn(criteria), direction: "ASC" };
   });
 };
 
@@ -204,7 +210,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   optionsBuilder(queryBuilder: Knex.QueryBuilder, op: Operation) {
     const { sort, page } = op.params;
     if (sort) {
-      buildSortClause(sort).forEach(({ field, direction }) => {
+      buildSortClause(sort, this.resourceClass.schema).forEach(({ field, direction }) => {
         queryBuilder.orderBy(field, direction);
       });
     }
