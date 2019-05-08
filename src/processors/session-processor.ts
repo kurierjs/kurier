@@ -54,7 +54,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     const session = {
       token,
       [this.appInstance.app.serializer.attributeToColumn(
-        `${this.resourceClass.type}${this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY}`
+        `${this.resourceClass.type}_${this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY}`
       )]: userId,
       id: randomBytes(16).toString("hex")
     };
