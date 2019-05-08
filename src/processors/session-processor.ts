@@ -19,7 +19,9 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
       throw jsonApiErrors.InvalidData();
     }
 
-    const user = await this.knex(this.appInstance.app.serializer.resourceTypeToTableName(this.resourceClass.type))
+    const userType = this.resourceClass.schema.relationships.user.type();
+
+    const user = await this.knex(this.appInstance.app.serializer.resourceTypeToTableName(userType.type))
       .where(fields)
       .first();
 
@@ -38,7 +40,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     delete user.id;
 
     const secureData = {
-      type: this.resourceClass.type,
+      type: userType.type,
       id: userId,
       attributes: {
         ...user
@@ -54,7 +56,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     const session = {
       token,
       [this.appInstance.app.serializer.attributeToColumn(
-        `${this.resourceClass.type}_${this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY}`
+        `${userType.type}_${userType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY}`
       )]: userId,
       id: randomBytes(16).toString("hex")
     };
