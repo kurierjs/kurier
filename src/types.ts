@@ -2,6 +2,7 @@ import * as Knex from "knex";
 
 import Resource from "./resource";
 import Password from "./attribute-types/password";
+import Addon from "./addon";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -175,3 +176,9 @@ export interface IJsonApiSerializer {
   serializeResource(resource: Resource, resourceType: typeof Resource): Resource;
   serializeRelationship(relationships: Resource | Resource[], primaryKeyName?: string): ResourceRelationshipData[];
 }
+
+export interface IAddon {
+  install(): Promise<void>;
+}
+export type AddonOptions = { [key: string]: any };
+export type ApplicationAddons = { addon: typeof Addon; options: AddonOptions }[];

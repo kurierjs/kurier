@@ -10,7 +10,9 @@ import {
   ResourceRelationshipData,
   DEFAULT_PRIMARY_KEY,
   ApplicationServices,
-  IJsonApiSerializer
+  IJsonApiSerializer,
+  ApplicationAddons,
+  AddonOptions
 } from "./types";
 import pick from "./utils/pick";
 import unpick from "./utils/unpick";
@@ -18,6 +20,7 @@ import unpick from "./utils/unpick";
 import ApplicationInstance from "./application-instance";
 import JsonApiSerializer from "./serializers/serializer";
 import Password from "./attribute-types/password";
+import Addon from "./addon";
 
 export default class Application {
   namespace: string;
@@ -26,6 +29,7 @@ export default class Application {
   defaultProcessor: typeof OperationProcessor;
   serializer: IJsonApiSerializer;
   services: ApplicationServices;
+  addons: ApplicationAddons;
 
   constructor(settings: {
     namespace?: string;
@@ -40,8 +44,18 @@ export default class Application {
     this.processors = settings.processors || [];
     this.services = settings.services || ({} as ApplicationServices);
     this.defaultProcessor = settings.defaultProcessor || OperationProcessor;
-
+    this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
+  }
+
+  use(addon: typeof Addon, options: AddonOptions) {
+    if (this.addons.find(installedAddon => installedAddon.addon === addon)) {
+      return;
+    }
+
+    new addon(this, options).install().then(() => {
+      this.addons.push({ addon, options });
+    });
   }
 
   async executeOperations(
