@@ -12,17 +12,13 @@ export default class Article extends Resource {
     relationships: {
       author: {
         type: () => User,
-        belongsTo: true
+        belongsTo: true,
+        foreignKeyName: "author"
       },
       votes: {
         type: () => Vote,
         hasMany: true,
         foreignKeyName: "article_id"
-      },
-      comments: {
-        type: () => Comment,
-        hasMany: true,
-        foreignKeyName: "author_id"
       }
     }
   };
