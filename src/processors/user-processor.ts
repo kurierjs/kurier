@@ -1,5 +1,5 @@
 import Authorize from "../decorators/authorize";
-import { Operation, HasId, ResourceAttributes } from "../types";
+import { Operation, HasId, ResourceAttributes, DEFAULT_PRIMARY_KEY } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
 import Password from "../attribute-types/password";
@@ -11,18 +11,8 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
     return super.get({ ...op, params: {} });
   }
 
-  protected async encryptPassword(op: Operation): Promise<ResourceAttributes> {
-    console.warn(
-      "WARNING: You're using the default encryptPassword callback with UserManagementAddon." +
-        "Your password is NOT being encrypted. Implement this callback in your addon configuration."
-    );
-
-    const passwordField = Object.keys(op.data.attributes).find(
-      attribute => this.resourceClass.schema.attributes[attribute] === Password
-    );
-
-    return { password: op.data.attributes[passwordField] };
-  }
+  protected async generateId(): Promise<any> {}
+  protected async encryptPassword(op: Operation): Promise<any> {}
 
   async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)
@@ -30,7 +20,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
       .map(attribute => ({ [attribute]: op.data.attributes[attribute] }))
       .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
 
-    const id = Date.now();
+    const id = await this.generateId();
 
     const encryptedPassword = await this.encryptPassword(op);
     const tableName = this.appInstance.app.serializer.resourceTypeToTableName(this.resourceClass.type);
@@ -43,6 +33,12 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
 
     const user = await this.knex(tableName)
       .where({ id })
+      .select(
+        this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY,
+        ...Object.keys(fields)
+          .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
+          .map(attribute => this.appInstance.app.serializer.attributeToColumn(attribute))
+      )
       .first();
 
     return user;
