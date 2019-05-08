@@ -1,6 +1,6 @@
 import Session from "../resources/session";
 import KnexProcessor from "./knex-processor";
-import { Operation, HasId } from "../types";
+import { Operation, HasId, DEFAULT_PRIMARY_KEY } from "../types";
 import jsonApiErrors from "../json-api-errors";
 import { randomBytes } from "crypto";
 import { sign } from "jsonwebtoken";
@@ -19,7 +19,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
       throw jsonApiErrors.InvalidData();
     }
 
-    const user = await this.knex("users")
+    const user = await this.knex(this.appInstance.app.serializer.resourceTypeToTableName(this.resourceClass.type))
       .where(fields)
       .first();
 
@@ -38,7 +38,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     delete user.id;
 
     const secureData = {
-      type: "user",
+      type: this.resourceClass.type,
       id: userId,
       attributes: {
         ...user
@@ -53,7 +53,9 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
 
     const session = {
       token,
-      [this.appInstance.app.serializer.attributeToColumn("userId")]: userId,
+      [this.appInstance.app.serializer.attributeToColumn(
+        `${this.resourceClass.type}${this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY}`
+      )]: userId,
       id: randomBytes(16).toString("hex")
     };
 
