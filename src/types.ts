@@ -133,12 +133,12 @@ export type PasswordConstructor = typeof Password;
 
 export type ResourceSchemaAttributes = {
   [key: string]:
-    | StringConstructor
-    | NumberConstructor
-    | BooleanConstructor
-    | ArrayConstructor
-    | ObjectConstructor
-    | PasswordConstructor;
+  | StringConstructor
+  | NumberConstructor
+  | BooleanConstructor
+  | ArrayConstructor
+  | ObjectConstructor
+  | PasswordConstructor;
 };
 
 export type ResourceSchemaRelationships = {
@@ -172,6 +172,7 @@ export interface IJsonApiSerializer {
   relationshipToColumn(relationshipName: string, primaryKeyName: string): string;
   columnToRelationship(columnName: string, primaryKeyName: string): string;
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
+  deserializeResource(op: Operation, resourceClass: typeof Resource): Operation;
   serializeResource(resource: Resource, resourceType: typeof Resource): Resource;
   serializeRelationship(relationships: Resource | Resource[], primaryKeyName?: string): ResourceRelationshipData[];
 }
