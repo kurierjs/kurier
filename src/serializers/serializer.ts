@@ -1,5 +1,5 @@
 import { camelize, underscore, classify, pluralize } from "../utils/string";
-import { IJsonApiSerializer, DEFAULT_PRIMARY_KEY, ResourceRelationshipData } from "../types";
+import { IJsonApiSerializer, DEFAULT_PRIMARY_KEY, ResourceRelationshipData, Operation } from "../types";
 import Resource from "../resource";
 import unpick from "../utils/unpick";
 import pick from "../utils/pick";
@@ -27,6 +27,27 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
 
   foreignResourceToForeignTableName(foreignResourceType: string, prefix: string = "belonging"): string {
     return underscore(`${prefix} `) + this.resourceTypeToTableName(foreignResourceType);
+  }
+
+  deserializeResource(op: Operation, resourceType: typeof Resource): Operation {
+    if (!op.data || !op.data.attributes || !op.data.relationships) {
+      return op;
+    }
+
+    const primaryKey = resourceType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const schemaRelationships = resourceType.schema.relationships;
+    op.data.attributes = Object.keys(schemaRelationships)
+      .filter(relName => schemaRelationships[relName].belongsTo && op.data.relationships.hasOwnProperty(relName))
+      .reduce((relationAttributes, relName) => {
+        const key = schemaRelationships[relName].foreignKeyName || this.relationshipToColumn(relName, primaryKey);
+        const value = (<ResourceRelationshipData>op.data.relationships[relName].data).id;
+
+        return {
+          ...relationAttributes,
+          [key]: value
+        };
+      }, op.data.attributes);
+    return op;
   }
 
   serializeResource(data: Resource, resourceType: typeof Resource): Resource {

@@ -89,7 +89,9 @@ export default class Application {
   }
 
   async executeOperation(op: Operation, processor: OperationProcessor<Resource>): Promise<OperationResponse> {
-    const result = await processor.execute(await this.deserializeResource(op));
+    const resourceClass = await this.resourceFor(op.ref.type);
+    const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
+    const result = await processor.execute(deserializedOperation);
     return this.buildOperationResponse(result);
   }
 
@@ -106,34 +108,7 @@ export default class Application {
       })
     );
   }
-  // TODO: test create/update resources
-  async deserializeResource(op: Operation) {
-    if (!op.data || !op.data.attributes) {
-      return op;
-    }
 
-    const resourceClass = await this.resourceFor(op.ref.type);
-    const primaryKey = resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const schemaRelationships = resourceClass.schema.relationships;
-    op.data.attributes = Object.keys(schemaRelationships)
-      .filter(
-        relName =>
-          schemaRelationships[relName].belongsTo &&
-          op.data.relationships &&
-          op.data.relationships.hasOwnProperty(relName)
-      )
-      .reduce((relationAttributes, relName) => {
-        const key =
-          schemaRelationships[relName].foreignKeyName || this.serializer.relationshipToColumn(relName, primaryKey);
-        const value = (<ResourceRelationshipData>op.data.relationships[relName].data).id;
-
-        return {
-          ...relationAttributes,
-          [key]: value
-        };
-      }, op.data.attributes);
-    return op;
-  }
 
   async processorFor(
     resourceType: string,
@@ -175,8 +150,11 @@ export default class Application {
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
-    if (!data || (Array.isArray(data) && !data.length)) {
+    if (!data) {
       return null;
+    }
+    if (Array.isArray(data) && !data.length) {
+      return [];
     }
 
     const dataArrayed = Array.isArray(data) ? data : [data];

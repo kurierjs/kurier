@@ -110,6 +110,10 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
       .select(getColumns(this.resourceClass, this.appInstance.app.serializer, op.params.fields));
 
+    if (!records.length && id) {
+      throw JsonApiErrors.RecordNotExists();
+    }
+
     return records;
   }
 
