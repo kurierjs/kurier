@@ -1,4 +1,4 @@
-import JsonApiErrors from "../json-api-errors";
+import JsonApiErrors from "../errors/json-api-errors";
 import { AttributeValueMatch } from "../types";
 
 import decorateWith from "./decorator";

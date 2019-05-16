@@ -3,7 +3,7 @@ import ApplicationInstance from "./application-instance";
 import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
 import IfUser from "./decorators/if-user";
-import JsonApiErrors from "./json-api-errors";
+import JsonApiErrors from "./errors/json-api-errors";
 import jsonApiKoa from "./middlewares/json-api-koa";
 import jsonApiWebSocket from "./middlewares/json-api-websocket";
 import KnexProcessor from "./processors/knex-processor";
