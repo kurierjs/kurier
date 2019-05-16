@@ -19,11 +19,15 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [The `add` operation](#the-add-operation)
   - [The `update` operation](#the-update-operation)
   - [The `remove` operation](#the-remove-operation)
+  - [Running multiple operations](#running-multiple-operations)
 - [Transport layers](#transport-layers)
   - [jsonApiKoa](#jsonapikoa)
-    - [Usage](#usage)
+    - [Using jsonApiKoa](#using-jsonapikoa)
     - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
     - [Request/response mapping](#requestresponse-mapping)
+  - [jsonApiWebSocket](#jsonapiwebsocket)
+    - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
+    - [Executing operations over sockets](#executing-operations-over-sockets)
 - [Processors](#processors)
   - [What is a processor?](#what-is-a-processor)
   - [The `OperationProcessor` class](#the-operationprocessor-class)
@@ -90,11 +94,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
    ```ts
-   import {
-     Application,
-     jsonApiKoa as jsonApi,
-     KnexProcessor
-   } from "@ebryn/jsonapi-ts";
+   import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "@ebryn/jsonapi-ts";
    import Koa from "koa";
 
    import Author from "./resources/author";
@@ -418,6 +418,50 @@ A `delete` operation represents the intent to destroy an existing resources in t
 
 The response, if successful, will be `typeof void`.
 
+### Running multiple operations
+
+JSONAPI-TS supports a _bulk_ mode that allows the execution of a list of operations in a single request. This mode is exposed differently according to the transport layer (see the next section for more details on this).
+
+A bulk request payload is essentially a wrapper around a list of operations:
+
+```json
+{
+  "meta": {
+    // ...
+  },
+  "operations": [
+    // Add a book.
+    {
+      "op": "add",
+      "ref": {
+        "type": "book"
+      },
+      "data": {
+        // ...
+      }
+    },
+    // Adding an author...
+    {
+      "op": "add",
+      "ref": {
+        "type": "author"
+      },
+      "data": {
+        // ...
+      }
+    },
+    // Getting all authors.
+    {
+      "op": "get",
+      "ref": {
+        "type": "author"
+      }
+    }
+    // ...and maybe even more stuff.
+  ]
+}
+```
+
 ## Transport layers
 
 JSONAPI-TS is built following a decoupled, modular approach, providing somewhat opinionated methodologies regarding how to make the API usable to consumers.
@@ -426,7 +470,7 @@ JSONAPI-TS is built following a decoupled, modular approach, providing somewhat 
 
 Currently we support integrating with [Koa](https://koajs.com) by providing a `jsonApiKoa` middleware, that can be imported and piped through your Koa server, along with other middlewares.
 
-#### Usage
+#### Using jsonApiKoa
 
 As seen in the [Getting started](#getting-started) section, once your [JSONAPI application](#The-JSONAPI-application) is instantiated, you can simply do:
 
@@ -546,6 +590,42 @@ DELETE /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 
 The middleware, if successful, will respond with a `204 No Content` HTTP status code.
 
+### jsonApiWebSocket
+
+The framework supports JSONAPI operations via WebSockets, using the [`ws`](http://npmjs.org/package/ws) package.
+
+> We recommend installing the `@types/ws` package as well to have the proper typings available in your IDE.
+
+#### Using jsonApiWebSocket
+
+The wrapper function `jsonApiWebSocket` takes a `WebSocket.Server` instance, bound to an HTTP server (so you can combine it with the `jsonApiKoa` middleware), and manipulates the `Application` object to wire it up with the `connection` and `message` events provided by `ws`.
+
+So, after instantiating your application, you can enable WebSockets support with just a couple of extra lines of code:
+
+```ts
+import { Server as WebSocketServer } from "ws";
+import { jsonApiWebSocket } from "@ebryn/jsonapi-ts";
+
+// Assume an app has been configured with its resources
+// and processors, etc.
+// .
+// .
+// .
+// Also, assume `httpServer` is a Koa server,
+// `app` is a JSONAPI application instance.
+httpServer.use(jsonApiKoa(app));
+
+// Create a WebSockets server.
+const ws = new WebSocketServer({ server: httpServer });
+
+// Let JSONAPI-TS connect your API.
+jsonApiWebSocket(ws, app);
+```
+
+#### Executing operations over sockets
+
+Unlike its HTTP counterpart, `jsonApiWebSocket` works with [bulk requests](#running-multiple-operations). Since there's no need for a RESTful protocol, you send and receive raw operation payloads.
+
 ## Processors
 
 ### What is a processor?
@@ -607,12 +687,7 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
 What happens if in the previous example something goes wrong? For example, a record in our super filesystem-based storage does not contain valid JSON? We can create an error response using try/catch and `JsonApiErrors`:
 
 ```ts
-import {
-  OperationProcessor,
-  Operation,
-  JsonApiErrors,
-  Resource
-} from "@ebryn/jsonapi-ts";
+import { OperationProcessor, Operation, JsonApiErrors, Resource } from "@ebryn/jsonapi-ts";
 import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
@@ -700,15 +775,17 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
       .replace(/Z/g, "")
       .split("T");
 
-    return [{
-      type: "moment",
-      id,
-      attributes: {
-        date,
-        time
-      },
-      relationships: {}
-    }];
+    return [
+      {
+        type: "moment",
+        id,
+        attributes: {
+          date,
+          time
+        },
+        relationships: {}
+      }
+    ];
   }
 }
 ```
@@ -780,7 +857,7 @@ export default class User extends Resource {
       name: String
     },
     relationships: {}
-  }
+  };
 }
 ```
 
@@ -952,11 +1029,7 @@ The last piece of the framework is the `Application` object. This component wrap
 It's what orchestrates, routes and executes operations. In code, we're talking about something like this:
 
 ```ts
-import {
-  Application,
-  jsonApiKoa as jsonApi,
-  KnexProcessor
-} from "@ebryn/jsonapi-ts";
+import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "@ebryn/jsonapi-ts";
 import Koa from "koa";
 
 import Author from "./resources/author";
