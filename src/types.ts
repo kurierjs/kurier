@@ -104,7 +104,7 @@ export type Operation = {
     lid?: string;
     relationship?: string;
   };
-  params: JsonApiParams;
+  params?: JsonApiParams;
   links?: Links;
   meta?: Meta;
 };
