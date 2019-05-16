@@ -4,12 +4,13 @@ import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
 
 import Application from "../application";
-import JsonApiErrors from "../json-api-errors";
-import { JsonApiDocument, JsonApiError, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
+import JsonApiErrors from "../errors/json-api-errors";
+import { JsonApiDocument, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 import ApplicationInstance from "../application-instance";
 import User from "../resources/user";
+import JsonApiError from "../errors/error";
 
 const STATUS_MAPPING = {
   GET: 200,

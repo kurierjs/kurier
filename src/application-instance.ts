@@ -5,7 +5,7 @@ import Application from "./application";
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
 import { Operation } from "./types";
-import jsonApiErrors from "./json-api-errors";
+import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
 
 export default class ApplicationInstance {

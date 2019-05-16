@@ -57,11 +57,11 @@ export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> 
 };
 
 export type JsonApiErrorsDocument = {
-  errors: JsonApiError[];
+  errors: IJsonApiError[];
   meta?: Meta;
 };
 
-export type JsonApiError = {
+export interface IJsonApiError {
   id?: string;
   status: HttpStatusCode;
   code: string;
@@ -74,7 +74,7 @@ export type JsonApiError = {
   links?: {
     about?: string;
   };
-};
+}
 
 export type JsonApiParams = {
   include?: string[];

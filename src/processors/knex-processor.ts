@@ -1,5 +1,5 @@
 import * as Knex from "knex";
-import JsonApiErrors from "../json-api-errors";
+import JsonApiErrors from "../errors/json-api-errors";
 import Resource from "../resource";
 import {
   HasId,

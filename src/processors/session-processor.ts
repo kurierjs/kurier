@@ -1,7 +1,7 @@
 import Session from "../resources/session";
 import KnexProcessor from "./knex-processor";
 import { Operation, HasId, DEFAULT_PRIMARY_KEY, ResourceAttributes } from "../types";
-import jsonApiErrors from "../json-api-errors";
+import jsonApiErrors from "../errors/json-api-errors";
 import { randomBytes } from "crypto";
 import { sign } from "jsonwebtoken";
 import Password from "../attribute-types/password";
