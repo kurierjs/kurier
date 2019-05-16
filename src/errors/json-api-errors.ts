@@ -7,5 +7,6 @@ export default {
   Unauthorized: () => new JsonApiError(HttpStatusCode.Unauthorized, "unauthorized"),
   RecordNotExists: () => new JsonApiError(HttpStatusCode.NotFound, "not_found"),
   InvalidToken: () => new JsonApiError(HttpStatusCode.UnprocessableEntity, "invalid_token"),
-  InvalidData: () => new JsonApiError(HttpStatusCode.UnprocessableEntity, "invalid_data")
+  InvalidData: () => new JsonApiError(HttpStatusCode.UnprocessableEntity, "invalid_data"),
+  BadRequest: () => new JsonApiError(HttpStatusCode.BadRequest, "bad_request")
 };
