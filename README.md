@@ -424,7 +424,7 @@ JSONAPI-TS supports a _bulk_ mode that allows the execution of a list of operati
 
 A bulk request payload is essentially a wrapper around a list of operations:
 
-```json
+```js
 {
   "meta": {
     // ...
