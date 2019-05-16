@@ -7,14 +7,12 @@ import Resource from "./resource";
 import {
   Operation,
   OperationResponse,
-  ResourceRelationshipData,
   DEFAULT_PRIMARY_KEY,
   ApplicationServices,
   IJsonApiSerializer,
   ApplicationAddons,
   AddonOptions
 } from "./types";
-import pick from "./utils/pick";
 import unpick from "./utils/unpick";
 
 import ApplicationInstance from "./application-instance";
@@ -153,13 +151,15 @@ export default class Application {
     if (!data) {
       return null;
     }
-    if (Array.isArray(data) && !data.length) {
-      return [];
+    if (Array.isArray(data)) {
+      if (!data.length) {
+        return [];
+      }
+      const resource = await this.resourceFor(data[0].type);
+      return data.map(record => this.serializer.serializeResource(record, resource));
     }
-
-    const dataArrayed = Array.isArray(data) ? data : [data];
-    const resource = await this.resourceFor(dataArrayed[0].type);
-    return dataArrayed.map(record => this.serializer.serializeResource(record, resource));
+    const resource = await this.resourceFor(data.type);
+    return this.serializer.serializeResource(data, resource);
   }
 
   // TODO: remove type any for data.relationships[relationshipName]

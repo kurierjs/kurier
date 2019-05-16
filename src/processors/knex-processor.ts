@@ -99,7 +99,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     });
   }
 
-  async get(op: Operation): Promise<HasId[]> {
+  async get(op: Operation): Promise<HasId[] | HasId> {
     const { params, ref } = op;
     const { id } = ref;
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
@@ -114,6 +114,9 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       throw JsonApiErrors.RecordNotExists();
     }
 
+    if (id) {
+      return records[0];
+    }
     return records;
   }
 

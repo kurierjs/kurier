@@ -44,6 +44,6 @@ export default class ApplicationInstance {
       throw jsonApiErrors.InvalidToken();
     }
 
-    return user.data[0];
+    return <Resource>user.data;
   }
 }
