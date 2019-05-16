@@ -19,7 +19,6 @@ export type UserManagementAddonOptions = AddonOptions & {
 
 const defaults: UserManagementAddonOptions = {
   userResource: User,
-  userGenerateIdCallback: async () => Date.now().toString(),
   userLoginCallback: async () => {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
@@ -59,7 +58,7 @@ export default class UserManagementAddon extends Addon {
         public static resourceClass = options.userResource;
 
         protected async generateId() {
-          return options.userGenerateIdCallback();
+          return (options.userGenerateIdCallback || (async () => undefined))();
         }
 
         protected async encryptPassword(op: Operation) {

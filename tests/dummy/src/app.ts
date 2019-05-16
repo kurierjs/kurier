@@ -15,13 +15,14 @@ const knexConfig = knexfile[process.env.NODE_ENV || "development"];
 
 const app = new Application({
   namespace: "api",
-  types: [User, Article, Comment, Vote],
+  types: [Article, Comment, Vote],
   processors: [ArticleProcessor, VoteProcessor],
   defaultProcessor: KnexProcessor
 });
 
 app.use(UserManagementAddon, {
   userResource: User,
+  // userGenerateIdCallback: async () => (-Date.now()).toString(),
   userLoginCallback: login,
   userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
