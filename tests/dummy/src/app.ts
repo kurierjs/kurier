@@ -10,6 +10,7 @@ import knexfile from "./knexfile";
 
 import login from "./callbacks/login";
 import encryptPassword from "./callbacks/encrypt-password";
+import MyVeryOwnUserProcessor from "./processors/user";
 
 const knexConfig = knexfile[process.env.NODE_ENV || "development"];
 
@@ -22,9 +23,10 @@ const app = new Application({
 
 app.use(UserManagementAddon, {
   userResource: User,
+  userProcessor: MyVeryOwnUserProcessor,
+  userLoginCallback: login
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
-  userLoginCallback: login,
-  userEncryptPasswordCallback: encryptPassword
+  // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
 
 app.services.knex = Knex(knexConfig);

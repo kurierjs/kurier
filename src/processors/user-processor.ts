@@ -12,7 +12,9 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   }
 
   protected async generateId(): Promise<any> {}
-  protected async encryptPassword(op: Operation): Promise<any> {}
+  protected async encryptPassword(op: Operation): Promise<any> {
+    throw new Error("You must implement a password encryption mechanism.");
+  }
 
   async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)

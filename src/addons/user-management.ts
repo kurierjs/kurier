@@ -10,6 +10,7 @@ import Session from "../resources/session";
 
 export type UserManagementAddonOptions = AddonOptions & {
   userResource: typeof User;
+  userProcessor?: typeof JsonApiUserProcessor;
   userEncryptPasswordCallback?: (op: Operation) => Promise<ResourceAttributes>;
   userLoginCallback?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
   userGenerateIdCallback?: () => Promise<string>;
@@ -19,6 +20,7 @@ export type UserManagementAddonOptions = AddonOptions & {
 
 const defaults: UserManagementAddonOptions = {
   userResource: User,
+  userProcessor: JsonApiUserProcessor,
   userLoginCallback: async () => {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
@@ -53,16 +55,29 @@ export default class UserManagementAddon extends Addon {
   }
 
   private createUserProcessor() {
+    const { userProcessor, userEncryptPasswordCallback, userGenerateIdCallback } = this.options;
+
+    let generateIdCallback = async () => undefined;
+    let encryptPasswordCallback = async (op: Operation) => ({});
+
+    if (userProcessor === JsonApiUserProcessor) {
+      generateIdCallback = userGenerateIdCallback || generateIdCallback;
+      encryptPasswordCallback = userEncryptPasswordCallback;
+    } else {
+      generateIdCallback = userProcessor.prototype["generateId"];
+      encryptPasswordCallback = userProcessor.prototype["encryptPassword"];
+    }
+
     return (options =>
-      class UserProcessor<T extends User> extends JsonApiUserProcessor<T> {
+      class UserProcessor<T extends User> extends options.userProcessor<T> {
         public static resourceClass = options.userResource;
 
         protected async generateId() {
-          return (options.userGenerateIdCallback || (async () => undefined))();
+          return generateIdCallback.bind(this)();
         }
 
         protected async encryptPassword(op: Operation) {
-          return options.userEncryptPasswordCallback(op);
+          return encryptPasswordCallback.bind(this)(op);
         }
       })(this.options);
   }
