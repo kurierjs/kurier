@@ -11,8 +11,8 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
     return super.get({ ...op, params: {} });
   }
 
-  protected async generateId(): Promise<any> { }
-  protected async encryptPassword(op: Operation): Promise<any> { }
+  protected async generateId(): Promise<any> {}
+  protected async encryptPassword(op: Operation): Promise<any> {}
 
   async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)
@@ -23,23 +23,14 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
     const id = await this.generateId();
 
     const encryptedPassword = await this.encryptPassword(op);
-    const tableName = this.appInstance.app.serializer.resourceTypeToTableName(this.resourceClass.type);
 
-    await this.knex(tableName).insert({
+    op.data.attributes = {
       ...fields,
-      ...encryptedPassword,
-      id
-    });
+      ...encryptedPassword
+    };
+    op.data.id = id;
 
-    const user = await this.knex(tableName)
-      .where({ id })
-      .select(
-        this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY,
-        ...Object.keys(fields).map(attribute => this.appInstance.app.serializer.attributeToColumn(attribute))
-      )
-      .first();
-
-    return user;
+    return super.add(op);
   }
 
   @Authorize()
