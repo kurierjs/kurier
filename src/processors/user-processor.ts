@@ -8,7 +8,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   public static resourceClass = User;
 
   async identify(op: Operation): Promise<HasId[] | HasId> {
-    return await super.get({ ...op, params: {} })
+    return super.get({ ...op, params: {} });
   }
 
   protected async generateId(): Promise<any> { }
