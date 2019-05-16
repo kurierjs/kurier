@@ -134,12 +134,12 @@ export type PasswordConstructor = typeof Password;
 
 export type ResourceSchemaAttributes = {
   [key: string]:
-  | StringConstructor
-  | NumberConstructor
-  | BooleanConstructor
-  | ArrayConstructor
-  | ObjectConstructor
-  | PasswordConstructor;
+    | StringConstructor
+    | NumberConstructor
+    | BooleanConstructor
+    | ArrayConstructor
+    | ObjectConstructor
+    | PasswordConstructor;
 };
 
 export type ResourceSchemaRelationships = {
@@ -162,8 +162,6 @@ export type EagerLoadedData = { [key: string]: KnexRecord[] | undefined };
 
 export type ApplicationServices = {
   knex?: Knex;
-  login?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
-  password?: (op: Operation) => Promise<ResourceAttributes>;
 } & { [key: string]: any };
 
 export interface IJsonApiSerializer {
