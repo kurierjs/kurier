@@ -55,16 +55,29 @@ export default class UserManagementAddon extends Addon {
   }
 
   private createUserProcessor() {
+    const { userProcessor, userEncryptPasswordCallback, userGenerateIdCallback } = this.options;
+
+    let generateIdCallback = async () => undefined;
+    let encryptPasswordCallback = async (op: Operation) => ({});
+
+    if (userProcessor === JsonApiUserProcessor) {
+      generateIdCallback = userGenerateIdCallback || generateIdCallback;
+      encryptPasswordCallback = userEncryptPasswordCallback;
+    } else {
+      generateIdCallback = userProcessor.prototype["generateId"];
+      encryptPasswordCallback = userProcessor.prototype["encryptPassword"];
+    }
+
     return (options =>
       class UserProcessor<T extends User> extends options.userProcessor<T> {
         public static resourceClass = options.userResource;
 
         protected async generateId() {
-          return (options.userGenerateIdCallback || (async () => undefined))();
+          return generateIdCallback.bind(this)();
         }
 
         protected async encryptPassword(op: Operation) {
-          return options.userEncryptPasswordCallback(op);
+          return encryptPasswordCallback.bind(this)(op);
         }
       })(this.options);
   }
