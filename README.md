@@ -48,6 +48,9 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
   - [Referencing types and processors](#referencing-types-and-processors)
   - [Using a default processor](#using-a-default-processor)
+- [Extending the framework](#extending-the-framework)
+  - [What is an addon?](#what-is-an-addon)
+  - [Using an addon](#using-an-addon)
 
 ## Features
 
@@ -1081,6 +1084,46 @@ const app = new Application({
   types: [Author, Book, BookCount],
   defaultProcessor: new KnexProcessor(/* db settings */)
 });
+```
+
+## Extending the framework
+
+Beyond the fact that JSONAPI-TS allows you to extend any of its primitives, the framework provides a simple yet effective way of injecting custom behavior with an _addon system_.
+
+### What is an addon?
+
+An _addon_ is a piece of code that is aware of a JSONAPI Application object that can be tweaked externally, without subclassing it directly.
+
+You can build an addon by deriving a new class extending from the `Addon` primitive type:
+
+```ts
+export default class MyAddon extends Addon {
+  constructor(public readonly app: Application, public readonly options?: MyAddonOptions) {
+    super(app, options);
+  }
+
+  async install() {}
+}
+```
+
+You're required to implement an async method called `install()`, which will take care of any manipulation you intend to apply through the addon.
+
+You can inject resources and processors or alter any element of the public API.
+
+> You can take a look at the UserManangementAddon provided with the framework as a blueprint for building your own addons.
+
+### Using an addon
+
+Once you've finished working on your addon, you can use with your JSONAPI Application following a similar pattern to those of HTTP middlewares:
+
+```ts
+import { MyAddon, MyAddonOptions } from "./my-addon";
+
+// Assume `app` is a JSONAPI {Application} object.
+app.use(MyAddon, {
+  // Addon options.
+  foo: 3
+} as MyAddonOptions);
 ```
 
 ## License
