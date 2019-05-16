@@ -1,4 +1,5 @@
 import app from "../../dummy/src/app";
+import { Resource } from "../../../src";
 
 export default async function createSessionToken(email: string, password: string): Promise<string> {
   const attributes = { email, password };
@@ -18,5 +19,5 @@ export default async function createSessionToken(email: string, password: string
     }
   ]);
 
-  return `Bearer ${result.data[0].attributes.token}`;
+  return `Bearer ${(<Resource>result.data).attributes.token}`;
 }

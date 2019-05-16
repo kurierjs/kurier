@@ -1,7 +1,7 @@
-import context from "../../transaction";
 import userFactory from "../factories/user";
 import app from "../../dummy/src/app";
 import User from "../../dummy/src/resources/user";
+import { Resource } from "../../../src";
 
 export default async function createUser(user = null): Promise<User> {
   let attributes = user;
@@ -25,5 +25,5 @@ export default async function createUser(user = null): Promise<User> {
     }
   ]);
 
-  return result.data[0];
+  return <Resource>result.data;
 }

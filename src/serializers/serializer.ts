@@ -3,6 +3,7 @@ import { IJsonApiSerializer, DEFAULT_PRIMARY_KEY, ResourceRelationshipData, Oper
 import Resource from "../resource";
 import unpick from "../utils/unpick";
 import pick from "../utils/pick";
+import Password from "../attribute-types/password";
 
 export default class JsonApiSerializer implements IJsonApiSerializer {
   resourceTypeToTableName(resourceType: string): string {
@@ -85,6 +86,11 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       relationshipsFound
         .map(relationship => relationship.key)
         .filter(relationshipKey => !Object.keys(resourceSchema.attributes).includes(relationshipKey))
+        .concat(
+          Object.keys(resourceSchema.attributes).filter(
+            attributeKey => resourceSchema.attributes[attributeKey] === Password
+          )
+        )
     );
 
     data.attributes = Object.keys(data.attributes)

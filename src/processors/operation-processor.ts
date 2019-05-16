@@ -120,7 +120,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return this.appInstance.processorFor(resourceType);
   }
 
-  async get(op: Operation): Promise<HasId[]> {
+  async get(op: Operation): Promise<HasId[] | HasId> {
     return [];
   }
 

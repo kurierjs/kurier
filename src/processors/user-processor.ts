@@ -1,5 +1,5 @@
 import Authorize from "../decorators/authorize";
-import { Operation, HasId, ResourceAttributes, DEFAULT_PRIMARY_KEY } from "../types";
+import { Operation, HasId, DEFAULT_PRIMARY_KEY } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
 import Password from "../attribute-types/password";
@@ -7,12 +7,12 @@ import Password from "../attribute-types/password";
 export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   public static resourceClass = User;
 
-  async identify(op: Operation): Promise<HasId[]> {
+  async identify(op: Operation): Promise<HasId[] | HasId> {
     return super.get({ ...op, params: {} });
   }
 
-  protected async generateId(): Promise<any> {}
-  protected async encryptPassword(op: Operation): Promise<any> {}
+  protected async generateId(): Promise<any> { }
+  protected async encryptPassword(op: Operation): Promise<any> { }
 
   async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data.attributes)
@@ -35,9 +35,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
       .where({ id })
       .select(
         this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY,
-        ...Object.keys(fields)
-          .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
-          .map(attribute => this.appInstance.app.serializer.attributeToColumn(attribute))
+        ...Object.keys(fields).map(attribute => this.appInstance.app.serializer.attributeToColumn(attribute))
       )
       .first();
 
@@ -45,17 +43,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   }
 
   @Authorize()
-  async get(op: Operation): Promise<HasId[]> {
-    return super.get({
-      ...op,
-      params: {
-        fields: {
-          ...op.params.fields,
-          user: (op.params.fields && op.params.fields["user"] ? op.params.fields["user"] : [])
-            .concat(Object.keys(this.resourceClass.schema.attributes))
-            .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
-        }
-      }
-    });
+  async get(op: Operation): Promise<HasId[] | HasId> {
+    return super.get(op);
   }
 }
