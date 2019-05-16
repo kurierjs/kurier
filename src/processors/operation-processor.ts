@@ -20,7 +20,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(protected appInstance: ApplicationInstance) { }
+  constructor(protected appInstance: ApplicationInstance) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
@@ -58,7 +58,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
   }
 
   async getRelationships(op: Operation, record: HasId, eagerLoadedData: EagerLoadedData) {
-    const relationships = pick(this.relationships, op.params.include);
+    const include = op.params ? op.params.include : [];
+    const relationships = pick(this.relationships, include);
 
     return promiseHashMap(relationships, key => {
       return relationships[key].call(this, record);
@@ -73,12 +74,13 @@ export default class OperationProcessor<ResourceT extends Resource> {
   ) {
     const relationshipKeys = Object.keys(resourceClass.schema.relationships)
       .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
-      .map(relName =>
-        resourceClass.schema.relationships[relName].foreignKeyName ||
-        this.appInstance.app.serializer.relationshipToColumn(
-          relName,
-          resourceClass.schema.relationships[relName].type().schema.primaryKeyName
-        )
+      .map(
+        relName =>
+          resourceClass.schema.relationships[relName].foreignKeyName ||
+          this.appInstance.app.serializer.relationshipToColumn(
+            relName,
+            resourceClass.schema.relationships[relName].type().schema.primaryKeyName
+          )
       );
     return pick(record, relationshipKeys);
   }

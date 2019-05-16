@@ -92,7 +92,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   async eagerLoad(op: Operation, result: ResourceT | ResourceT[]) {
-    const relationships = pick(this.resourceClass.schema.relationships, op.params.include);
+    const include = op.params ? op.params.include : [];
+    const relationships = pick(this.resourceClass.schema.relationships, include);
 
     return promiseHashMap(relationships, (key: string) => {
       return this.eagerFetchRelationship(key, result);
@@ -230,7 +231,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   async getRelationships(op: Operation, record: HasId, eagerLoadedData: EagerLoadedData) {
-    const relationships = pick(this.resourceClass.schema.relationships, op.params.include);
+    const include = op.params ? op.params.include : [];
+    const relationships = pick(this.resourceClass.schema.relationships, include);
 
     return promiseHashMap(relationships, (key: string) => {
       if (relationships[key] instanceof Function) {
