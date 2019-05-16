@@ -8,7 +8,7 @@ import {
   ResourceSchemaRelationship,
   EagerLoadedData,
   DEFAULT_PRIMARY_KEY,
-  IJsonApiSerializer,
+  IJsonApiSerializer
 } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
@@ -170,6 +170,10 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
         [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
       }))
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+
+    if (op.data.id) {
+      dataToInsert[primaryKeyName] = op.data.id;
+    }
 
     const ids = await this.getQuery().insert(dataToInsert, primaryKeyName);
 
