@@ -13,7 +13,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
   protected async login(op: Operation, userDataSource: ResourceAttributes) {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
-        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+      "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
     );
     return true;
   }
@@ -71,8 +71,8 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
 
     const session = {
       token,
-      [this.appInstance.app.serializer.attributeToColumn(
-        `${userType.type}_${userType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY}`
+      [this.appInstance.app.serializer.relationshipToColumn(
+        userType.type, userType.schema.primaryKeyName
       )]: userId,
       id: randomBytes(16).toString("hex")
     };

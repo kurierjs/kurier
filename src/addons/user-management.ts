@@ -109,8 +109,7 @@ export default class UserManagementAddon extends Addon {
           relationships: {
             user: {
               type: () => options.userResource,
-              belongsTo: true,
-              foreignKeyName: "user_id"
+              belongsTo: true
             }
           }
         };

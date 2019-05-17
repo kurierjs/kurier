@@ -17,7 +17,6 @@ export default class Session extends Resource {
       user: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "user_id"
       }
     }
   };
