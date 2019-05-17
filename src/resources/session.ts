@@ -16,7 +16,7 @@ export default class Session extends Resource {
     relationships: {
       user: {
         type: () => User,
-        belongsTo: true,
+        belongsTo: true
       }
     }
   };
