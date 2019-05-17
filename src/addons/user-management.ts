@@ -24,7 +24,7 @@ const defaults: UserManagementAddonOptions = {
   userLoginCallback: async () => {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
-        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+      "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
     );
     return true;
   },
@@ -32,7 +32,7 @@ const defaults: UserManagementAddonOptions = {
   userEncryptPasswordCallback: async (op: Operation) => {
     console.warn(
       "WARNING: You're using the default encryptPassword callback with UserManagementAddon." +
-        "Your password is NOT being encrypted. Implement this callback in your addon configuration."
+      "Your password is NOT being encrypted. Implement this callback in your addon configuration."
     );
 
     return { password: op.data.attributes.password };
@@ -109,7 +109,8 @@ export default class UserManagementAddon extends Addon {
           relationships: {
             user: {
               type: () => options.userResource,
-              belongsTo: true
+              belongsTo: true,
+              foreignKeyName: "user_id"
             }
           }
         };
