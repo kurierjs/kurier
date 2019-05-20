@@ -90,11 +90,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
    ```ts
-   import {
-     Application,
-     jsonApiKoa as jsonApi,
-     KnexProcessor
-   } from "@ebryn/jsonapi-ts";
+   import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "@ebryn/jsonapi-ts";
    import Koa from "koa";
 
    import Author from "./resources/author";
@@ -607,12 +603,7 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
 What happens if in the previous example something goes wrong? For example, a record in our super filesystem-based storage does not contain valid JSON? We can create an error response using try/catch and `JsonApiErrors`:
 
 ```ts
-import {
-  OperationProcessor,
-  Operation,
-  JsonApiErrors,
-  Resource
-} from "@ebryn/jsonapi-ts";
+import { OperationProcessor, Operation, JsonApiErrors, Resource } from "@ebryn/jsonapi-ts";
 import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
@@ -700,15 +691,17 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
       .replace(/Z/g, "")
       .split("T");
 
-    return [{
-      type: "moment",
-      id,
-      attributes: {
-        date,
-        time
-      },
-      relationships: {}
-    }];
+    return [
+      {
+        type: "moment",
+        id,
+        attributes: {
+          date,
+          time
+        },
+        relationships: {}
+      }
+    ];
   }
 }
 ```
@@ -780,7 +773,7 @@ export default class User extends Resource {
       name: String
     },
     relationships: {}
-  }
+  };
 }
 ```
 
@@ -943,6 +936,17 @@ In order for authorization to work, whichever app is consuming the JSONAPI expos
 Authorization: Bearer JWT_HASH_GOES_HERE
 ```
 
+For authorization with websockets, the token should be provided inside a _meta_ object property, like this:
+
+```
+{
+  "meta":{
+    "token":"JWT_HASH_GOES_HERE"
+  },
+  "operations":[...]
+}
+```
+
 ## The JSONAPI Application
 
 The last piece of the framework is the `Application` object. This component wraps and connects everything we've described so far.
@@ -952,11 +956,7 @@ The last piece of the framework is the `Application` object. This component wrap
 It's what orchestrates, routes and executes operations. In code, we're talking about something like this:
 
 ```ts
-import {
-  Application,
-  jsonApiKoa as jsonApi,
-  KnexProcessor
-} from "@ebryn/jsonapi-ts";
+import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "@ebryn/jsonapi-ts";
 import Koa from "koa";
 
 import Author from "./resources/author";
