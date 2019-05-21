@@ -1015,6 +1015,17 @@ In order for authorization to work, whichever app is consuming the JSONAPI expos
 Authorization: Bearer JWT_HASH_GOES_HERE
 ```
 
+For authorization with websockets, the token should be provided inside a _meta_ object property, like this:
+
+```
+{
+  "meta":{
+    "token":"JWT_HASH_GOES_HERE"
+  },
+  "operations":[...]
+}
+```
+
 ## The JSONAPI Application
 
 The last piece of the framework is the `Application` object. This component wraps and connects everything we've described so far.
