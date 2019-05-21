@@ -228,7 +228,7 @@ export default class Book extends Resource {
 Any number of relationships can be declared for a resource. Each relationship must have a type function which returns a Class, the kind of relationship, which can be **belongsTo** or **hasMany**, and
 The expected foreign key depends on the serializer, which can be customized, but with the default serializer, the FK is `${relationshipName}${primaryKeyName}`.
 
-A relationship should be defined on it's two ends. For example, on the example, with the above code in the _Book_ resource definition, a GET request to `books?include=author`, would include in the response the related user for each book, but for the inverse filter, in the _User_ resource schema definition, we should include:
+A relationship should be defined on its two ends. For example, on the example, with the above code in the _Book_ resource definition, a GET request to `books?include=author`, would include in the response the related user for each book, but for the inverse filter, in the _User_ resource schema definition, we should include:
 
 ```
   static schema = {
