@@ -182,6 +182,8 @@ This is how our _Book_ resource would look like, without relationships:
 ```ts
 // resources/book.ts
 import { Resource } from "@ebryn/jsonapi-ts";
+import User from "./user";
+import Comment from "./comment";
 
 export default class Book extends Resource {
   // The *type* is usually inferred automatically from the resource's
@@ -193,6 +195,10 @@ export default class Book extends Resource {
   // Every field we declare in a resource is contained in a *schema*.
   // A schema comprises attributes and relationships.
   static schema = {
+    primaryKeyName: "_id",
+    // The primary key for each resource is by default "id", but you can overwrite that default
+    // with the primaryKeyName property
+
     attributes: {
       // An attribute has a name and a primitive type.
       // Accepted types are String, Number and Boolean.
@@ -200,10 +206,47 @@ export default class Book extends Resource {
       yearOfPublication: Number,
       price: Number
     },
-    relationships: {}
+    relationships: {
+      author: {
+        type: () => User,
+        belongsTo: true,
+        foreignKeyName: "authorId"
+      },
+      comments: {
+        type: () => Comment,
+        hasMany: true
+        // for hasMany relationships declarations, the FK is in the related object, so it's
+        // recommendable to assign a custom FK.
+      }
+    }
   };
 }
 ```
+
+#### Relationship Declarations
+
+Any number of relationships can be declared for a resource. Each relationship must have a type function which returns a Class, the kind of relationship, which can be **belongsTo** or **hasMany**, and
+The expected foreign key depends on the serializer, which can be customized, but with the default serializer, the FK is `${relationshipName}${primaryKeyName}`.
+
+A relationship should be defined on its two ends. For example, on the example, with the above code in the _Book_ resource definition, a GET request to `books?include=author`, would include in the response the related user for each book, but for the inverse filter, in the _User_ resource schema definition, we should include:
+
+```
+  static schema = {
+   attributes: { /* ... */ },
+    relationships: {
+      // ...,
+      books: {
+        type: () => Book,
+        hasMany: true,
+        foreignKeyName: "authorId"
+      },
+    }
+  };
+```
+
+For a GET request to `users?include=books` to include the books related to each user.
+
+> Declaring a relationship is necessary to parse each resource and return a JSONAPI-compliant response. Also, it gives the API the necessary information so that the `include` clause works correctly.
 
 ### Accepted attribute types
 
