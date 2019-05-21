@@ -209,11 +209,11 @@ export default class Book extends Resource {
 
 The JSONAPI spec restricts any attribute value to "any valid JSON value".
 
-However, JSONAPI-TS supports three primitive types for now: `String`, `Number` and `Boolean`. `null` is also a valid value.
+JSONAPI-TS supports the following primitive types: `String`, `Number`, `Boolean`, `Array` and `Object`. `null` is also a valid value.
 
 Dates are supported in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:MM:SS.sss` + the time zone).
 
-> ⚠️ If you need to store complex types like arrays, you might want to reconsider and think of those array items as different resources of the same type and relate them to the parent resource.
+> ⚠️ While we support arrays and objects, you might want to reconsider and think of those array/object items as different resources of the same type and relate them to the parent resource.
 
 ## Operations
 
