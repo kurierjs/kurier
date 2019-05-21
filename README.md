@@ -1113,7 +1113,7 @@ You're required to implement an async method called `install()`, which will take
 
 You can inject resources and processors or alter any element of the public API.
 
-> You can take a look at the [UserManangementAddon](#using-the-usermanagement-addon) provided with the framework as a blueprint for building your own addons.
+> You can take a look at the [UserManagementAddon](#using-the-usermanagement-addon) provided with the framework as a blueprint for building your own addons.
 
 ### Using an addon
 
