@@ -25,6 +25,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
     - [Using jsonApiKoa](#using-jsonapikoa)
     - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
     - [Request/response mapping](#requestresponse-mapping)
+    - [Bulk operations in HTTP](#bulk-operations-in-http)
   - [jsonApiWebSocket](#jsonapiwebsocket)
     - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
     - [Executing operations over sockets](#executing-operations-over-sockets)
@@ -590,6 +591,10 @@ DELETE /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 ```
 
 The middleware, if successful, will respond with a `204 No Content` HTTP status code.
+
+#### Bulk operations in HTTP
+
+The `jsonApiKoa` middleware exposes a `/bulk` endpoint which can be used to execute multiple operations. The request must use the `PATCH` method, using the JSON payload [shown earlier](#running-multiple-operations).
 
 ### jsonApiWebSocket
 
