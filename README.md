@@ -37,6 +37,9 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
   - [The `KnexProcessor` class](#the-knexprocessor-class)
   - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
+- [Serialization](#serialization)
+  - [The JsonApiSerializer class](#the-jsonapiserializer-class)
+  - [Extending the serializer](#extending-the-serializer)
 - [Authentication and authorization](#authorization)
   - [Defining an `User` resource](#defining-an-user-resource)
   - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
@@ -879,6 +882,66 @@ export default class BookProcessor extends KnexProcessor<Book> {
 The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor and then do other actions around it.
 
 > ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
+
+## Serialization
+
+When converting a request or an operation into a database query, there are several transformations that occur in order to match attribute and type names to column and table names, respectively.
+
+### The JsonApiSerializer class
+
+This class implements the default serialization behavior for the framework through several functions.
+
+Let's use our [Book resource](#declaring-a-resource) as an example.
+
+| Function                        | Description                                      | Default behaviour                       | Example                                           |
+| ------------------------------- | ------------------------------------------------ | --------------------------------------- | ------------------------------------------------- |
+| **`resourceTypeToTableName()`** | Transforms a type name into a table name.        | `underscore` then `pluralize`           | `book` => `books`<br>`comicBook` => `comic_books` |
+| **`attributeToColumn()`**       | Converts an attribute name into a column name.   | `underscore`                            | `datePublished` => `date_published`               |
+| **`relationshipToColumn()`**    | Converts a relationship type into a column name. | `underscore(type + primaryKeyName)`     | `authorId` => `author_id`                         |
+| **`columnToAttribute()`**       | Transforms a column name into an attribute name. | `camelize`                              | `date_published` => `datePublished`               |
+| **`columnToRelationship()`**    | Converts a column name into a relationship type. | `camelize(columnName - primaryKeyName)` | `author_id` => `author`                           |
+
+### Extending the serializer
+
+You can modify the serializer's behavior to adapt to an existing database by overriding the previously described functions and then passing it to the App:
+
+`serializer.ts`
+
+```ts
+import {
+  JsonApiSerializer,
+  camelize, capitalize, classify, dasherize, underscore, pluralize, singularize
+} from "@ebyrn/jsonapi-ts";
+
+export default MySerializer extends JsonApiSerializer {
+  // Overrides here...
+}
+```
+
+`app.ts`
+
+```ts
+// ...
+import MySerializer from "./serializer";
+// ...
+
+const app = new Application({
+  // ...other settings...
+  serializer: MySerializer // Pass the serializer here.
+});
+```
+
+JSONAPI-TS exports the following string utilities:
+
+| Function          | Example                                  |
+| ----------------- | ---------------------------------------- |
+| **`camelize`**    | `camelized text` => `camelizedText`      |
+| **`capitalize`**  | `capitalized text` => `Capitalized Text` |
+| **`classify`**    | `classified text` => `Classified text`   |
+| **`dasherize`**   | `dasherized text` => `dasherized-text`   |
+| **`underscore`**  | `underscored text` => `underscored_text` |
+| **`pluralize`**   | `book` => `books`                        |
+| **`singularize`** | `books` => `book`                        |
 
 ## Authentication and authorization
 
