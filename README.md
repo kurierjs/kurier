@@ -19,11 +19,16 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [The `add` operation](#the-add-operation)
   - [The `update` operation](#the-update-operation)
   - [The `remove` operation](#the-remove-operation)
+  - [Running multiple operations](#running-multiple-operations)
 - [Transport layers](#transport-layers)
   - [jsonApiKoa](#jsonapikoa)
-    - [Usage](#usage)
+    - [Using jsonApiKoa](#using-jsonapikoa)
     - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
     - [Request/response mapping](#requestresponse-mapping)
+    - [Bulk operations in HTTP](#bulk-operations-in-http)
+  - [jsonApiWebSocket](#jsonapiwebsocket)
+    - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
+    - [Executing operations over sockets](#executing-operations-over-sockets)
 - [Processors](#processors)
   - [What is a processor?](#what-is-a-processor)
   - [The `OperationProcessor` class](#the-operationprocessor-class)
@@ -32,18 +37,19 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
   - [The `KnexProcessor` class](#the-knexprocessor-class)
   - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
-- [Authorization](#authorization)
+- [Authentication and authorization](#authorization)
   - [Defining an `User` resource](#defining-an-user-resource)
-  - [Implementing an `User` processor](#implementing-an-user-processor)
-  - [Defining a `Session` resource](#defining-a-session-resource)
-  - [Implementing a `Session` processor](#implementing-a-session-processor)
   - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
   - [Using the `IfUser()` helper](#using-the-ifuser-helper)
+  - [Using the `UserManagement` addon](#using-the-usermanagement-addon)
   - [Front-end requirements](#front-end-requirements)
 - [The JSONAPI application](#the-jsonapi-application)
   - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
   - [Referencing types and processors](#referencing-types-and-processors)
   - [Using a default processor](#using-a-default-processor)
+- [Extending the framework](#extending-the-framework)
+  - [What is an addon?](#what-is-an-addon)
+  - [Using an addon](#using-an-addon)
 
 ## Features
 
@@ -414,6 +420,50 @@ A `delete` operation represents the intent to destroy an existing resources in t
 
 The response, if successful, will be `typeof void`.
 
+### Running multiple operations
+
+JSONAPI-TS supports a _bulk_ mode that allows the execution of a list of operations in a single request. This mode is exposed differently according to the transport layer (see the next section for more details on this).
+
+A bulk request payload is essentially a wrapper around a list of operations:
+
+```js
+{
+  "meta": {
+    // ...
+  },
+  "operations": [
+    // Add a book.
+    {
+      "op": "add",
+      "ref": {
+        "type": "book"
+      },
+      "data": {
+        // ...
+      }
+    },
+    // Adding an author...
+    {
+      "op": "add",
+      "ref": {
+        "type": "author"
+      },
+      "data": {
+        // ...
+      }
+    },
+    // Getting all authors.
+    {
+      "op": "get",
+      "ref": {
+        "type": "author"
+      }
+    }
+    // ...and maybe even more stuff.
+  ]
+}
+```
+
 ## Transport layers
 
 JSONAPI-TS is built following a decoupled, modular approach, providing somewhat opinionated methodologies regarding how to make the API usable to consumers.
@@ -422,7 +472,7 @@ JSONAPI-TS is built following a decoupled, modular approach, providing somewhat 
 
 Currently we support integrating with [Koa](https://koajs.com) by providing a `jsonApiKoa` middleware, that can be imported and piped through your Koa server, along with other middlewares.
 
-#### Usage
+#### Using jsonApiKoa
 
 As seen in the [Getting started](#getting-started) section, once your [JSONAPI application](#The-JSONAPI-application) is instantiated, you can simply do:
 
@@ -541,6 +591,46 @@ DELETE /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 ```
 
 The middleware, if successful, will respond with a `204 No Content` HTTP status code.
+
+#### Bulk operations in HTTP
+
+The `jsonApiKoa` middleware exposes a `/bulk` endpoint which can be used to execute multiple operations. The request must use the `PATCH` method, using the JSON payload [shown earlier](#running-multiple-operations).
+
+### jsonApiWebSocket
+
+The framework supports JSONAPI operations via WebSockets, using the [`ws`](http://npmjs.org/package/ws) package.
+
+> We recommend installing the `@types/ws` package as well to have the proper typings available in your IDE.
+
+#### Using jsonApiWebSocket
+
+The wrapper function `jsonApiWebSocket` takes a `WebSocket.Server` instance, bound to an HTTP server (so you can combine it with the `jsonApiKoa` middleware), and manipulates the `Application` object to wire it up with the `connection` and `message` events provided by `ws`.
+
+So, after instantiating your application, you can enable WebSockets support with just a couple of extra lines of code:
+
+```ts
+import { Server as WebSocketServer } from "ws";
+import { jsonApiWebSocket } from "@ebryn/jsonapi-ts";
+
+// Assume an app has been configured with its resources
+// and processors, etc.
+// .
+// .
+// .
+// Also, assume `httpServer` is a Koa server,
+// `app` is a JSONAPI application instance.
+httpServer.use(jsonApiKoa(app));
+
+// Create a WebSockets server.
+const ws = new WebSocketServer({ server: httpServer });
+
+// Let JSONAPI-TS connect your API.
+jsonApiWebSocket(ws, app);
+```
+
+#### Executing operations over sockets
+
+Unlike its HTTP counterpart, `jsonApiWebSocket` works with [bulk requests](#running-multiple-operations). Since there's no need for a RESTful protocol, you send and receive raw operation payloads.
 
 ## Processors
 
@@ -747,17 +837,15 @@ The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor an
 
 > ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
 
-## Authorization
+## Authentication and authorization
 
-JSONAPI-TS has authorization capabilities by using [JSON Web Tokens](https://www.jsonwebtoken.io/). Basically, it allows you to allow or deny operation execution based on user/role presence in a token.
+JSONAPI-TS supports authentication and authorization capabilities by using [JSON Web Tokens](https://www.jsonwebtoken.io/). Basically, it allows you to allow or deny operation execution based on user/role presence in a token.
 
-For this feature to work, you'll need to:
+For this feature to work, you'll need at least to:
 
 - Declare an `User` resource
-- Implement an `User` processor
-- Declare a `Session` resource
-- Implement a `Session` processor
 - Apply the `@Authorize` decorator and the `IfUser()` helper where necessary
+- Apply the `UserManagement` addon to your application
 - Have your front-end send requests with an `Authorization` header
 
 ### Defining an `User` resource
@@ -765,123 +853,23 @@ For this feature to work, you'll need to:
 A minimal, bare-bones declaration of an `User` resource could look something like this:
 
 ```ts
-import { Resource } from "@ebryn/jsonapi-ts";
+import { User as JsonApiUser, Password } from "@ebryn/jsonapi-ts";
 
-export default class User extends Resource {
+export default class User extends JsonApiUser {
   static schema = {
     attributes: {
-      name: String
+      username: String,
+      emailAddress: String,
+      passphrase: Password
     },
     relationships: {}
   };
 }
 ```
 
-### Implementing an `User` processor
+Note that the resource must extend from `JsonApiUser` instead of `Resource`.
 
-The key to implement the `UserProcessor` is to use the private `identify` operation. This operation is not mapped through any transport layer, so it's only code by the `jsonApiKoa` middleware to get all of the user data to see if it matches with a given token.
-
-```ts
-export default class UserProcessor extends KnexProcessor<User> {
-  public resourceClass = User;
-
-  async identify(op: Operation): Promise<User> {
-    return super.get(op)[0];
-  }
-}
-```
-
-Now, in order to generate that token, you'll need to build a resource and processor to serve and create it.
-
-> ⚠️ The following examples are **NOT** production-ready and are **NOT** safe. They're only for educational purposes.
-
-### Defining a `Session` resource
-
-A `Session` resource is a container for a JSON Web Token.
-
-When requesting to create a `Session`, we'll need the username and password the
-
-```ts
-import { Resource } from "@ebryn/jsonapi-ts";
-
-export default class Session extends Resource {
-  static schema = {
-    attributes: {
-      username: String,
-      password: String,
-      token?: String;
-    },
-    relationships: {}
-  }
-}
-```
-
-### Implementing a `Session` processor
-
-In order to create the session, you'll need to implement a processor that encodes the `User` resource into a JSON Web Token. Such processor would look something like this:
-
-```ts
-import { KnexProcessor, Operation, JsonApiErrors } from "@ebryn/jsonapi-ts";
-import { sign } from "jsonwebtoken";
-import { Session } from "./resources";
-import { v4 as uuid } from "uuid";
-
-export default class SessionProcessor extends KnexProcessor {
-  public resourceClass = Session;
-
-  // We use the `add` operation since we're "creating"
-  // a session. A valid approach would also be to create
-  // a custom `login` operation.
-  public async add(op: Operation): Promise<Session> {
-    // Find the user. Since we're using a KnexProcessor as a base class,
-    // we have access to the Knex instance.
-    const user = await this.knex("users")
-      .where({
-        username: op.data.attributes.username,
-        password: op.data.attributes.password
-      })
-      .first();
-
-    // If we didn't get a user, we abort the operation with an error.
-    if (!user) {
-      throw JsonApiErrors.AccessDenied();
-    }
-
-    const userId = user.id;
-
-    // Scrub any privileged data.
-    delete user.password;
-    delete user.id;
-
-    const secureData = {
-      type: "user",
-      id: userId,
-      attributes: {
-        ...user
-      },
-      relationships: {}
-    };
-
-    // Create the JWT.
-    const token = sign(secureData, process.env.SESSION_KEY, {
-      subject: secureData.id,
-      expiresIn: "1d"
-    });
-
-    // Return it.
-    const session = {
-      type: "session",
-      id: uuid(),
-      attributes: {
-        token
-      },
-      relationships: {}
-    };
-
-    return session;
-  }
-}
-```
+> ⚠️ Be sure to mark sensitive fields such as the user's password with the `Password` type! This prevents the data in those fields to be leaked through the transport layer.
 
 ### Using the `@Authorize` decorator
 
@@ -926,6 +914,97 @@ The `IfUser()` helper syntax is as follows:
 
 ```ts
 IfUser(attributeName: string, attributeValue: string | number | boolean);
+```
+
+### Using the `UserManagement` addon
+
+In order to put all the pieces together, JSONAPI-TS provides an [addon](#what-is-an-addon) to manage both user and session concerns.
+
+You'll need to define at least two functions:
+
+- **A `login` callback which allows a user to identify itself with their credentials.** Internally, it receives an `add` operation for the `session` resource and an attribute hash containing user data. This callback must return a boolean and somehow compare if the user and password (or whatever identification means you need) are a match:
+
+  ```ts
+  // Assume `hash` is a function that takes care of hashing a plain-text
+  // password with a given salt.
+  export default async function login(op: Operation, user: ResourceAttributes) {
+    return (
+      op.data.attributes.email === user.email &&
+      hash(op.data.attributes.password, process.env.SESSION_KEY) === user.password
+    );
+  }
+  ```
+
+- **An `encryptPassword` callback which takes care of transforming the plain-text password when the API receives a request to create a new user.** Internally, it receives an `add` operation for the `user` resource. This callback must return an object containing a key with the column name for your password field, with a value of an encrypted version of your password, using a cryptographic algorithm of your choice:
+
+  ```ts
+  // Assume `hash` is a function that takes care of hashing a plain-text
+  // password with a given salt.
+  export default async function encryptPassword(op: Operation) {
+    return {
+      password: hash(op.data.attributes.password, process.env.SESSION_KEY)
+    };
+  }
+  ```
+
+Optionally, you can define a `generateId` callback, which must return a string with a unique ID, used when a new user is being registered. An example of it could be:
+
+```ts
+// This is not production-ready.
+export default async function generateId() {
+  return Date.now().toString();
+}
+```
+
+Once you've got these functions, you can apply the `UserManagementAddon` like this:
+
+```ts
+// ...other imports...
+import { UserManagementAddon, UserManagementAddonOptions } from "@ebryn/jsonapi-ts";
+import { login, encryptPassword, generateId } from "./user-callbacks";
+import User from "./resources/user";
+
+// ...app definition...
+app.use(UserManagementAddon, {
+  userResource: User,
+  userLoginCallback: login,
+  userEncryptPasswordCallback: encryptPassword,
+  userGenerateIdCallback: generateId // optional
+} as UserManagementAddonOptions);
+```
+
+If you don't want to use loose functions like this, you can create a `UserProcessor` that implements these functions and pass it to the addon options as `userProcessor`:
+
+```ts
+// Note that MyVeryOwnUserProcessor extends from JSONAPI-TS's own UserProcessor.
+import { UserProcessor, Operation } from "@ebryn/jsonapi-ts";
+import User from "./resources/user";
+
+export default class MyVeryOwnUserProcessor<T extends User> extends UserProcessor<T> {
+  protected async generateId() {
+    return Date.now().toString();
+  }
+
+  protected async encryptPassword(op: Operation) {
+    // Assume `hash` is a function that takes care of hashing a plain-text
+    // password with a given salt.
+    return {
+      password: hash(op.data.attributes.password, process.env.SESSION_KEY)
+    };
+  }
+
+  // Login is not here because it's part of the Session resource's operations.
+}
+```
+
+Then, you can simply do:
+
+```ts
+app.use(UserManagementAddon, {
+  userResource: User,
+  userProcessor: MyVeryOwnUserProcessor,
+  userLoginCallback: login
+} as UserManagementAddonOptions);
 ```
 
 ### Front-end requirements
@@ -1008,6 +1087,46 @@ const app = new Application({
   types: [Author, Book, BookCount],
   defaultProcessor: new KnexProcessor(/* db settings */)
 });
+```
+
+## Extending the framework
+
+Beyond the fact that JSONAPI-TS allows you to extend any of its primitives, the framework provides a simple yet effective way of injecting custom behavior with an _addon system_.
+
+### What is an addon?
+
+An _addon_ is a piece of code that is aware of a JSONAPI Application object that can be tweaked externally, without subclassing it directly.
+
+You can build an addon by deriving a new class extending from the `Addon` primitive type:
+
+```ts
+export default class MyAddon extends Addon {
+  constructor(public readonly app: Application, public readonly options?: MyAddonOptions) {
+    super(app, options);
+  }
+
+  async install() {}
+}
+```
+
+You're required to implement an async method called `install()`, which will take care of any manipulation you intend to apply through the addon.
+
+You can inject resources and processors or alter any element of the public API.
+
+> You can take a look at the [UserManangementAddon](#using-the-usermanagement-addon) provided with the framework as a blueprint for building your own addons.
+
+### Using an addon
+
+Once you've finished working on your addon, you can use with your JSONAPI Application following a similar pattern to those of HTTP middlewares:
+
+```ts
+import { MyAddon, MyAddonOptions } from "./my-addon";
+
+// Assume `app` is a JSONAPI {Application} object.
+app.use(MyAddon, {
+  // Addon options.
+  foo: 3
+} as MyAddonOptions);
 ```
 
 ## License
