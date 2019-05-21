@@ -37,7 +37,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
   - [The `KnexProcessor` class](#the-knexprocessor-class)
   - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
-- [Serialization][#serialization]
+- [Serialization](#serialization)
   - [The JsonApiSerializer class](#the-jsonapiserializer-class)
   - [Extending the serializer](#extending-the-serializer)
 - [Authentication and authorization](#authorization)
