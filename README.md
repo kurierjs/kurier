@@ -917,7 +917,7 @@ In order to put all the pieces together, JSONAPI-TS provides an [addon](#what-is
 
 You'll need to define at least two functions:
 
-- A `login` callback which receives an `add` operation for the `session` resource and an attribute hash containing user data. This callback must return a boolean and somehow compare if the user and password (or whatever identification means you need) are a match:
+- **A `login` callback which allows a user to identify itself with their credentials.** Internally, it receives an `add` operation for the `session` resource and an attribute hash containing user data. This callback must return a boolean and somehow compare if the user and password (or whatever identification means you need) are a match:
 
   ```ts
   // Assume `hash` is a function that takes care of hashing a plain-text
@@ -930,7 +930,7 @@ You'll need to define at least two functions:
   }
   ```
 
-- An `encryptPassword` callback which receives an `add` operation for the `user` resource. This callback must return an object containing a key with the column name for your password field, with a value of an encrypted version of your password, using a cryptographic algorithm of your choice:
+- **An `encryptPassword` callback which takes care of transforming the plain-text password when the API receives a request to create a new user.** Internally, it receives an `add` operation for the `user` resource. This callback must return an object containing a key with the column name for your password field, with a value of an encrypted version of your password, using a cryptographic algorithm of your choice:
 
   ```ts
   // Assume `hash` is a function that takes care of hashing a plain-text
