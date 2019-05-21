@@ -234,7 +234,7 @@ A relationship should be defined on its two ends. For example, on the example, w
   static schema = {
    attributes:{...},
     relationships: {
-      ...,
+      // ...,
       books: {
         type: () => Book,
         hasMany: true,
