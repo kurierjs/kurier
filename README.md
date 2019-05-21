@@ -246,7 +246,7 @@ A relationship should be defined on its two ends. For example, on the example, w
 
 For a GET request to `users?include=books` to include the books related to each user.
 
-> Declaring a relationship is necessary to parse each resource and return a JSONAPI compliant response. Also, it gives the API the necessary information so that `include` filters work correctly.
+> Declaring a relationship is necessary to parse each resource and return a JSONAPI-compliant response. Also, it gives the API the necessary information so that the `include` clause works correctly.
 
 ### Accepted attribute types
 
