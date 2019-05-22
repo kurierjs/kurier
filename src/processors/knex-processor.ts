@@ -257,8 +257,6 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const sqlOperator = Array.isArray(result) ? "in" : "=";
 
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const foreignKey =
-      relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, primaryKey);
 
     const queryIn: string | string[] = Array.isArray(result)
       ? result.map((resource: Resource) => resource[primaryKey])
@@ -266,7 +264,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
     if (relationship.belongsTo) {
       const belongingPrimaryKey = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-
+      const foreignKey =
+        relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, primaryKey);
       const belongingTableName = this.appInstance.app.serializer.foreignResourceToForeignTableName(foreignType);
 
       return query
@@ -277,6 +276,9 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     }
 
     if (relationship.hasMany) {
+      const foreignKey =
+        relationship.foreignKeyName ||
+        this.appInstance.app.serializer.relationshipToColumn(this.resourceClass.type, primaryKey);
       return query
         .join(this.tableName, `${foreignTableName}.${foreignKey}`, "=", `${this.tableName}.${primaryKey}`)
         .where(`${this.tableName}.${primaryKey}`, sqlOperator, queryIn)
@@ -293,19 +295,21 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     if (!eagerLoadedData[key]) {
       return;
     }
-    const relatedPrimaryKey = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-    const thisPrimaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-
-    const foreignKeyName =
-      relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, relatedPrimaryKey);
 
     if (relationship.belongsTo) {
+      const relatedPrimaryKey = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+      const foreignKeyName =
+        relationship.foreignKeyName || this.appInstance.app.serializer.relationshipToColumn(key, relatedPrimaryKey);
       return eagerLoadedData[key].find(
         (eagerLoadedRecord: KnexRecord) => eagerLoadedRecord[relatedPrimaryKey] === record[foreignKeyName]
       );
     }
 
     if (relationship.hasMany) {
+      const thisPrimaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+      const foreignKeyName =
+        relationship.foreignKeyName ||
+        this.appInstance.app.serializer.relationshipToColumn(this.resourceClass.type, thisPrimaryKey);
       return eagerLoadedData[key].filter(
         (eagerLoadedRecord: KnexRecord) => record[thisPrimaryKey] === eagerLoadedRecord[foreignKeyName]
       );
