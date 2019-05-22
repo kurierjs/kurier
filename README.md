@@ -37,6 +37,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
   - [The `KnexProcessor` class](#the-knexprocessor-class)
   - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
+  - [Using computed properties in a processor](#using-computed-properties-in-a-processor)
 - [Serialization](#serialization)
   - [The JsonApiSerializer class](#the-jsonapiserializer-class)
   - [Extending the serializer](#extending-the-serializer)
@@ -842,6 +843,55 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
   }
 }
 ```
+
+### Using computed properties in a processor
+
+In addition to whatever attributes you declare in a resource, you can use a custom processor to extend it with computed properties.
+
+Every processor derived from `OperationProcessor` includes an `attributes` object, where you can define functions to compute the value of the properties you want the resource to have:
+
+```ts
+// Let's create a Comment resource.
+class Comment extends Resource {
+  static schema = {
+    text: String;
+  }
+
+  static relationships = {
+    // Assume we also have a Vote resource.
+    vote: {
+      type: () => Vote,
+      hasMany: true
+    }
+  }
+}
+
+// And a CommentProcessor to handle it.
+class CommentProcessor<T extends Comment> extends KnexProcessor<T> {
+  public static resourceClass = Comment;
+
+  attributes = {
+    // You can define computed properties with simple logic in them...
+    async isLongComment(this: CommentProcessor<Comment>, comment: HasId) {
+      return comment.text.length > 100;
+    },
+
+    // ...or more, data-driven ones.
+    async voteCount(this: CommentProcessor<Comment>, comment: hasId) {
+      const processor = this.processorFor("vote") as KnexProcessor<Vote>;
+
+      const [result] = await processor
+        .getQuery()
+        .where({ comment_id: comment.id })
+        .count();
+
+      return result["count(*)"];
+    }
+  }
+}
+```
+
+Any computed properties you define will be included in the resource on any operation. **Do not** declare these computed properties in the resource's schema, as JSONAPI-TS will interpret them as columns in a table and fail due to non-existing columns.
 
 ### The `KnexProcessor` class
 
