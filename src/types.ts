@@ -122,6 +122,7 @@ export type KnexRecord = {
 export type AttributeValueMatch = {
   attribute: string;
   value: AttributeValue;
+  operator?: "not" | "some" | "every";
 };
 
 export type ResourceSchema = {
