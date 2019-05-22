@@ -1,4 +1,4 @@
-import { UserProcessor, Operation } from "../jsonapi-ts";
+import { UserProcessor, Operation, Authorize, IfUserNotMatches } from "../jsonapi-ts";
 import User from "../resources/user";
 import encryptPassword from "../callbacks/encrypt-password";
 
@@ -18,6 +18,15 @@ export default class MyVeryOwnUserProcessor<T extends User> extends UserProcesso
 
     coolFactor(): number {
       return 3;
+    },
+
+    async roles() {
+      return ["user", "author", "voter"];
     }
   };
+
+  @Authorize(IfUserNotMatches("roles", ["foo"]))
+  public async get(op: Operation) {
+    return super.get(op);
+  }
 }
