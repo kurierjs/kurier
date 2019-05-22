@@ -11,7 +11,7 @@ export function ifUserNotMatches(
   return { attribute, value, operator: "not" };
 }
 
-export function ifUserMatchEvery(
+export function ifUserMatchesEvery(
   attribute: string,
   value: string | number | boolean | string[] | number[]
 ): AttributeValueMatch {

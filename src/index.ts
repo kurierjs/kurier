@@ -5,7 +5,7 @@ import decorateWith from "./decorators/decorator";
 import {
   ifUser as IfUser,
   ifUserNotMatches as IfUserNotMatches,
-  ifUserMatchEvery as IfUserMatchEvery
+  ifUserMatchesEvery as IfUserMatchesEvery
 } from "./decorators/if-user";
 import JsonApiErrors from "./errors/json-api-errors";
 import jsonApiKoa from "./middlewares/json-api-koa";
@@ -37,7 +37,7 @@ export {
   decorateWith,
   Authorize,
   IfUser,
-  IfUserMatchEvery,
+  IfUserMatchesEvery,
   IfUserNotMatches,
   // Auth module
   UserProcessor,
