@@ -2,7 +2,11 @@ import Application from "./application";
 import ApplicationInstance from "./application-instance";
 import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
-import IfUser from "./decorators/if-user";
+import {
+  ifUser as IfUser,
+  ifUserNotMatches as IfUserNotMatches,
+  ifUserMatchEvery as IfUserMatchEvery
+} from "./decorators/if-user";
 import JsonApiErrors from "./errors/json-api-errors";
 import jsonApiKoa from "./middlewares/json-api-koa";
 import jsonApiWebSocket from "./middlewares/json-api-websocket";
@@ -33,6 +37,8 @@ export {
   decorateWith,
   Authorize,
   IfUser,
+  IfUserMatchEvery,
+  IfUserNotMatches,
   // Auth module
   UserProcessor,
   SessionProcessor,
