@@ -10,4 +10,14 @@ export default class MyVeryOwnUserProcessor<T extends User> extends UserProcesso
   protected async encryptPassword(op: Operation) {
     return encryptPassword(op);
   }
+
+  attributes = {
+    async friends() {
+      return [{ name: "Joel" }, { name: "Ryan" }];
+    },
+
+    coolFactor(): number {
+      return 3;
+    }
+  };
 }
