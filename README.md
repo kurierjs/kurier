@@ -1023,6 +1023,11 @@ The `IfUser()` helper syntax is as follows:
 IfUser(attributeName: string, attributeValue: string | number | boolean);
 ```
 
+There are also more complex helpers for more granular control, with the same syntax:
+
+- `IfUserNotMatches()` will check if a given value is _not_ a match against an attribute value. Useful for exclusion.
+- `IfUserMatchesEvery()` will check if _all_ items in a list of given values are a match again a property with a list of attribute values.
+
 ### Using the `UserManagement` addon
 
 In order to put all the pieces together, JSONAPI-TS provides an [addon](#what-is-an-addon) to manage both user and session concerns.
