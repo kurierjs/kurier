@@ -15,7 +15,7 @@ export default class User extends JsonApiUser {
       articles: {
         type: () => Article,
         hasMany: true,
-        foreignKeyName: "author_id"
+        foreignKeyName: "author"
       },
       comments: {
         type: () => Comment,
@@ -24,8 +24,7 @@ export default class User extends JsonApiUser {
       },
       votes: {
         type: () => Vote,
-        hasMany: true,
-        foreignKeyName: "user_id"
+        hasMany: true
       }
     }
   };

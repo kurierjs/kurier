@@ -219,7 +219,8 @@ export default class Book extends Resource {
         type: () => Comment,
         hasMany: true
         // for hasMany relationships declarations, the FK is in the related object, so it's
-        // recommendable to assign a custom FK.
+        // recommendable to assign a custom FK. In this case, assuming that we use the default serializer,
+        // the fk name would be "book_id". Read more below this example.
       }
     }
   };
@@ -229,7 +230,7 @@ export default class Book extends Resource {
 #### Relationship Declarations
 
 Any number of relationships can be declared for a resource. Each relationship must have a type function which returns a Class, the kind of relationship, which can be **belongsTo** or **hasMany**, and
-The expected foreign key depends on the serializer, which can be customized, but with the default serializer, the FK is `${relationshipName}${primaryKeyName}`.
+The expected foreign key depends on the serializer, and the type of relationship, which can be customized, but on a belongsTo relationship, the default FK is `${relationshipName}_${primaryKeyName}`. And for a hasMany relationship, the default FK name expected in the related resource is `${baseType}_${primaryKeyName}`.
 
 A relationship should be defined on its two ends. For example, on the example, with the above code in the _Book_ resource definition, a GET request to `books?include=author`, would include in the response the related user for each book, but for the inverse filter, in the _User_ resource schema definition, we should include:
 
