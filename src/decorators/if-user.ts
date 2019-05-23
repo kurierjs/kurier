@@ -4,7 +4,7 @@ export function ifUser(attribute: string, value: string | number | boolean | str
   return { attribute, value };
 }
 
-export function ifUserNotMatches(
+export function ifUserDoesNotMatches(
   attribute: string,
   value: string | number | boolean | string[] | number[]
 ): AttributeValueMatch {
@@ -16,4 +16,28 @@ export function ifUserMatchesEvery(
   value: string | number | boolean | string[] | number[]
 ): AttributeValueMatch {
   return { attribute, value, operator: "every" };
+}
+
+export function ifUserHasRole(value: string | string[]): AttributeValueMatch {
+  return ifUser("roles", value);
+}
+
+export function ifUserHasEveryRole(value: string[]): AttributeValueMatch {
+  return ifUserMatchesEvery("roles", value);
+}
+
+export function ifUserDoesNotHaveRole(value: string | string[]): AttributeValueMatch {
+  return ifUserDoesNotMatches("roles", value);
+}
+
+export function ifUserHasPermission(value: string | string[]): AttributeValueMatch {
+  return ifUser("permissions", value);
+}
+
+export function ifUserHasEveryPermission(value: string[]): AttributeValueMatch {
+  return ifUserMatchesEvery("permissions", value);
+}
+
+export function ifUserDoesNotHavePermission(value: string | string[]): AttributeValueMatch {
+  return ifUserDoesNotMatches("permissions", value);
 }

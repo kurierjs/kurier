@@ -3,6 +3,7 @@ import * as Knex from "knex";
 import Resource from "./resource";
 import Password from "./attribute-types/password";
 import Addon from "./addon";
+import User from "./resources/user";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -163,6 +164,8 @@ export type EagerLoadedData = { [key: string]: KnexRecord[] | undefined };
 
 export type ApplicationServices = {
   knex?: Knex;
+  roles?: (user: User) => Promise<string[]>;
+  permissions?: (user: User) => Promise<string[]>;
 } & { [key: string]: any };
 
 export interface IJsonApiSerializer {
