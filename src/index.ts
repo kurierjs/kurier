@@ -4,8 +4,14 @@ import Authorize from "./decorators/authorize";
 import decorateWith from "./decorators/decorator";
 import {
   ifUser as IfUser,
-  ifUserNotMatches as IfUserNotMatches,
-  ifUserMatchesEvery as IfUserMatchesEvery
+  ifUserDoesNotMatches as IfUserDoesNotMatches,
+  ifUserMatchesEvery as IfUserMatchesEvery,
+  ifUserDoesNotHavePermission as IfUserDoesNotHavePermission,
+  ifUserDoesNotHaveRole as IfUserDoesNotHaveRole,
+  ifUserHasEveryPermission as IfUserHasEveryPermission,
+  ifUserHasEveryRole as IfUserHasEveryRole,
+  ifUserHasPermission as IfUserHasPermission,
+  ifUserHasRole as IfUserHasRole
 } from "./decorators/if-user";
 import JsonApiErrors from "./errors/json-api-errors";
 import jsonApiKoa from "./middlewares/json-api-koa";
@@ -38,13 +44,19 @@ export {
   Authorize,
   IfUser,
   IfUserMatchesEvery,
-  IfUserNotMatches,
+  IfUserDoesNotMatches,
   // Auth module
   UserProcessor,
   SessionProcessor,
   User,
   Session,
   Password,
+  IfUserDoesNotHavePermission,
+  IfUserDoesNotHaveRole,
+  IfUserHasEveryPermission,
+  IfUserHasEveryRole,
+  IfUserHasPermission,
+  IfUserHasRole,
   // Addons
   Addon,
   UserManagementAddon,
