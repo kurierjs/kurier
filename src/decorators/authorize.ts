@@ -35,6 +35,10 @@ function authorizeMiddleware(operation: Function, conditions: AttributeValueMatc
             }
           }
 
+          if (operator === "not") {
+            return !match(actual)(expected);
+          }
+
           return match(actual)(expected);
         }
 
