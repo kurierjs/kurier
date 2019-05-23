@@ -7,6 +7,7 @@ import Resource from "../resource";
 import JsonApiUserProcessor from "../processors/user-processor";
 import JsonApiSessionProcessor from "../processors/session-processor";
 import Session from "../resources/session";
+import ApplicationInstance from "../application-instance";
 
 export type UserManagementAddonOptions = AddonOptions & {
   userResource: typeof User;
@@ -14,8 +15,8 @@ export type UserManagementAddonOptions = AddonOptions & {
   userEncryptPasswordCallback?: (op: Operation) => Promise<ResourceAttributes>;
   userLoginCallback?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
   userGenerateIdCallback?: () => Promise<string>;
-  userRolesProvider?: (user: User) => Promise<string[]>;
-  userPermissionsProvider?: (user: User) => Promise<string[]>;
+  userRolesProvider?: (this: ApplicationInstance, user: User) => Promise<string[]>;
+  userPermissionsProvider?: (this: ApplicationInstance, user: User) => Promise<string[]>;
   usernameRequestParameter?: string;
   passwordRequestParameter?: string;
 };
