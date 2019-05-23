@@ -44,11 +44,12 @@ export default class ApplicationInstance {
       throw jsonApiErrors.InvalidToken();
     }
 
-    const data = <Resource>user.data;
-    const userProcessor = await this.processorFor("user");
+    this.transaction = await this.app.createTransaction();
 
-    data.attributes["roles"] = await this.app.services.roles.bind(userProcessor)(user.data as User);
-    data.attributes["permissions"] = await this.app.services.permissions.bind(userProcessor)(user.data as User);
+    const data = <Resource>user.data;
+
+    data.attributes["roles"] = await this.app.services.roles.bind(this)(user.data as User);
+    data.attributes["permissions"] = await this.app.services.permissions.bind(this)(user.data as User);
 
     return data;
   }
