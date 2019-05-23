@@ -44,6 +44,11 @@ export default class ApplicationInstance {
       throw jsonApiErrors.InvalidToken();
     }
 
-    return <Resource>user.data;
+    const data = <Resource>user.data;
+
+    data.attributes["roles"] = await this.app.services.roles(user.data as User);
+    data.attributes["permissions"] = await this.app.services.permissions(user.data as User);
+
+    return data;
   }
 }
