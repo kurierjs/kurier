@@ -24,7 +24,8 @@ const app = new Application({
 app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
-  userLoginCallback: login
+  userLoginCallback: login,
+  userRolesProvider: async () => ["Admin"]
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
   // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
