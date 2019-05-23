@@ -1,17 +1,12 @@
 const promiseHashMap = async (hash, callback) => {
   const keys = Object.keys(hash);
-  const promises = await Promise.all(
-    keys.map(async key => {
-      return {
-        key,
-        value: await callback(key)
-      };
-    })
-  );
+  const result = {};
 
-  return promises.reduce((accum, { key, value }) => {
-    return { ...accum, [key]: value };
-  }, {});
+  for (const key of keys) {
+    result[key] = await callback(key);
+  }
+
+  return result;
 };
 
 export default promiseHashMap;
