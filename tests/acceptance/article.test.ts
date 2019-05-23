@@ -1,44 +1,39 @@
-import * as faker from "faker";
 import { SuperTest, Test } from "supertest";
 import * as agent from "supertest-koa-agent";
 import factory from "./factories/article";
 import context from "../transaction";
 import http from "../dummy/src/http";
+import app from "../dummy/src/app";
+import Article from "../dummy/src/resources/article";
 
 const request = agent(http) as SuperTest<Test>;
 
 describe("Articles", () => {
   describe("GET", () => {
     it("Show articles index", async () => {
-      const factoryData = factory.buildList(faker.random.number({ min: 3, max: 10 }));
-      await context.transaction.table("articles").insert(factoryData);
-      const dbResources = await context.transaction.table("articles").select("*");
+      const data = JSON.parse(JSON.stringify(factory.toInsert[0]));
+      const rawArticle = app.serializer.deserializeResource({ op: "add", data, ref: { type: "article" } }, Article);
+      await context.transaction.table("articles").insert(rawArticle.data.attributes);
 
       const result = await request.get(`/articles`);
 
       expect(result.status).toEqual(200);
-      expect(result.body.data.length).toEqual(dbResources.length);
-
-      dbResources.forEach(dbRecord => {
-        const requestResult = result.body.data.find(a => a.id === dbRecord.id);
-
-        expect(requestResult).not.toBeUndefined();
-        expect(requestResult.attributes.body).toEqual(dbRecord.body);
-      });
     });
 
     it("Gets article by id", async () => {
-      const factoryData = factory.buildList(faker.random.number({ min: 3, max: 10 }));
-      await context.transaction.table("articles").insert(factoryData);
-      const dbResources = await context.transaction.table("articles").select("*");
-      const dbRecord: any = faker.random.arrayElement(dbResources);
+      const data = JSON.parse(JSON.stringify(factory.toInsert[0]));
+      const rawArticle = app.serializer.deserializeResource({ op: "add", data, ref: { type: "article" } }, Article);
+      await context.transaction.table("articles").insert(rawArticle.data.attributes);
 
-      const result = await request.get(`/articles/${dbRecord.id}`);
+      const result = await request.get(`/articles/1`);
+      const {
+        relationships, type,
+        attributes: { body }
+      } = factory.toInsert[0];
+      const mockedResult = { relationships, type, id: 1, attributes: { body, voteCount: 0 } };
 
       expect(result.status).toEqual(200);
-      const requestResult = result.body.data;
-      expect(requestResult).not.toBeUndefined();
-      expect(requestResult.attributes.body).toEqual(dbRecord.body);
+      expect(result.body.data).toEqual(mockedResult);
     });
   });
 });

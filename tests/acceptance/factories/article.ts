@@ -1,6 +1,26 @@
-import * as faker from "faker";
-import { Factory } from "rosie";
-
-export default Factory.define("user").attrs({
-  body: () => faker.lorem.paragraphs(3),
-});
+export default {
+  toInsert: [
+    {
+      attributes: {
+        body: "this is test 1",
+      },
+      type: "article",
+      relationships: {
+        author: {
+          data: { id: "1", type: "user" }
+        }
+      }
+    },
+    {
+      attributes: {
+        body: "this is test 2",
+      },
+      type: "article",
+      relationships: {
+        author: {
+          data: { id: "1", type: "user" }
+        }
+      }
+    },
+  ]
+};
