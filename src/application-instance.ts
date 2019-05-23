@@ -45,9 +45,10 @@ export default class ApplicationInstance {
     }
 
     const data = <Resource>user.data;
+    const userProcessor = await this.processorFor("user");
 
-    data.attributes["roles"] = await this.app.services.roles(user.data as User);
-    data.attributes["permissions"] = await this.app.services.permissions(user.data as User);
+    data.attributes["roles"] = await this.app.services.roles.bind(userProcessor)(user.data as User);
+    data.attributes["permissions"] = await this.app.services.permissions.bind(userProcessor)(user.data as User);
 
     return data;
   }

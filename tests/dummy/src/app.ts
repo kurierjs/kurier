@@ -25,7 +25,9 @@ app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
   userLoginCallback: login,
-  userRolesProvider: async () => ["Admin"]
+  async userRolesProvider(this: MyVeryOwnUserProcessor<User>, user: User) {
+    return ["Admin"];
+  }
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
   // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
