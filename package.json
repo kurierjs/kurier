@@ -7,8 +7,9 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
-    "test": "jest --runInBand",
+    "test": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc jest --runInBand",
     "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy/src/",
+    "test:migration:make": "knex migrate:make --migrations-directory ./tests/dummy/src/migrations --knexfile ./tests/dummy/src/knexfile.ts -x ts",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
   "repository": {
