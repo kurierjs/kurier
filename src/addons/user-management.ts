@@ -7,6 +7,7 @@ import Resource from "../resource";
 import JsonApiUserProcessor from "../processors/user-processor";
 import JsonApiSessionProcessor from "../processors/session-processor";
 import Session from "../resources/session";
+import ApplicationInstance from "../application-instance";
 
 export type UserManagementAddonOptions = AddonOptions & {
   userResource: typeof User;
@@ -14,6 +15,8 @@ export type UserManagementAddonOptions = AddonOptions & {
   userEncryptPasswordCallback?: (op: Operation) => Promise<ResourceAttributes>;
   userLoginCallback?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
   userGenerateIdCallback?: () => Promise<string>;
+  userRolesProvider?: (this: ApplicationInstance, user: User) => Promise<string[]>;
+  userPermissionsProvider?: (this: ApplicationInstance, user: User) => Promise<string[]>;
   usernameRequestParameter?: string;
   passwordRequestParameter?: string;
 };
@@ -21,10 +24,12 @@ export type UserManagementAddonOptions = AddonOptions & {
 const defaults: UserManagementAddonOptions = {
   userResource: User,
   userProcessor: JsonApiUserProcessor,
+  userRolesProvider: async () => [],
+  userPermissionsProvider: async () => [],
   userLoginCallback: async () => {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
-      "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
     );
     return true;
   },
@@ -32,7 +37,7 @@ const defaults: UserManagementAddonOptions = {
   userEncryptPasswordCallback: async (op: Operation) => {
     console.warn(
       "WARNING: You're using the default encryptPassword callback with UserManagementAddon." +
-      "Your password is NOT being encrypted. Implement this callback in your addon configuration."
+        "Your password is NOT being encrypted. Implement this callback in your addon configuration."
     );
 
     return { password: op.data.attributes.password };
@@ -49,6 +54,9 @@ export default class UserManagementAddon extends Addon {
 
   async install() {
     const sessionResourceType = this.createSessionResource();
+
+    this.app.services.roles = this.options.userRolesProvider;
+    this.app.services.permissions = this.options.userPermissionsProvider;
 
     this.app.types.push(this.options.userResource, sessionResourceType);
     this.app.processors.push(this.createUserProcessor(), this.createSessionProcessor(sessionResourceType));

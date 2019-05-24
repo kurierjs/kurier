@@ -44,6 +44,13 @@ export default class ApplicationInstance {
       throw jsonApiErrors.InvalidToken();
     }
 
-    return <Resource>user.data;
+    this.transaction = await this.app.createTransaction();
+
+    const data = <Resource>user.data;
+
+    data.attributes["roles"] = await this.app.services.roles.bind(this)(user.data as User);
+    data.attributes["permissions"] = await this.app.services.permissions.bind(this)(user.data as User);
+
+    return data;
   }
 }
