@@ -7,9 +7,8 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
+    "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy-app/",
     "test": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc jest --runInBand",
-    "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy/src/",
-    "test:migration:make": "knex migrate:make --migrations-directory ./tests/dummy/src/migrations --knexfile ./tests/dummy/src/knexfile.ts -x ts",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
   "repository": {
@@ -35,20 +34,16 @@
     "ws": "^7.0.0"
   },
   "devDependencies": {
-    "@types/faker": "^4.1.5",
     "@types/jest": "^24.0.12",
     "@types/jsonwebtoken": "^8.3.0",
-    "@types/knex": "^0.15.1",
     "@types/koa": "^2.0.48",
     "@types/pluralize": "^0.0.29",
     "@types/supertest": "^2.0.7",
     "@types/ws": "^6.0.1",
     "axios": "^0.18.0",
-    "faker": "^4.1.0",
     "jest": "^24.8.0",
     "knex-migrate": "^1.7.2",
     "prettier": "^1.15.3",
-    "rosie": "^2.0.1",
     "sqlite3": "^4.0.6",
     "supertest": "^4.0.2",
     "supertest-koa-agent": "^0.3.2",
@@ -77,7 +72,7 @@
           }
         },
         "testMatch": [
-          "<rootDir>/tests/unit/**/?(*.)+(spec|test).ts"
+          "<rootDir>/tests/test-suite/unit/**/?(*.)+(spec|test).ts"
         ]
       },
       {
@@ -87,7 +82,7 @@
           "js"
         ],
         "setupFilesAfterEnv": [
-          "<rootDir>/tests/setup.ts"
+          "<rootDir>/tests/test-suite/setup.ts"
         ],
         "transform": {
           "^.+\\.(ts)$": "ts-jest"
@@ -98,7 +93,7 @@
           }
         },
         "testMatch": [
-          "<rootDir>/tests/acceptance/**/?(*.)+(spec|test).ts"
+          "<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"
         ]
       }
     ]
