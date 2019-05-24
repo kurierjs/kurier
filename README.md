@@ -44,9 +44,9 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 - [Authentication and authorization](#authorization)
   - [Defining an `User` resource](#defining-an-user-resource)
   - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
-  - [Using the `IfUser()` helper](#using-the-ifuser-helper)
   - [Using the `UserManagement` addon](#using-the-usermanagement-addon)
   - [Configuring roles and permissions](#configuring-roles-and-permissions)
+  - [Using the `IfUser-*` helpers](#using-the-ifuser--helpers)
   - [Front-end requirements](#front-end-requirements)
 - [The JSONAPI application](#the-jsonapi-application)
   - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
@@ -1049,36 +1049,6 @@ export default class BookProcessor extends KnexProcessor<Book> {
 }
 ```
 
-### Using the `IfUser()` helper
-
-You might want to restrict an operation to a specific subset of users who match a certain criteria. For that purpose, you can augment the `@Authorize` decorator with the `IfUser()` helper:
-
-```ts
-import { KnexProcessor, Operation, Authorize, IfUser } from "@ebryn/jsonapi-ts";
-import { Book } from "./resources";
-
-export default class BookProcessor extends KnexProcessor<Book> {
-  // This operation will return an `Unauthorized` error if there's
-  // no user with the role "librarian" in the JSONAPI application
-  // instance.
-  @Authorize(IfUser("role", "librarian"))
-  async get(op: Operation): Promise<Book[]> {
-    return super.get(op);
-  }
-}
-```
-
-The `IfUser()` helper syntax is as follows:
-
-```ts
-IfUser(attributeName: string, attributeValue: string | number | boolean);
-```
-
-There are also more complex helpers for more granular control, with the same syntax:
-
-- `IfUserNotMatches()` will check if a given value is _not_ a match against an attribute value. Useful for exclusion.
-- `IfUserMatchesEvery()` will check if _all_ items in a list of given values are a match again a property with a list of attribute values.
-
 ### Using the `UserManagement` addon
 
 In order to put all the pieces together, JSONAPI-TS provides an [addon](#what-is-an-addon) to manage both user and session concerns.
@@ -1181,17 +1151,17 @@ In order to enable this feature, you'll need to supply two additional callbacks,
 For example, a role provider could look like this:
 
 `role-provider.ts`
+
 ```ts
 import { ApplicationInstance, User } from "@ebryn/jsonapi-ts";
 
 export default async function roleProvider(this: ApplicationInstance, user: User): Promise<string[]> {
   const userRoleProcessor = this.processorFor("userRole");
-  
-  return (
-    await roleProcessor.getQuery()
-      .where({ "user_id": user.id })
-      .select("role_name")
-  ).map(record => record["role_name"]);
+
+  return (await roleProcessor
+    .getQuery()
+    .where({ user_id: user.id })
+    .select("role_name")).map(record => record["role_name"]);
 }
 ```
 
@@ -1208,6 +1178,39 @@ app.use(UserManagementAddon, {
   userPermissionsProvider: permissionsProvider
 } as UserManagementAddonOptions);
 ```
+
+### Using the `IfUser-*` helpers
+
+You might want to restrict an operation to a specific subset of users who match a certain criteria. For that purpose, you can augment the `@Authorize` decorator with the `IfUser()` helper:
+
+```ts
+import { KnexProcessor, Operation, Authorize, IfUser } from "@ebryn/jsonapi-ts";
+import { Book } from "./resources";
+
+export default class BookProcessor extends KnexProcessor<Book> {
+  // This operation will return an `Unauthorized` error if there's
+  // no user with the role "librarian" in the JSONAPI application
+  // instance.
+  @Authorize(IfUser("role", "librarian"))
+  async get(op: Operation): Promise<Book[]> {
+    return super.get(op);
+  }
+}
+```
+
+These are the available helpers:
+
+| Helper                            | Parameters                                                   | Description                                                                   |
+| --------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| **`IfUser`**                      | `attribute` _(string)_<br>`value`: any primitive value/array | Checks if a user's attribute matches at least one of the provided values.     |
+| **`IfUserDoesNotMatches`**        | `attribute` _(string)_<br>`value`: any primitive value/array | Checks if a user's attribute does _not_ matches _any_ of the provided values. |
+| **`IfUserMatchesEvery`**          | `attribute` _(string)_<br>`value`: any primitive value/array | Checks if a user's attribute matches every single one of the provided values. |
+| **`IfUserHasRole`**               | `roleName` _(string, string[])_                              | Checks if a user has at least one of the provided roles.                      |
+| **`IfUserHasEveryRole`**          | `roleNames` _(string[])_                                     | Checks if a user has all of the provided roles.                               |
+| **`IfUserDoesNotHaveRole`**       | `roleName` _(string, string[])_                              | Checks if a user has none of the provided roles.                              |
+| **`IfUserHasPermission`**         | `permissionName` _(string, string[])_                        | Checks if a user has at least one of the provided permissions.                |
+| **`IfUserHasEveryPermission`**    | `permissionNames` _(string[])_                               | Checks if a user has all of the provided permissions.                         |
+| **`IfUserDoesNotHavePermission`** | `permissionName` _(string, string[])_                        | Checks if a user has none of the provided permissions.                        |
 
 ### Front-end requirements
 
