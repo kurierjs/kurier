@@ -7,7 +7,6 @@ import Comment from "./resources/comment";
 import Vote from "./resources/vote";
 import VoteProcessor from "./processors/vote";
 import knexfile from "./../../data/knexfile";
-
 import login from "./callbacks/login";
 import MyVeryOwnUserProcessor from "./processors/user";
 
