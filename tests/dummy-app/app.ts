@@ -20,10 +20,11 @@ const app = new Application({
 app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
-  userLoginCallback: login
+  userLoginCallback: login,
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
   // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
+
 app.services.knex = Knex(knexfile["development"]);
 
 export default app;
