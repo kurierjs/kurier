@@ -9,7 +9,7 @@ export default {
     relationships: {}
   },
   forCreation: {
-    initial: {
+    request: {
       data: {
         attributes: {
           email: "test@test.com",
@@ -20,7 +20,7 @@ export default {
         relationships: {}
       }
     },
-    final: {
+    response: {
       data: {
         id: 1,
         type: "user",
@@ -36,7 +36,7 @@ export default {
     }
   },
   toUpdate: {
-    initial: {
+    request: {
       data: {
         attributes: {
           email: "test@test.com",
@@ -55,7 +55,7 @@ export default {
         }
       }
     },
-    final: {
+    response: {
       data: {
         id: 1,
         type: "user",
@@ -82,7 +82,7 @@ export default {
         relationships: {}
       }
     },
-    initial: {
+    request: {
       data: {
         attributes: {
           email: "test@test.com",
@@ -91,7 +91,7 @@ export default {
         type: "session"
       }
     },
-    final: {
+    response: {
       data: {
         id: "STRING",
         type: "session",

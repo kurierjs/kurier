@@ -10,17 +10,17 @@ const request = agent(http) as SuperTest<Test>;
 describe("Users", () => {
   describe("POST", () => {
     it("Create user", async () => {
-      const result = await request.post("/users").send(users.forCreation.initial)
+      const result = await request.post("/users").send(users.forCreation.request)
       expect(result.status).toEqual(201);
-      expect(result.body).toEqual(users.forCreation.final);
+      expect(result.body).toEqual(users.forCreation.response);
     });
   });
 
   describe("PATCH", () => {
     it("Update a user", async () => {
-      const [insertedId] = await context.transaction.table("users").insert(users.toUpdate.initial.data.attributes);
+      const [insertedId] = await context.transaction.table("users").insert(users.toUpdate.request.data.attributes);
       const result = await request.patch(`/users/${insertedId}`).send(users.toUpdate.dataToUpdate)
-      expect(result.body).toEqual(users.toUpdate.final);
+      expect(result.body).toEqual(users.toUpdate.response);
       expect(result.status).toEqual(200);
     });
   });
@@ -28,12 +28,12 @@ describe("Users", () => {
   describe("GET", () => {
     it("Session Creation", async () => {
       await request.post("/users").send(users.toAuthenticate.user);
-      const result = await request.post("/session").send(users.toAuthenticate.initial);
+      const result = await request.post("/session").send(users.toAuthenticate.request);
       expect(result.status).toEqual(201);
       expect(result.body.data.id).toBeDefined();
       expect(result.body.data.attributes.token).toBeDefined();
       expect(result.body.data.type).toEqual("session");
-      expect(result.body.data.relationships).toEqual(users.toAuthenticate.final.data.relationships);
+      expect(result.body.data.relationships).toEqual(users.toAuthenticate.response.data.relationships);
     });
 
     it("Authenticated - Get all users", async () => {

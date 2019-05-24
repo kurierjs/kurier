@@ -1,6 +1,6 @@
 export default {
   toGet: {
-    initial: [
+    request: [
       {
         attributes: {
           body: "this is test 1"
@@ -13,7 +13,7 @@ export default {
         }
       }
     ],
-    loaded: [
+    response: [
       {
         id: 1,
         attributes: {
