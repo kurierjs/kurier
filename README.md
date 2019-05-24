@@ -46,6 +46,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
   - [Using the `IfUser()` helper](#using-the-ifuser-helper)
   - [Using the `UserManagement` addon](#using-the-usermanagement-addon)
+  - [Configuring roles and permissions](#configuring-roles-and-permissions)
   - [Front-end requirements](#front-end-requirements)
 - [The JSONAPI application](#the-jsonapi-application)
   - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
@@ -1166,6 +1167,45 @@ app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
   userLoginCallback: login
+} as UserManagementAddonOptions);
+```
+
+### Configuring roles and permissions
+
+This framework provides support for more granular access control via _roles_ and _permissions_. These layers allow to fine-tune the `@Authorize` decorator to more specific conditions.
+
+In order to enable this feature, you'll need to supply two additional callbacks, called _providers_: `userRolesProvider` and `userPermissionsProvider`. These functions operate with the scope of an `ApplicationInstance` and receive a `User` resource; they must return an array of strings, containing the names of the roles and permissions, respectively.
+
+> 👆️ Depending on your data sources, you might need to define a `Role` and a `Permission` resource.
+
+For example, a role provider could look like this:
+
+`role-provider.ts`
+```ts
+import { ApplicationInstance, User } from "@ebryn/jsonapi-ts";
+
+export default async function roleProvider(this: ApplicationInstance, user: User): Promise<string[]> {
+  const userRoleProcessor = this.processorFor("userRole");
+  
+  return (
+    await roleProcessor.getQuery()
+      .where({ "user_id": user.id })
+      .select("role_name")
+  ).map(record => record["role_name"]);
+}
+```
+
+This will inject the roles into the ApplicationInstance object, specifically in `appInstance.user.data.attributes.roles` and `appInstance.user.data.attributes.permissions`. Note that these two special attributes are only available in the context of the `@Authorize` decorator. They won't be part of any JSONAPI response.
+
+Once you've defined your providers, you can pass them along the rest of the UserManagementAddon options:
+
+```ts
+app.use(UserManagementAddon, {
+  userResource: User,
+  userProcessor: MyVeryOwnUserProcessor,
+  userLoginCallback: login,
+  userRolesProvider: roleProvider,
+  userPermissionsProvider: permissionsProvider
 } as UserManagementAddonOptions);
 ```
 
