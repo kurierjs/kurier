@@ -12,7 +12,7 @@ export default class ApplicationInstance {
   public user: User;
   public transaction: Knex.Transaction;
 
-  constructor(public app: Application) {}
+  constructor(public app: Application) { }
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
     return this.app.processorFor(resourceType, this);
@@ -50,7 +50,7 @@ export default class ApplicationInstance {
 
     data.attributes["roles"] = await this.app.services.roles.bind(this)(user.data as User);
     data.attributes["permissions"] = await this.app.services.permissions.bind(this)(user.data as User);
-
+    await this.transaction.commit();
     return data;
   }
 }
