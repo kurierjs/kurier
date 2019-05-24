@@ -22,7 +22,7 @@ app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
   userLoginCallback: login,
-  async userRolesProvider(this: MyVeryOwnUserProcessor<User>, user: User) {
+  async userRolesProvider(user: User) {
     return ["Admin"];
   }
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
