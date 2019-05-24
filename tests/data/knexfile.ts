@@ -5,7 +5,7 @@ export default {
   development: {
     client: "sqlite3",
     connection: {
-      filename: "./tests/dummy/db/dev.sqlite3"
+      filename: join(__dirname, "dev.sqlite3")
     },
     useNullAsDefault: true,
     debug: true
@@ -13,8 +13,9 @@ export default {
   test: {
     client: "sqlite3",
     connection: {
-      filename: "./tests/dummy/db/test.sqlite3"
+      filename: join(__dirname, "test.sqlite3")
     },
+    extension: "ts",
     useNullAsDefault: true,
     migrations: {
       directory: join(__dirname, "migrations")

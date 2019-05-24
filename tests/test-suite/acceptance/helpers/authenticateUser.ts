@@ -1,15 +1,15 @@
-import app from "../../dummy/src/app";
-import { Resource, HasId } from "../../../src";
+import app from "../../test-app/app";
 import factory from "../factories/user";
+import { HasId, Resource } from "../../../../src";
 
 export default async function authenticateUser(): Promise<{ token: string, user: HasId }> {
-  const { email, password } = factory.usersToInsert[0].attributes;
+  const { email, password } = factory.userToAuthenticate.attributes;
 
   const [createdUser] = await app.executeOperations([
     {
       op: "add",
       params: {},
-      data: factory.usersToInsert[0],
+      data: factory.userToAuthenticate,
       ref: {
         type: "user"
       }

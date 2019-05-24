@@ -1,4 +1,5 @@
-import { Application, KnexProcessor } from "../../src";
+import { KnexProcessor, Application } from "../../../src";
+
 
 describe("Application", () => {
   it("can be instantiated", async () => {

@@ -1,5 +1,5 @@
 import { Transaction } from "knex";
-import app from "./dummy/src/app";
+import app from "./test-app/app";
 import context from "./transaction";
 
 const knex = app.services.knex;
