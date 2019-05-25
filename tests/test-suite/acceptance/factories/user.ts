@@ -1,20 +1,11 @@
 export default {
-  userToAuthenticate: {
-    attributes: {
-      email: "me@me.com",
-      password: "mememe",
-      username: "me"
-    },
-    type: "user",
-    relationships: {}
-  },
   forCreation: {
     request: {
       data: {
         attributes: {
-          email: "test@test.com",
+          email: "creationtest@test.com",
           password: "test",
-          username: 123456
+          username: "creationtest"
         },
         type: "user",
         relationships: {}
@@ -22,11 +13,11 @@ export default {
     },
     response: {
       data: {
-        id: 1,
+        id: 4,
         type: "user",
         attributes: {
-          username: "123456",
-          email: "test@test.com",
+          username: "creationtest",
+          email: "creationtest@test.com",
           friends: [{ name: "Joel" }, { name: "Ryan" }],
           coolFactor: 3,
           roles: ["user", "author", "voter"]
@@ -36,32 +27,21 @@ export default {
     }
   },
   toUpdate: {
-    request: {
-      data: {
-        attributes: {
-          email: "test@test.com",
-          password: "test",
-          username: 123456
-        },
-        type: "user",
-        relationships: {}
-      }
-    },
     dataToUpdate: {
       data: {
         type: "user",
         attributes: {
-          email: "modifiedemail@test.com"
+          email: "updatetest@test.com"
         }
       }
     },
     response: {
       data: {
-        id: 1,
+        id: 2,
         type: "user",
         attributes: {
-          username: "123456",
-          email: "modifiedemail@test.com",
+          username: "username2",
+          email: "updatetest@test.com",
           friends: [{ name: "Joel" }, { name: "Ryan" }],
           coolFactor: 3,
           roles: ["user", "author", "voter"]
@@ -71,24 +51,14 @@ export default {
     }
   },
   toAuthenticate: {
-    user: {
-      data: {
-        attributes: {
-          email: "test@test.com",
-          password: "test",
-          username: 123456
-        },
-        type: "user",
-        relationships: {}
-      }
-    },
     request: {
       data: {
         attributes: {
-          email: "test@test.com",
+          email: "me@me.com",
           password: "test"
         },
-        type: "session"
+        type: "session",
+        relationships: {}
       }
     },
     response: {
@@ -117,6 +87,30 @@ export default {
       attributes: {
         email: "me@me.com",
         username: "me",
+        friends: [{ name: "Joel" }, { name: "Ryan" }],
+        coolFactor: 3,
+        roles: ["user", "author", "voter"]
+      },
+      relationships: {}
+    },
+    {
+      id: 2,
+      type: "user",
+      attributes: {
+        email: "me2@me.com",
+        username: "username2",
+        friends: [{ name: "Joel" }, { name: "Ryan" }],
+        coolFactor: 3,
+        roles: ["user", "author", "voter"]
+      },
+      relationships: {}
+    },
+    {
+      id: 3,
+      type: "user",
+      attributes: {
+        email: "me3@me.com",
+        username: "username3",
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
         roles: ["user", "author", "voter"]

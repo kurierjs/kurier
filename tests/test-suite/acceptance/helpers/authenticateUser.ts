@@ -1,34 +1,15 @@
-import app from "../../test-app/app";
-import factory from "../factories/user";
-import { HasId, Resource } from "../../../../src";
+import userFactory from "../factories/user"
+import { HasId } from "../../../../src";
+import { sign } from "jsonwebtoken";
 
 export default async function authenticateUser(): Promise<{ token: string, user: HasId }> {
-  const { email, password } = factory.userToAuthenticate.attributes;
+  const secureData = {
+    type: 'user',
+    id: 1,
+    attributes: { username: 'me', email: 'me@me.com' },
+    relationships: {}
+  };
 
-  const [createdUser] = await app.executeOperations([
-    {
-      op: "add",
-      params: {},
-      data: factory.userToAuthenticate,
-      ref: {
-        type: "user"
-      }
-    }
-  ]);
-
-  const [result] = await app.executeOperations([
-    {
-      op: "add",
-      params: {},
-      data: {
-        attributes: { email, password },
-        type: "session",
-        relationships: {}
-      },
-      ref: {
-        type: "session"
-      }
-    }
-  ]);
-  return { user: createdUser.data as HasId, token: `Bearer ${(<Resource>result.data).attributes.token}` };
+  const token = sign(secureData, process.env.SESSION_KEY || "test", { subject: String(1), expiresIn: "1d" });
+  return { user: userFactory.toGet[0] as HasId, token: `Bearer ${token}` };
 }
