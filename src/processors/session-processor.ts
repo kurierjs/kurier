@@ -64,7 +64,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
       userType
     );
 
-    const token = sign(secureData, process.env.SESSION_KEY || 'test_session_key', {
+    const token = sign(secureData, process.env.SESSION_KEY, {
       subject: String(userId),
       expiresIn: "1d"
     });
