@@ -20,6 +20,7 @@ const createTransaction = (connection, callback): Promise<Transaction> => {
 beforeAll(async () => {
   migrationTransaction = await createTransaction(knex, () => { });
   await migrationTransaction.migrate.latest();
+  await migrationTransaction.seed.run();
 });
 
 afterAll(async () => {
