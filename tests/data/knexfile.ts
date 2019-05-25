@@ -17,6 +17,9 @@ export default {
     },
     extension: "ts",
     useNullAsDefault: true,
+    seeds: {
+      directory: join(__dirname, "seeds")
+    },
     migrations: {
       directory: join(__dirname, "migrations")
     }
