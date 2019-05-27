@@ -16,8 +16,8 @@ extended_description: |
   or similar languages.
 
   This technique alleviates the expense of sending large datasets from a server
-  to a client and also reduces the processing time that a client would require
-  to filter a large dataset.
+  to a client and also reduces the processing time that a client would otherwise
+  require to filter a large dataset.
 
   In order to support data filtering, this specification defines a series of
   comparers:
@@ -38,7 +38,7 @@ extended_description: |
   GET /people?filter[countryOfBirth]=AR
   ```
 
-  Also, if working with JSON:API Operations, the same request would like this:
+  Also, if working with JSON:API Operations, the same request would be like this:
 
   ```json
   {
@@ -54,8 +54,8 @@ extended_description: |
   }
   ```
 
-  Other combinations are possible, and these parameters are described in more detail
-  in the following sections.
+  Other combinations are possible, and these parameters are described in greater
+  detail in the following sections.
 
 minimum_jsonapi_version: 1.0
 minimum_jsonapi_version_explanation: /
@@ -78,7 +78,7 @@ categories:
 ## Filtering requirements
 
 The server implementing this profile **SHOULD** support filtering when
-[fetching](https://jsonapi.org/format/1.0/#fetching-resources).
+[fetching](https://jsonapi.org/format/1.0/#fetching-resources) resources.
 
 The server implementing this profile **MAY** support filtering when
 [updating](https://jsonapi.org/format/1.0/#crud-updating)
@@ -119,7 +119,8 @@ Where:
 
 ## On JSON:API operations
 
-The client **MUST** use the [`filter` attribute in the `params` object of an operation](https://github.com/json-api/json-api/blob/999e6df77b28549d6c37b163b73c8e9102400020/_format/1.1/index.md#-operation-objects), following this format:
+The client **MUST** use the [`filter` attribute in the `params` object of an operation](https://github.com/json-api/json-api/blob/999e6df77b28549d6c37b163b73c8e9102400020/_format/1.1/index.md#-operation-objects),
+following this format:
 
 ```json
 {
@@ -135,18 +136,8 @@ The client **MUST** use the [`filter` attribute in the `params` object of an ope
 }
 ```
 
-Where:
-
-- `{type}` is a [resource type](https://jsonapi.org/format/1.0/#document-resource-object-identification),
-  used to describe resource objects that share common attributes
-  and relationships.
-- `{attribute}` is the name of an [attribute](https://jsonapi.org/format/1.0/#document-resource-object-attributes),
-  a representation of information about the resource object.
-- `{comparer:}` is one of the [comparers](#comparers) defined in
-  this profile, followed by a colon. If a comparer is not specified,
-  the server **MUST** assume that is an equality (`eq`) comparison.
-- `{value}` is the information which the comparer will use to match
-  against the attribute's value.
+Where `{type}`, `{attribute}`, `{comparer:}` and `value` represent the same
+concepts described in the HTTP request format.
 
 # Comparers
 
@@ -197,18 +188,22 @@ GET /people/filter[countryOfBirth]=ne:AR
 }
 ```
 
-Note that for the equality examples, the `eq` comparer is not declared as part
-of the request/operation. This is because `eq` is the default comparer.
+Note that for the equality examples, the `eq` comparer is not declared
+as part of the request/operation. This is because `eq` is the default
+comparer.
 
-If a comparer is not specified, the server **MUST** assume that is an equality (`eq`) comparison.
+If a comparer is not specified, the server **MUST** assume that is an
+equality (`eq`) comparison.
 
 ## Range comparison (`lt`, `gt`, `le`, `ge`)
 
-The less-than (`lt`), greater-than (`gt`), less-or-equal (`le`) and greater-or-equal (`ge`)
-comparers allow a client to request filtered data by using a range comparison.
+The less-than (`lt`), greater-than (`gt`), less-or-equal (`le`) and
+greater-or-equal (`ge`) comparers allow a client to request filtered
+data by using a range comparison.
 
-The server **SHOULD** implement this comparer for all applicable types where a notion of _less-than_
-or _greater-than_ apply (such as numbers or timestamps).
+The server **SHOULD** implement this comparer for all applicable types
+where a notion of _less-than_ or _greater-than_ apply (such as numbers
+or timestamps).
 
 **HTTP request**
 
@@ -284,36 +279,42 @@ GET /people/filter[yearOfBirth]=ge:2000
 
 ## Partial match (`like`)
 
-The `like` comparer allows to partially match a given value against the value of an attribute.
+The `like` comparer allows to partially match a given value against
+the value of an attribute.
 
-The server **SHOULD** implement this comparer for any value types that contain text or string data.
+The server **SHOULD** implement this comparer for any value types that
+contain text or string data.
 
-This comparer makes use of the `%` symbol as a wild-card to determine how it behaves:
+This comparer makes use of the `%` symbol as a wild-card to determine
+how it behaves:
 
-- If `%` **precedes** the value to match, the comparer **MUST** match against any attribute value
-  that **ends with** the provided value.
-- If `%` **follows** the value to match, the comparer **MUST** match against any attribute value
-  that **starts with** the provided value.
-- If `%` **surrounds** the value to match, the comparer **MUST** match against any attribute value
-  that **contains** the provided value.
+- If `%` **precedes** the value to match, the comparer **MUST** match
+  against any attribute value that **ends with** the provided value.
+- If `%` **follows** the value to match, the comparer **MUST** match
+  against any attribute value that **starts with** the provided value.
+- If `%` **surrounds** the value to match, the comparer **MUST** match
+  against any attribute value that **contains** the provided value.
 
 **HTTP request**
 
 ```sh
-# Do a GET HTTP request for people who contain the word "engineer" in their job title.
+# Do a GET HTTP request for people who contain the word
+# "engineer" in their job title.
 GET /people?filter[jobTitle]=like:%engineer%
 
 # Do a GET HTTP request for people whose name starts with John.
 GET /people?filter[firstName]=like:John%
 
-# Do a GET HTTP request for people whose Social Security Number ends with 123.
+# Do a GET HTTP request for people whose Social Security Number
+# ends with 123.
 GET /people/filter[ssn]=like:%123
 ```
 
 **JSON:API operation**
 
 ```json
-// Do a "get" operation for people who contain the word "engineer" in their job title.
+// Do a "get" operation for people who contain the word "engineer"
+// in their job title.
 {
   "op": "get",
   "ref": {
@@ -339,7 +340,8 @@ GET /people/filter[ssn]=like:%123
   }
 }
 
-// Do a "get" operation for people whose Social Security Number ends with 123.
+// Do a "get" operation for people whose Social Security Number
+// ends with 123.
 {
   "op": "get",
   "ref": {
@@ -355,9 +357,13 @@ GET /people/filter[ssn]=like:%123
 
 ## Match against possible values (`in`, `nin`)
 
-The `in` and not-in (`nin`) comparers are used to match an attribute value against a list of possible values. It's an extension of the equality and inequality comparers, since they match or not-match exactly against a value.
+The `in` and not-in (`nin`) comparers are used to match an attribute
+value against a list of possible values. It's an extension of the
+equality and inequality comparers, since they match or not-match
+exactly against a value.
 
-The client **MUST** provide a list of possible values in a comma-separated list when using either `in` or `nin`.
+The client **MUST** provide a list of possible values in a
+comma-separated list when using either `in` or `nin`.
 
 The server **MUST** implement this comparer for all value types.
 
@@ -403,13 +409,14 @@ GET /people?filter[maritalStatus]=nin:married,single
 
 # Combining multiple filters
 
-It is possible to apply multiple criteria to further restrict the subset of data the server will
-send to the client.
+It is possible to apply multiple criteria to further restrict the
+subset of data the server will send to the client.
 
-The server **MUST** support applying multiple filter query parameters to different attributes.
+The server **MUST** support applying multiple filter query parameters
+to different attributes.
 
-Note that all filters will be applied and evaluated as an `AND`-chain. In order to a resource to be
-served, all criteria must be met.
+Note that all filters will be applied and evaluated as an `AND`-chain.
+In order to a resource to be served, all criteria must be met.
 
 **HTTP request**
 
