@@ -1,5 +1,3 @@
-import flatten = require("flatten");
-
 import * as Knex from "knex";
 
 import OperationProcessor from "./processors/operation-processor";
@@ -14,6 +12,7 @@ import {
   AddonOptions
 } from "./types";
 import unpick from "./utils/unpick";
+import flatten from "./utils/flatten";
 
 import ApplicationInstance from "./application-instance";
 import JsonApiSerializer from "./serializers/serializer";
@@ -106,7 +105,6 @@ export default class Application {
       })
     );
   }
-
 
   async processorFor(
     resourceType: string,
