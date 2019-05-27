@@ -28,9 +28,6 @@ const operators = {
   nin: "not in"
 };
 
-const getOperator = (paramValue: string): string =>
-  operators[Object.keys(operators).find(operator => paramValue.indexOf(`${operator}:`) === 0)];
-
 const getWhereMethod = (value: string, operator: string) => {
   if (value !== "null") {
     return "andWhere";
@@ -195,22 +192,33 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
 
     Object.keys(filters).forEach(key => {
-      let value = String(filters[key]);
-      const operator = getOperator(value) || "=";
+      const matches = String(filters[key]).split("|");
 
-      if (value.substring(value.indexOf(":") + 1)) {
-        value = value.substring(value.indexOf(":") + 1);
-      }
+      processedFilters.push(
+        ...matches.map((match: string) => {
+          let value = "";
+          let comparer = "";
 
-      processedFilters.push({
-        value,
-        operator,
-        method: getWhereMethod(value, operator),
-        column:
-          key === this.resourceClass.schema.primaryKeyName
-            ? key
-            : this.appInstance.app.serializer.attributeToColumn(key)
-      });
+          if (match.includes(":")) {
+            [comparer, value] = match.split(":");
+          } else {
+            comparer = "eq";
+            value = match;
+          }
+
+          const operator = operators[comparer];
+
+          return {
+            value,
+            operator,
+            method: getWhereMethod(value, operator),
+            column:
+              key === this.resourceClass.schema.primaryKeyName
+                ? key
+                : this.appInstance.app.serializer.attributeToColumn(key)
+          };
+        })
+      );
     });
 
     return processedFilters.forEach(filter =>
