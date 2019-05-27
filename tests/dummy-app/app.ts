@@ -1,5 +1,11 @@
 import * as Knex from "knex";
-import { Application, KnexProcessor, UserManagementAddon, UserManagementAddonOptions } from "./jsonapi-ts";
+import {
+  Application,
+  ApplicationInstance,
+  KnexProcessor,
+  UserManagementAddon,
+  UserManagementAddonOptions
+} from "./jsonapi-ts";
 import ArticleProcessor from "./processors/article";
 import Article from "./resources/article";
 import User from "./resources/user";
@@ -21,7 +27,7 @@ app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
   userLoginCallback: login,
-  async userRolesProvider(user: User) {
+  async userRolesProvider(this: ApplicationInstance, user: User) {
     return ["Admin"];
   }
   // userGenerateIdCallback: async () => (-Date.now()).toString(),

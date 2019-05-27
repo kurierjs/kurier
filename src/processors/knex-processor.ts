@@ -23,6 +23,7 @@ const operators = {
   le: "<=",
   ge: ">=",
   like: "like",
+  nlike: "not like",
   in: "in",
   nin: "not in"
 };

@@ -9,6 +9,7 @@ import VoteProcessor from "./processors/vote";
 import knexfile from "./../../data/knexfile";
 import login from "./callbacks/login";
 import MyVeryOwnUserProcessor from "./processors/user";
+import { ApplicationInstance } from "../../../src";
 
 const app = new Application({
   namespace: "api",
@@ -21,7 +22,7 @@ app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
   userLoginCallback: login,
-  async userRolesProvider(user: User) {
+  async userRolesProvider(this: ApplicationInstance, user: User) {
     return ["Admin"];
   }
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
