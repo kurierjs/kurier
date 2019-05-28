@@ -29,6 +29,7 @@ extended_description: |
   - `le` (less or equal)
   - `ge` (greater or equal)
   - `like` (starts with, contains, ends with)
+  - `nlike` (the negated form of `like`)
   - `in` (match against a series of values)
   - `nin` (not match against a series of values)
 
@@ -415,15 +416,21 @@ subset of data the server will send to the client.
 The server **MUST** support applying multiple filter query parameters
 to different attributes.
 
-Note that all filters will be applied and evaluated as an `AND`-chain.
-In order to a resource to be served, all criteria must be met.
+The server **MUST** support applying multiple comparers to a same attribute.
+
+Note that all filters **MUST** be applied and evaluated as an `AND`-chain.
+In order to a resource to be served, all criteria **MUST** be met.
 
 **HTTP request**
 
 ```sh
 # Do a GET HTTP request for people born in 1990 who are not married and
 # have a job related to Engineering.
-GET /people?filter[yearOfBirth]=1990&maritalStatus=ne:married&jobTitle=like:%engineer%
+GET /people?filter[yearOfBirth]=1990&filter[maritalStatus]=ne:married&filter[jobTitle]=like:%engineer%
+
+# Do a GET HTTP Request for people born between 1990 and 1995 who have
+# not got a job a related to Engineering.
+GET /people?filter[yearOfBirth]=ge:1990|le:1995&filter[jobTitle]=nlike:%engineer%
 ```
 
 **JSON:API operation**
@@ -441,6 +448,21 @@ GET /people?filter[yearOfBirth]=1990&maritalStatus=ne:married&jobTitle=like:%eng
       "yearOfBirth": "1990",
       "maritalStatus": "ne:married",
       "jobTitle": "like:%engineer%"
+    }
+  }
+}
+
+// Do a "get" operation for people born between 1990 and 1995 who have
+// not got a job related to Engineering.
+{
+  "op": "get",
+  "ref": {
+    "type": "person"
+  },
+  "params": {
+    "filter": {
+      "yearOfBirth": "ge:1990|le:1995",
+      "jobTitle": "nlike:%engineer%"
     }
   }
 }
