@@ -11,12 +11,12 @@ export async function up(knex: Knex): Promise<any> {
     table.integer("createdBy");
 
     table
-      .string("author")
+      .integer("user_id")
       .references("id")
       .inTable("users");
 
     table
-      .string("article_id")
+      .integer("article_id")
       .references("id")
       .inTable("articles");
   });
@@ -25,4 +25,3 @@ export async function up(knex: Knex): Promise<any> {
 export async function down(knex: Knex): Promise<any> {
   await knex.schema.dropTable("votes");
 }
-

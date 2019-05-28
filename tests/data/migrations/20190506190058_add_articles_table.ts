@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<any> {
     table.increments("id").primary();
     table.string("body");
     table
-      .string("author")
+      .integer("author")
       .references("id")
       .inTable("users");
     table.timestamps();
