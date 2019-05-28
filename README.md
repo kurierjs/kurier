@@ -578,7 +578,7 @@ GET /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 GET /books?filter[id]=ef70e4a4-5016-467b-958d-449ead0ce08e
 
 # Get the first 5 book names, sorted by name.
-GET /books?fields=name&page[number]=0&page[size]=5&sort=name
+GET /books?fields[book]=name&page[number]=0&page[size]=5&sort=name
 
 # Skip 2 books, then get the next 5 books.
 GET /books?page[offset]=2&page[limit]=5

@@ -8,7 +8,7 @@ const request = agent(http) as SuperTest<Test>;
 describe("Comments", () => {
   describe("GET", () => {
     it("Get Comment by id - Only show the body attribute", async () => {
-      const result = await request.get("/comments/1?fields=body");
+      const result = await request.get("/comments/1?fields[comment]=body");
       expect(result.status).toEqual(200);
       expect(result.body).toEqual(comments.singleArticleNoTypeField);
     });
@@ -17,7 +17,6 @@ describe("Comments", () => {
       const result = await request.get("/comments?sort=-body");
       expect(result.status).toEqual(200);
       expect(result.body).toEqual(comments.toGetReverseSorted);
-
     });
 
     it("Get Comments - Test pagination and sorting - Should only show one ", async () => {
