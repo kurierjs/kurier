@@ -117,5 +117,169 @@ export default {
       },
       relationships: {}
     }
-  ]
+  ],
+  multipleIncludeGetSingleUser: {
+    data: {
+      id: 1,
+      type: "user",
+      attributes: {
+        username: "me",
+        email: "me@me.com",
+        friends: [
+          {
+            name: "Joel"
+          },
+          {
+            name: "Ryan"
+          }
+        ],
+        coolFactor: 3,
+        roles: ["user", "author", "voter"]
+      },
+      relationships: {
+        comments: {
+          data: [
+            {
+              id: 1,
+              type: "comment"
+            },
+            {
+              id: 3,
+              type: "comment"
+            }
+          ]
+        },
+        articles: {
+          data: [
+            {
+              id: 1,
+              type: "article"
+            }
+          ]
+        },
+        votes: {
+          data: [
+            {
+              id: 1,
+              type: "vote"
+            },
+            {
+              id: 2,
+              type: "vote"
+            }
+          ]
+        }
+      }
+    },
+    included: [
+      {
+        id: 1,
+        type: "comment",
+        attributes: {
+          body: "hello",
+          type: "not_spam"
+        },
+        relationships: {
+          author: {
+            data: {
+              id: 1,
+              type: "user"
+            }
+          },
+          parentComment: {
+            data: {
+              id: 2,
+              type: "comment"
+            }
+          }
+        }
+      },
+      {
+        id: 3,
+        type: "comment",
+        attributes: {
+          body: "hello3",
+          type: "spam"
+        },
+        relationships: {
+          author: {
+            data: {
+              id: 1,
+              type: "user"
+            }
+          },
+          parentComment: {
+            data: null
+          }
+        }
+      },
+      {
+        id: 1,
+        type: "article",
+        attributes: {
+          body: "this is test 1",
+          createdAt: null,
+          updatedAt: null
+        },
+        relationships: {
+          author: {
+            data: {
+              id: 1,
+              type: "user"
+            }
+          }
+        }
+      },
+      {
+        id: 1,
+        type: "vote",
+        attributes: {
+          points: 10,
+          createdOn: null,
+          updatedOn: null,
+          updatedBy: null,
+          createdBy: null
+        },
+        relationships: {
+          user: {
+            data: {
+              id: 1,
+              type: "user"
+            }
+          },
+          article: {
+            data: {
+              id: 1,
+              type: "article"
+            }
+          }
+        }
+      },
+      {
+        id: 2,
+        type: "vote",
+        attributes: {
+          points: 2,
+          createdOn: null,
+          updatedOn: null,
+          updatedBy: null,
+          createdBy: null
+        },
+        relationships: {
+          user: {
+            data: {
+              id: 1,
+              type: "user"
+            }
+          },
+          article: {
+            data: {
+              id: 1,
+              type: "article"
+            }
+          }
+        }
+      }
+    ]
+  }
 };
