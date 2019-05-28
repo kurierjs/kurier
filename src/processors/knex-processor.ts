@@ -235,7 +235,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     }
 
     if (page) {
-      queryBuilder.offset(page.offset).limit(page.limit);
+      queryBuilder.offset(page.offset || page.number * page.size).limit(page.limit || page.size);
     }
   }
 
