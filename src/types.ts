@@ -178,7 +178,12 @@ export interface IJsonApiSerializer {
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
   deserializeResource(op: Operation, resourceClass: typeof Resource): Operation;
   serializeResource(resource: Resource, resourceType: typeof Resource): Resource;
-  serializeRelationship(relationships: Resource | Resource[], primaryKeyName?: string): ResourceRelationshipData[];
+  serializeRelationship(
+    relationships: Resource | Resource[],
+    resourceType: typeof Resource,
+    primaryKeyName?: string
+  ): ResourceRelationshipData[];
+  serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource): Resource[] | null;
 }
 
 export interface IAddon {
