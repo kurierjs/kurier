@@ -134,7 +134,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     }
 
     return await this.getQuery()
-      .where({ [primaryKey]: op.ref.id })
+      .where({ [primaryKey]: id })
       .del()
       .then(() => undefined);
   }
