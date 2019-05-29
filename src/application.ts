@@ -89,6 +89,7 @@ export default class Application {
     const resourceClass = await this.resourceFor(op.ref.type);
     const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
     const result = await processor.execute(deserializedOperation);
+
     return this.buildOperationResponse(result);
   }
 
@@ -135,98 +136,41 @@ export default class Application {
   }
 
   async buildOperationResponse(data: Resource | Resource[] | void): Promise<OperationResponse> {
-    const included = flatten(await this.extractIncludedResources(data)).filter(Boolean);
-    const uniqueIncluded = [...new Set(included.map((item: Resource) => `${item.type}_${item.id}`))].map(typeId =>
-      included.find((item: Resource) => `${item.type}_${item.id}` === typeId)
-    );
+    let resourceType: string;
+
+    if (Array.isArray(data)) {
+      resourceType = data[0] ? data[0].type : null;
+    } else if (data) {
+      resourceType = data.type;
+    } else {
+      resourceType = null;
+    }
+
+    const included = flatten(
+      await this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType))
+    ).filter(Boolean);
 
     const serializedResources = await this.serializeResources(data);
 
-    return included.length ? { included: uniqueIncluded, data: serializedResources } : { data: serializedResources };
+    return included.length ? { included, data: serializedResources } : { data: serializedResources };
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
     if (!data) {
       return null;
     }
+
     if (Array.isArray(data)) {
       if (!data.length) {
         return [];
       }
+
       const resource = await this.resourceFor(data[0].type);
+
       return data.map(record => this.serializer.serializeResource(record, resource));
     }
+
     const resource = await this.resourceFor(data.type);
     return this.serializer.serializeResource(data, resource);
-  }
-
-  // TODO: remove type any for data.relationships[relationshipName]
-  // TODO: improve this function, there's repeated code that I don't like
-  async extractIncludedResources(data: Resource | Resource[] | void) {
-    if (!data) {
-      return null;
-    }
-    if (Array.isArray(data)) {
-      return Promise.all(data.map(record => this.extractIncludedResources(record)));
-    }
-
-    const schemaRelationships = (await this.resourceFor(data.type)).schema.relationships;
-    const includedData: Resource[] = [];
-    Object.keys(data.relationships)
-      .filter(relationshipName => data.relationships[relationshipName])
-      .forEach(relationshipName => {
-        if (Array.isArray(data.relationships[relationshipName])) {
-          data.relationships[relationshipName] = (data.relationships[relationshipName] as any).map(rel => {
-            const relatedResourceClass = schemaRelationships[relationshipName].type();
-            const resource = rel[0] || rel;
-            const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-
-            if (resource[pkName]) {
-              includedData.push(
-                this.serializer.serializeResource(
-                  new relatedResourceClass({
-                    id: resource[pkName],
-                    attributes: unpick(resource, [
-                      pkName,
-                      ...Object.keys(relatedResourceClass.schema.attributes).filter(
-                        attribute => relatedResourceClass.schema.attributes[attribute] === Password
-                      )
-                    ])
-                  }),
-                  relatedResourceClass
-                )
-              );
-            }
-
-            resource["type"] = relatedResourceClass.type;
-            return resource;
-          });
-        } else {
-          const resource = data.relationships[relationshipName];
-          const relatedResourceClass = schemaRelationships[relationshipName].type();
-          const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-
-          if (resource[pkName]) {
-            includedData.push(
-              this.serializer.serializeResource(
-                new relatedResourceClass({
-                  id: resource[pkName],
-                  attributes: unpick(resource, [
-                    pkName,
-                    ...Object.keys(relatedResourceClass.schema.attributes).filter(
-                      attribute => relatedResourceClass.schema.attributes[attribute] === Password
-                    )
-                  ])
-                }),
-                relatedResourceClass
-              )
-            );
-          }
-
-          resource["type"] = relatedResourceClass.type;
-        }
-      });
-
-    return includedData;
   }
 }

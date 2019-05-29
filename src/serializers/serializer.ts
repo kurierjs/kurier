@@ -4,6 +4,7 @@ import Resource from "../resource";
 import unpick from "../utils/unpick";
 import pick from "../utils/pick";
 import Password from "../attribute-types/password";
+import flatten from "../utils/flatten";
 
 export default class JsonApiSerializer implements IJsonApiSerializer {
   resourceTypeToTableName(resourceType: string): string {
@@ -106,27 +107,80 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           ? DEFAULT_PRIMARY_KEY
           : schemaRelationships[relName].type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
-        const relationship = this.serializeRelationship(
-          (data.relationships[relName] as unknown) as Resource | Resource[],
-          fkName
-        );
         data.relationships[relName] = {
-          data: relationship
+          data: this.serializeRelationship(
+            (data.relationships[relName] as unknown) as Resource | Resource[],
+            schemaRelationships[relName].type(),
+            fkName
+          )
         };
       });
 
     return data;
   }
 
-  serializeRelationship(relationships: Resource | Resource[], primaryKeyName: string = DEFAULT_PRIMARY_KEY) {
+  serializeRelationship(
+    relationships: Resource | Resource[],
+    resourceType: typeof Resource,
+    primaryKeyName: string = DEFAULT_PRIMARY_KEY
+  ) {
     if (Array.isArray(relationships)) {
-      return relationships.map(relationship => this.serializeRelationship(relationship, primaryKeyName));
+      return relationships.map(relationship => this.serializeRelationship(relationship, resourceType, primaryKeyName));
     }
+
     relationships.id = relationships[primaryKeyName || DEFAULT_PRIMARY_KEY];
+
     if (!relationships.id) {
       return null;
     }
 
+    relationships.type = resourceType.type;
+
     return pick(relationships, ["id", "type"]) as ResourceRelationshipData[];
+  }
+
+  serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource) {
+    if (!data) {
+      return null;
+    }
+
+    if (Array.isArray(data)) {
+      return data.map(record => this.serializeIncludedResources(record, resourceType));
+    }
+
+    const schemaRelationships = resourceType.schema.relationships;
+    const includedData = [];
+
+    Object.keys(data.relationships)
+      .filter(relationshipName => data.relationships[relationshipName])
+      .map(relationshipName => ({ relationshipName, resources: flatten([data.relationships[relationshipName]]) }))
+      .forEach(({ relationshipName, resources }: { relationshipName: string; resources: Resource[] }) => {
+        const relatedResourceClass = schemaRelationships[relationshipName].type();
+        const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+
+        includedData.push(
+          ...resources
+            .filter(resource => resource[pkName])
+            .map(resource => ({
+              ...this.serializeResource(
+                new relatedResourceClass({
+                  id: resource[pkName],
+                  attributes: unpick(resource, [
+                    pkName,
+                    ...Object.keys(relatedResourceClass.schema.attributes).filter(
+                      attribute => relatedResourceClass.schema.attributes[attribute] === Password
+                    )
+                  ])
+                }),
+                relatedResourceClass
+              ),
+              type: relatedResourceClass.type
+            }))
+        );
+      });
+
+    return [...new Set(includedData.map((item: Resource) => `${item.type}_${item.id}`))].map(typeId =>
+      includedData.find((item: Resource) => `${item.type}_${item.id}` === typeId)
+    );
   }
 }
