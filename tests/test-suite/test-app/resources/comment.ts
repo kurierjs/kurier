@@ -12,7 +12,6 @@ export default class Comment extends Resource {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "author_id"
       },
       parentComment: {
         type: () => Comment,

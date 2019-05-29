@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<any> {
     table.string("type");
     table
       .integer("author_id")
+      .notNullable()
       .references("id")
       .inTable("users");
 
