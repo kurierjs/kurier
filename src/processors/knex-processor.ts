@@ -120,10 +120,13 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   async remove(op: Operation): Promise<void> {
-    const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const { params, ref } = op;
+    const { id } = ref;
+    const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
     const record = await this.getQuery()
-      .where({ [primaryKeyName]: op.ref.id })
+      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
       .first();
 
     if (!record) {
@@ -131,14 +134,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     }
 
     return await this.getQuery()
-      .where({ [primaryKeyName]: op.ref.id })
+      .where({ [primaryKey]: op.ref.id })
       .del()
       .then(() => undefined);
   }
 
   async update(op: Operation): Promise<HasId> {
-    const { id } = op.ref;
-    const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const { params, ref } = op;
+    const { id } = ref;
+    const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
     const dataToUpdate = Object.keys(op.data.attributes)
       .map(attribute => ({
@@ -147,7 +152,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
     const updated = await this.getQuery()
-      .where({ [primaryKeyName]: id })
+      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
       .first()
       .update(dataToUpdate);
 
@@ -156,7 +161,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     }
 
     return await this.getQuery()
-      .where({ [primaryKeyName]: id })
+      .where({ [primaryKey]: id })
       .select(getColumns(this.resourceClass, this.appInstance.app.serializer))
       .first();
   }
