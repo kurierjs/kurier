@@ -20,7 +20,7 @@ describe("Comments", () => {
     });
 
     it("Get Comments - Test pagination and sorting - Should only show one ", async () => {
-      const result = await request.get("/comments?page[number]=0&page[size]=1&sort=-body");
+      const result = await request.get("/comments?page[number]=0&page[size]=1");
       expect(result.status).toEqual(200);
       expect(result.body).toEqual({ data: [comments.toGetReverseSorted.data[2]] });
     });
