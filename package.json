@@ -8,6 +8,7 @@
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
     "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy-app/",
+    "run:tests": "SESSION_KEY=test tsnd tests/test-suite/test-app/",
     "test": "SESSION_KEY=test jest --forceExit",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
@@ -80,6 +81,7 @@
           "ts",
           "js"
         ],
+        "globalSetup": "<rootDir>/tests/test-suite/globalSetup.ts",
         "setupFilesAfterEnv": [
           "<rootDir>/tests/test-suite/setup.ts"
         ],
