@@ -13,7 +13,7 @@ export default {
   test: {
     client: "sqlite3",
     connection: {
-      filename: ":memory:"
+      filename: join(__dirname, "test.sqlite3")
     },
     extension: "ts",
     useNullAsDefault: true,

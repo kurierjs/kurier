@@ -4,8 +4,6 @@ import context from "./transaction";
 
 const knex = app.services.knex;
 
-let migrationTransaction: Transaction;
-
 const createTransaction = (connection, callback): Promise<Transaction> => {
   return new Promise(resolve =>
     connection
@@ -17,19 +15,9 @@ const createTransaction = (connection, callback): Promise<Transaction> => {
   );
 };
 
-beforeAll(async () => {
-  migrationTransaction = await createTransaction(knex, () => { });
-  await migrationTransaction.migrate.latest();
-  await migrationTransaction.seed.run();
-});
-
-afterAll(async () => {
-  await migrationTransaction.rollback();
-});
-
 beforeEach(async () => {
-  context.transaction = await createTransaction(migrationTransaction, t => {
-    app.services.knex = t;
+  context.transaction = await createTransaction(knex, transaction => {
+    app.services.knex = transaction;
   });
 });
 

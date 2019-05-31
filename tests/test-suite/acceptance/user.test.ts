@@ -7,22 +7,6 @@ import getAuthenticationData from "./helpers/authenticateUser";
 const request = agent(http) as SuperTest<Test>;
 
 describe("Users", () => {
-  describe("POST", () => {
-    it("Create user", async () => {
-      const result = await request.post("/users").send(users.forCreation.request);
-      expect(result.status).toEqual(201);
-      expect(result.body).toEqual(users.forCreation.response);
-    });
-  });
-
-  describe("PATCH", () => {
-    it("Update a user", async () => {
-      const result = await request.patch(`/users/2`).send(users.toUpdate.dataToUpdate);
-      expect(result.body).toEqual(users.toUpdate.response);
-      expect(result.status).toEqual(200);
-    });
-  });
-
   describe("GET", () => {
     it("Authenticated - Get all users", async () => {
       const authData = await getAuthenticationData();
@@ -43,6 +27,22 @@ describe("Users", () => {
       const result = await request.get("/users?filter[email]=me@me.com").set("Authorization", authData.token);
       expect(result.status).toEqual(200);
       expect(result.body).toEqual({ data: [users.toGet[0]] });
+    });
+  });
+
+  describe("POST", () => {
+    it("Create user", async () => {
+      const result = await request.post("/users").send(users.forCreation.request);
+      expect(result.status).toEqual(201);
+      expect(result.body).toEqual(users.forCreation.response);
+    });
+  });
+
+  describe("PATCH", () => {
+    it("Update a user", async () => {
+      const result = await request.patch(`/users/2`).send(users.toUpdate.dataToUpdate);
+      expect(result.body).toEqual(users.toUpdate.response);
+      expect(result.status).toEqual(200);
     });
   });
 
