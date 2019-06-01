@@ -10,18 +10,32 @@ export default {
     useNullAsDefault: true,
     debug: true
   },
-  test: {
+  test_snake_case: {
     client: "sqlite3",
     connection: {
-      filename: join(__dirname, "test.sqlite3")
+      filename: join(__dirname, "snake_case", "test.sqlite3")
     },
     extension: "ts",
     useNullAsDefault: true,
     seeds: {
-      directory: join(__dirname, "seeds")
+      directory: join(__dirname, "snake_case", "seeds")
     },
     migrations: {
-      directory: join(__dirname, "migrations")
+      directory: join(__dirname, "snake_case", "migrations")
+    }
+  },
+  test_camelCase: {
+    client: "sqlite3",
+    connection: {
+      filename: join(__dirname, "camelCase", "test.sqlite3")
+    },
+    extension: "ts",
+    useNullAsDefault: true,
+    seeds: {
+      directory: join(__dirname, "camelCase", "seeds")
+    },
+    migrations: {
+      directory: join(__dirname, "camelCase", "migrations")
     }
   }
 };

@@ -24,13 +24,23 @@ export default {
           }
         }
       },
-      rawRequest: {
+      rawRequestSnakeCase: {
         data: {
           attributes: {
             body: "new commentttt",
             type: "spam",
-            parent_comment_id: 1,
-            author_id: 2
+            author_id: 2,
+            parent_comment_id: 1
+          }
+        }
+      },
+      rawRequestCamelCase: {
+        data: {
+          attributes: {
+            body: "new commentttt",
+            type: "spam",
+            author_id: 2,
+            parentCommentId: 1
           }
         }
       }
@@ -294,7 +304,7 @@ export default {
       }
     ]
   },
-  singleArticleNoTypeField: {
+  singleCommentNoType: {
     data: {
       id: 1,
       type: "comment",
@@ -316,5 +326,27 @@ export default {
         }
       }
     }
+  },
+  singleCommentWithReflexiveInclude: {
+    data: {
+      id: 1,
+      type: "comment",
+      attributes: { body: "hello", type: "not_spam" },
+      relationships: {
+        parentComment: { data: { id: 2, type: "comment" } },
+        author: { data: { id: 1, type: "user" } }
+      }
+    },
+    included: [
+      {
+        id: 2,
+        type: "comment",
+        attributes: { body: "hello2", type: "not_spam" },
+        relationships: {
+          author: { data: { id: 2, type: "user" } },
+          parentComment: { data: { id: 3, type: "comment" } }
+        }
+      }
+    ]
   }
 };

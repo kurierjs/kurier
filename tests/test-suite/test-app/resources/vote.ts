@@ -20,8 +20,7 @@ export default class Vote extends Resource {
       },
       article: {
         type: () => Article,
-        belongsTo: true,
-        foreignKeyName: "article_id"
+        belongsTo: true
       }
     }
   };

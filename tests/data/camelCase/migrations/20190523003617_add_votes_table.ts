@@ -1,4 +1,4 @@
-import Knex from "knex";
+import * as Knex from "knex";
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable("votes", table => {
@@ -11,12 +11,12 @@ export async function up(knex: Knex): Promise<any> {
     table.integer("createdBy");
 
     table
-      .integer("user_id")
+      .integer("userId")
       .references("id")
       .inTable("users");
 
     table
-      .integer("article_id")
+      .integer("articleId")
       .references("id")
       .inTable("articles");
   });

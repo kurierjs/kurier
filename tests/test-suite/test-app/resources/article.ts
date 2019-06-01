@@ -16,8 +16,7 @@ export default class Article extends Resource {
       },
       votes: {
         type: () => Vote,
-        hasMany: true,
-        foreignKeyName: "article_id"
+        hasMany: true
       }
     }
   };
