@@ -53,8 +53,6 @@ function conditionsPass(
 
 function authorizeMiddleware(operation: Function, conditions: AttributeValueMatch[]) {
   const callback = function(this: OperationProcessor<Resource>) {
-    this.constructor["accessRules"][operation.name] = conditions;
-
     if (!this.appInstance.user) {
       throw JsonApiErrors.Unauthorized();
     }
@@ -86,6 +84,10 @@ export async function canAccessResource(resource: Resource, operationName: strin
 
   if (!accessRules.length) {
     return true;
+  }
+
+  if (!appInstance.user) {
+    return false;
   }
 
   return accessRules.every((condition: AttributeValueMatch) => conditionsPass(appInstance, condition));
