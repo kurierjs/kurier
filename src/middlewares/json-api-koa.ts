@@ -24,16 +24,23 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     const appInstance = new ApplicationInstance(app);
 
+    try {
+      await authenticate(appInstance, ctx);
+    } catch (error) {
+      ctx.body = convertErrorToHttpResponse(error);
+      ctx.status = error.status;
+      return next();
+    }
+
     const data = urlData(appInstance, ctx);
 
     if (ctx.method === "PATCH" && data.resource === "bulk") {
       await handleBulkEndpoint(appInstance, ctx);
-      return await next();
+      return next();
     }
 
     ctx.urlData = data;
-
-    return await handleJsonApiEndpoint(appInstance, ctx).then(() => next());
+    return handleJsonApiEndpoint(appInstance, ctx).then(() => next());
   };
 
   return compose([koaBody({ json: true }), ...middlewares, jsonApiKoa]);
@@ -80,7 +87,6 @@ async function handleJsonApiEndpoint(appInstance: ApplicationInstance, ctx: Cont
   if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
   try {
-    await authenticate(appInstance, ctx);
     const [result]: OperationResponse[] = await appInstance.app.executeOperations([op], appInstance);
 
     ctx.body = convertOperationResponseToHttpResponse(ctx, result);
