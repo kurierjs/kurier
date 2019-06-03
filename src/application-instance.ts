@@ -13,7 +13,7 @@ export default class ApplicationInstance {
   public user: User;
   public transaction: Knex.Transaction;
 
-  constructor(public app: Application) {}
+  constructor(public app: Application) { }
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
     return this.app.processorFor(resourceType, this);
@@ -22,19 +22,15 @@ export default class ApplicationInstance {
   async getUserFromToken(token: string): Promise<User | undefined> {
     const tokenPayload = decode(token);
 
-    if (!tokenPayload) {
+    if (!tokenPayload || !tokenPayload["id"]) {
       throw jsonApiErrors.InvalidToken();
     }
-
-    const userId = tokenPayload["id"];
-
-    if (!userId) return;
 
     const op = {
       op: "identify",
       ref: {
         type: "user",
-        id: userId
+        id: tokenPayload["id"]
       },
       params: {}
     } as Operation;
@@ -43,9 +39,7 @@ export default class ApplicationInstance {
 
     try {
       [user] = await this.app.executeOperations([op]);
-    } catch (e) {
-      const error = e as JsonApiError;
-
+    } catch (error) {
       if (error.code === "not_found") {
         throw jsonApiErrors.InvalidToken();
       }
