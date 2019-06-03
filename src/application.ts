@@ -5,19 +5,17 @@ import Resource from "./resource";
 import {
   Operation,
   OperationResponse,
-  DEFAULT_PRIMARY_KEY,
   ApplicationServices,
   IJsonApiSerializer,
   ApplicationAddons,
   AddonOptions
 } from "./types";
-import unpick from "./utils/unpick";
 import flatten from "./utils/flatten";
 
 import ApplicationInstance from "./application-instance";
 import JsonApiSerializer from "./serializers/serializer";
-import Password from "./attribute-types/password";
 import Addon from "./addon";
+import { canAccessResource } from "./decorators/authorize";
 
 export default class Application {
   namespace: string;
@@ -90,7 +88,7 @@ export default class Application {
     const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
     const result = await processor.execute(deserializedOperation);
 
-    return this.buildOperationResponse(result);
+    return this.buildOperationResponse(result, processor.appInstance);
   }
 
   async createTransaction(): Promise<Knex.Transaction | undefined> {
@@ -135,7 +133,10 @@ export default class Application {
     return this.types.find(({ type }) => type && type === resourceType);
   }
 
-  async buildOperationResponse(data: Resource | Resource[] | void): Promise<OperationResponse> {
+  async buildOperationResponse(
+    data: Resource | Resource[] | void,
+    appInstance: ApplicationInstance
+  ): Promise<OperationResponse> {
     let resourceType: string;
 
     if (Array.isArray(data)) {
@@ -146,9 +147,25 @@ export default class Application {
       resourceType = null;
     }
 
-    const included = flatten(
+    const allIncluded = flatten(
       await this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType))
-    ).filter(Boolean);
+    );
+
+    const included = [];
+
+    await Promise.all(
+      allIncluded.map((resource: Resource) => {
+        return new Promise(async resolve => {
+          const result = await canAccessResource(resource, "get", appInstance);
+
+          if (result) {
+            included.push(resource);
+          }
+
+          resolve();
+        });
+      })
+    );
 
     const serializedResources = await this.serializeResources(data);
 

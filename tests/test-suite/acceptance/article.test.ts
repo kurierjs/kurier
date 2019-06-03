@@ -45,10 +45,9 @@ describe("Articles", () => {
       expect(result.body).toEqual(articles.singleArticleMultipleIncludes);
     });
 
-    // TODO: THIS SHOULD'NT WORK WELL - EITHER 401 or simply don't show the author
-    it.skip("UNAuthenticated - Get an specific article with it's author - Should fail", async () => {
+    it("UNAuthenticated - Get an specific article with it's author - Should not include author", async () => {
       const result = await request.get("/articles/1?include=author");
-      expect(result.status).toEqual(401);
+      expect(result.body.included).toEqual(undefined);
     });
   });
 });
