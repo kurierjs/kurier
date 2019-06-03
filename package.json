@@ -56,13 +56,14 @@
     "typescript": "^3.4"
   },
   "jest": {
+    "globalSetup": "<rootDir>/tests/test-suite/globalSetup.ts",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
     "projects": [
       {
         "displayName": "unit",
-        "moduleFileExtensions": [
-          "ts",
-          "js"
-        ],
         "transform": {
           "^.+\\.(ts)$": "ts-jest"
         },
@@ -76,12 +77,7 @@
         ]
       },
       {
-        "displayName": "acceptance",
-        "moduleFileExtensions": [
-          "ts",
-          "js"
-        ],
-        "globalSetup": "<rootDir>/tests/test-suite/globalSetup.ts",
+        "displayName": "acceptance - snake_case",
         "setupFilesAfterEnv": [
           "<rootDir>/tests/test-suite/setup.ts"
         ],
@@ -89,6 +85,25 @@
           "^.+\\.(ts)$": "ts-jest"
         },
         "globals": {
+          "TEST_SUITE": "test_snake_case",
+          "ts-jest": {
+            "tsConfig": "tsconfig.test.json"
+          }
+        },
+        "testMatch": [
+          "<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"
+        ]
+      },
+      {
+        "displayName": "acceptance - camelCase",
+        "setupFilesAfterEnv": [
+          "<rootDir>/tests/test-suite/setup.ts"
+        ],
+        "transform": {
+          "^.+\\.(ts)$": "ts-jest"
+        },
+        "globals": {
+          "TEST_SUITE": "test_camelCase",
           "ts-jest": {
             "tsConfig": "tsconfig.test.json"
           }

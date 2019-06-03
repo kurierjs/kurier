@@ -1,4 +1,4 @@
-import Knex from "knex";
+import * as Knex from "knex";
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable("users", table => {
@@ -6,7 +6,8 @@ export async function up(knex: Knex): Promise<any> {
     table.string("username");
     table.string("email");
     table.string("password");
-    table.timestamps();
+    table.dateTime("created_at");
+    table.dateTime("updated_at");
   });
 }
 

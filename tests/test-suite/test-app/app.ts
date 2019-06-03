@@ -28,7 +28,5 @@ app.use(UserManagementAddon, {
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
   // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
-
-app.services.knex = Knex(knexfile["test"]);
-
+app.services.knex = app.services.knex || Knex(knexfile["test_camelCase"]);
 export default app;

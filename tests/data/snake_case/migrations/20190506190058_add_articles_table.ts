@@ -1,4 +1,4 @@
-import Knex from "knex";
+import * as Knex from "knex";
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable("articles", table => {
@@ -8,7 +8,9 @@ export async function up(knex: Knex): Promise<any> {
       .integer("author")
       .references("id")
       .inTable("users");
-    table.timestamps();
+    table.dateTime("created_at");
+    table.dateTime("updated_at");
+
   });
 }
 

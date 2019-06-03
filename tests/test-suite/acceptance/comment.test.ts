@@ -10,7 +10,7 @@ describe("Comments", () => {
     it("Get Comment - Test field filter - Should show only the body attribute", async () => {
       const result = await request.get("/comments/1?fields[comment]=body");
       expect(result.status).toEqual(200);
-      expect(result.body).toEqual(comments.singleArticleNoTypeField);
+      expect(result.body).toEqual(comments.singleCommentNoType);
     });
 
     it("List Comments - Test sorting - Should be sorted by body field", async () => {
@@ -24,11 +24,21 @@ describe("Comments", () => {
       expect(result.status).toEqual(200);
       expect(result.body).toEqual({ data: [comments.toGetReverseSorted.data[2]] });
     });
+
+    it("List Comments - Test pagination - Should only show one", async () => {
+      const result = await request.get("/comments/1?include=parentComment");
+      expect(result.status).toEqual(200);
+      expect(result.body).toEqual(comments.singleCommentWithReflexiveInclude);
+    });
   });
 
   describe("POST", () => {
     it("Create comment - raw request", async () => {
-      const result = await request.post("/comments").send(comments.forCreation.requests.rawRequest);
+      const data =
+        global["TEST_SUITE"] === "test_camelCase"
+          ? comments.forCreation.requests.rawRequestCamelCase
+          : comments.forCreation.requests.rawRequestSnakeCase;
+      const result = await request.post("/comments").send(data);
       expect(result.status).toEqual(201);
       expect(result.body).toEqual(comments.forCreation.responses.complete);
     });
