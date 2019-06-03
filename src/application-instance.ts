@@ -4,15 +4,16 @@ import * as Knex from "knex";
 import Application from "./application";
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
-import { Operation } from "./types";
+import { Operation, OperationResponse } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
+import JsonApiError from "./errors/error";
 
 export default class ApplicationInstance {
   public user: User;
   public transaction: Knex.Transaction;
 
-  constructor(public app: Application) { }
+  constructor(public app: Application) {}
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
     return this.app.processorFor(resourceType, this);
@@ -38,10 +39,18 @@ export default class ApplicationInstance {
       params: {}
     } as Operation;
 
-    const [user] = await this.app.executeOperations([op]);
+    let user: OperationResponse;
 
-    if (!user.data) {
-      throw jsonApiErrors.InvalidToken();
+    try {
+      [user] = await this.app.executeOperations([op]);
+    } catch (e) {
+      const error = e as JsonApiError;
+
+      if (error.code === "not_found") {
+        throw jsonApiErrors.InvalidToken();
+      }
+
+      throw error;
     }
 
     this.transaction = await this.app.createTransaction();
