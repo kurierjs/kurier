@@ -24,18 +24,23 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     const appInstance = new ApplicationInstance(app);
 
-    await authenticate(appInstance, ctx);
+    try {
+      await authenticate(appInstance, ctx);
+    } catch (error) {
+      ctx.body = convertErrorToHttpResponse(error);
+      ctx.status = error.status;
+      return next();
+    }
 
     const data = urlData(appInstance, ctx);
 
     if (ctx.method === "PATCH" && data.resource === "bulk") {
       await handleBulkEndpoint(appInstance, ctx);
-      return await next();
+      return next();
     }
 
     ctx.urlData = data;
-
-    return await handleJsonApiEndpoint(appInstance, ctx).then(() => next());
+    return handleJsonApiEndpoint(appInstance, ctx).then(() => next());
   };
 
   return compose([koaBody({ json: true }), ...middlewares, jsonApiKoa]);
@@ -58,7 +63,7 @@ function urlData(appInstance: ApplicationInstance, ctx: Context) {
     `^(\/+)?((?<namespace>${escapeStringRegexp(
       appInstance.app.namespace
     )})(\/+|$))?(?<resource>[^\\s\/?]+)?(\/+)?((?<id>[^\\s\/?]+)?(\/+)?\(?<relationships>relationships)?(\/+)?)?` +
-      "(?<relationship>[^\\s/?]+)?(/+)?$"
+    "(?<relationship>[^\\s/?]+)?(/+)?$"
   );
 
   const { resource, id, relationships, relationship } = (ctx.path.match(urlRegexp) || {})["groups"] || ({} as any);
@@ -86,14 +91,9 @@ async function handleJsonApiEndpoint(appInstance: ApplicationInstance, ctx: Cont
 
     ctx.body = convertOperationResponseToHttpResponse(ctx, result);
     ctx.status = STATUS_MAPPING[ctx.method];
-  } catch (e) {
-    const isJsonApiError = e && e.status;
-    if (!isJsonApiError) console.error("JSONAPI-TS: ", e);
-
-    const jsonApiError = isJsonApiError ? e : JsonApiErrors.UnhandledError();
-
-    ctx.body = convertJsonApiErrorToHttpResponse(jsonApiError);
-    ctx.status = jsonApiError.status;
+  } catch (error) {
+    ctx.body = convertErrorToHttpResponse(error);
+    ctx.status = error.status;
   }
 }
 
@@ -125,6 +125,10 @@ function convertOperationResponseToHttpResponse(ctx: Context, operation: Operati
   }
 }
 
-function convertJsonApiErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument {
-  return { errors: [error] };
+function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument {
+  const isJsonApiError = error && error.status;
+  if (!isJsonApiError) console.error("JSONAPI-TS: ", error);
+
+  const jsonApiError = isJsonApiError ? error : JsonApiErrors.UnhandledError();
+  return { errors: [jsonApiError] };
 }

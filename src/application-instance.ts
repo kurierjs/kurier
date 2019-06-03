@@ -4,9 +4,10 @@ import * as Knex from "knex";
 import Application from "./application";
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
-import { Operation } from "./types";
+import { Operation, OperationResponse } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
+import JsonApiError from "./errors/error";
 
 export default class ApplicationInstance {
   public user: User;
@@ -21,27 +22,29 @@ export default class ApplicationInstance {
   async getUserFromToken(token: string): Promise<User | undefined> {
     const tokenPayload = decode(token);
 
-    if (!tokenPayload) {
+    if (!tokenPayload || !tokenPayload["id"]) {
       throw jsonApiErrors.InvalidToken();
     }
-
-    const userId = tokenPayload["id"];
-
-    if (!userId) return;
 
     const op = {
       op: "identify",
       ref: {
         type: "user",
-        id: userId
+        id: tokenPayload["id"]
       },
       params: {}
     } as Operation;
 
-    const [user] = await this.app.executeOperations([op]);
+    let user: OperationResponse;
 
-    if (!user.data) {
-      throw jsonApiErrors.InvalidToken();
+    try {
+      [user] = await this.app.executeOperations([op]);
+    } catch (error) {
+      if (error.code === "not_found") {
+        throw jsonApiErrors.InvalidToken();
+      }
+
+      throw error;
     }
 
     this.transaction = await this.app.createTransaction();

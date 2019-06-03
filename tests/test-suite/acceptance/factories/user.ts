@@ -281,5 +281,13 @@ export default {
         }
       }
     ]
+  },
+  deletedUserError: {
+    errors: [
+      {
+        code: "not_found",
+        status: 404
+      }
+    ]
   }
 };
