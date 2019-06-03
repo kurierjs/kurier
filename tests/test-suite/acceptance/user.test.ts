@@ -49,11 +49,11 @@ describe("Users", () => {
   describe("DELETE", () => {
     it("Delete a user", async () => {
       const authData = await getAuthenticationData();
-      const deleteResponse = await request.delete("/users/1");
-      const emptyResponse = await request.get("/users/1").set("Authorization", authData.token);
+      const deleteResponse = await request.delete("/users/2");
+      const emptyResponse = await request.get("/users/2").set("Authorization", authData.token);
       expect(deleteResponse.status).toEqual(204);
       expect(emptyResponse.status).toEqual(404);
-      expect(emptyResponse.body).toEqual({});
+      expect(emptyResponse.body).toEqual(users.deletedUserError);
     });
   });
 });
