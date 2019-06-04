@@ -915,7 +915,7 @@ It receives a single argument, `options`, which is passed to the `Knex` construc
 
 Apart from the operations, this processor has some other methods, that operations use (so tread carefully here), that you can use while making custom operations.
 
-| Method    | functionality                                        |
+| Method    | Description                                        |
 | --------- | ---------------------------------------------------- |
 | `getQuery`| The common method to start a SQL request, starting with the table of the resource of the processor |
 | `tableName`     | Returns the table name of the resource of the processor                     |
