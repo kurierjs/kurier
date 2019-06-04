@@ -920,7 +920,7 @@ Apart from the operations, this processor has some other methods, that operation
 | `getQuery` | Returns an instance of [Knex.QueryBuilder](https://knexjs.org/#Builder), scoped to the table specified by `tableName` (the processor resource's data source) |
 | `tableName`     | Returns the table name for the resource handled by the processor                     |
 
-Using these two methods and the normal [knex functions](https://knexjs.org), you can extend however you want a processor.
+Using these two methods and the standard [Knex functions](https://knexjs.org/#Builder-wheres), you can extend a processor anyway you want to.
 
 ### Extending the `KnexProcessor` class
 
