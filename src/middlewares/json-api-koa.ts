@@ -93,7 +93,7 @@ async function handleJsonApiEndpoint(appInstance: ApplicationInstance, ctx: Cont
     ctx.status = STATUS_MAPPING[ctx.method];
   } catch (error) {
     ctx.body = convertErrorToHttpResponse(error);
-    ctx.status = error.status;
+    ctx.status = error.status || 500;
   }
 }
 
@@ -130,5 +130,12 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
   if (!isJsonApiError) console.error("JSONAPI-TS: ", error);
 
   const jsonApiError = isJsonApiError ? error : JsonApiErrors.UnhandledError();
+  if ((!process.env.NODE_ENV || process.env.NODE_ENV !== "production") && error.stack && !isJsonApiError) {
+    let firstLineErrorStack = error.stack.split("\n")[0];
+    if (firstLineErrorStack.indexOf('Error:') === 0) {
+      firstLineErrorStack = firstLineErrorStack.slice(7);
+    }
+    jsonApiError.detail = firstLineErrorStack;
+  }
   return { errors: [jsonApiError] };
 }
