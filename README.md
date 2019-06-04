@@ -917,7 +917,7 @@ Apart from the operations, this processor has some other methods, that operation
 
 | Method    | Description                                        |
 | --------- | ---------------------------------------------------- |
-| `getQuery`| The common method to start a SQL request, starting with the table of the resource of the processor |
+| `getQuery` | Returns an instance of [Knex.QueryBuilder](https://knexjs.org/#Builder), scoped to the table specified by `tableName` (the processor resource's data source) |
 | `tableName`     | Returns the table name of the resource of the processor                     |
 
 Using these two methods and the normal [knex functions](https://knexjs.org), you can extend however you want a processor.
