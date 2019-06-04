@@ -913,7 +913,7 @@ It maps operations to queries like this:
 
 It receives a single argument, `options`, which is passed to the `Knex` constructor. See the [Knex documentation](https://knexjs.org/#Installation-client) for detailed examples.
 
-Apart from the operations, this processor has some other methods, that operations use (so tread carefully here), that you can use while making custom operations.
+In addition to the operation handlers, this processor has some other methods that you can use while making custom operations. Note that all operations use these functions, so tread carefully here if you're interested in overriding them.
 
 | Method    | Description                                        |
 | --------- | ---------------------------------------------------- |
