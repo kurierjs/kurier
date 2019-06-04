@@ -897,7 +897,7 @@ class CommentProcessor<T extends Comment> extends KnexProcessor<T> {
 
 Any computed properties you define will be included in the resource on any operation. **Do not** declare these computed properties in the resource's schema, as JSONAPI-TS will interpret them as columns in a table and fail due to non-existing columns.
 
-### The `KnexProcessor` class
+## The `KnexProcessor` class
 
 This processor is a fully-implemented, database-driven extension of the `OperationProcessor` class seen before. It takes care of creating the necessary SQL queries to resolve any given operation.
 
@@ -912,6 +912,15 @@ It maps operations to queries like this:
 |           |                                                      |
 
 It receives a single argument, `options`, which is passed to the `Knex` constructor. See the [Knex documentation](https://knexjs.org/#Installation-client) for detailed examples.
+
+Apart from the operations, this processor has some other methods, that operations use (so tread carefully here), that you can use while making custom operations.
+
+| Method    | functionality                                        |
+| --------- | ---------------------------------------------------- |
+| `getQuery`| The common method to start a SQL request, starting with the table of the resource of the processor |
+| `tableName`     | Returns the table name of the resource of the processor                     |
+
+Using these two methods and the normal [knex functions](https://knexjs.org), you can extend however you want a processor.
 
 ### Extending the `KnexProcessor` class
 
@@ -937,6 +946,8 @@ export default class BookProcessor extends KnexProcessor<Book> {
 The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor and then do other actions around it.
 
 > ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
+
+> ℹ️ A thing to remember, is that JsonApiKoa won't parse the custom operations into endpoints, so to reach the custom operation from a HTTP request, you should use the *bulk* endpoint (or a JsonApiWebsockets operation), or execute the operation inside some of the default methods of the processor (with an if inside a GET, for example).
 
 ## Serialization
 
