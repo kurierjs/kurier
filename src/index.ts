@@ -15,6 +15,7 @@ import {
 } from "./decorators/if-user";
 import JsonApiErrors from "./errors/json-api-errors";
 import jsonApiKoa from "./middlewares/json-api-koa";
+import jsonApiExpress from "./middlewares/json-api-express";
 import jsonApiWebSocket from "./middlewares/json-api-websocket";
 import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
@@ -32,6 +33,7 @@ export {
   // Core objects
   Resource,
   jsonApiKoa,
+  jsonApiExpress,
   jsonApiWebSocket,
   Application,
   ApplicationInstance,
