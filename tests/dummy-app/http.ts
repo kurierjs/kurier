@@ -1,8 +1,13 @@
 import app from "./app";
 import * as Koa from "koa";
-import { jsonApiKoa } from "./jsonapi-ts";
+import * as express from "express";
+import { jsonApiKoa, jsonApiExpress } from "./jsonapi-ts";
 
-const koa = new Koa();
-koa.use(jsonApiKoa(app));
+const koaApp = new Koa();
+koaApp.use(jsonApiKoa(app));
 
-export default koa;
+const expressApp = express();
+expressApp.use(jsonApiExpress(app));
+
+export { expressApp, koaApp };
+export default koaApp;
