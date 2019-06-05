@@ -1,9 +1,7 @@
-import { SuperTest, Test } from "supertest";
-import * as agent from "supertest-koa-agent";
 import comments from "./factories/comment";
-import http from "../test-app/http";
+import testTransportLayer from "./helpers/transportLayers";
 
-const request = agent(http) as SuperTest<Test>;
+const request = testTransportLayer("express");
 
 describe("Comments", () => {
   describe("GET", () => {
