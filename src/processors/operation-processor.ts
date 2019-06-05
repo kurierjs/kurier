@@ -20,7 +20,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(public appInstance: ApplicationInstance) {}
+  constructor(public appInstance: ApplicationInstance) { }
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
@@ -44,7 +44,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
     record: HasId,
     eagerLoadedData: EagerLoadedData
   ) {
-    const typeFields = op.params.fields && op.params.fields[resourceClass.type];
+    const typeFields = op.params && op.params.fields && op.params.fields[resourceClass.type];
 
     const attributes = typeFields ? pick(this.attributes, typeFields) : this.attributes;
 
@@ -53,7 +53,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
   async getAttributes(op: Operation, resourceClass: typeof Resource, record: HasId, eagerLoadedData: EagerLoadedData) {
     const attributeKeys =
-      (op.params.fields && op.params.fields[resourceClass.type]) || Object.keys(resourceClass.schema.attributes);
+      (op.params && op.params.fields && op.params.fields[resourceClass.type]) ||
+      Object.keys(resourceClass.schema.attributes);
     return pick(record, attributeKeys);
   }
 
