@@ -1,139 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="57" failures="0" time="12.286">
-  <testsuite name="Comments" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:16" time="2.184" tests="12">
-    <testcase classname="Comments GET Get Comment - Test field filter - Should show only the body attribute" name="Comments GET Get Comment - Test field filter - Should show only the body attribute" time="0.077">
+<testsuites name="jest tests" tests="57" failures="0" time="13.038">
+  <testsuite name="Comments" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:25" time="2.246" tests="12">
+    <testcase classname="Comments GET Get Comment - Test field filter - Should show only the body attribute" name="Comments GET Get Comment - Test field filter - Should show only the body attribute" time="0.102">
     </testcase>
-    <testcase classname="Comments GET List Comments - Test sorting - Should be sorted by body field" name="Comments GET List Comments - Test sorting - Should be sorted by body field" time="0.019">
+    <testcase classname="Comments GET List Comments - Test sorting - Should be sorted by body field" name="Comments GET List Comments - Test sorting - Should be sorted by body field" time="0.014">
     </testcase>
     <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.007">
     </testcase>
-    <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.01">
+    <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - raw request" name="Comments POST Create comment - raw request" time="0.033">
+    <testcase classname="Comments POST Create comment - raw request" name="Comments POST Create comment - raw request" time="0.035">
     </testcase>
-    <testcase classname="Comments POST Create comment - Jsonapi request" name="Comments POST Create comment - Jsonapi request" time="0.012">
+    <testcase classname="Comments POST Create comment - Jsonapi request" name="Comments POST Create comment - Jsonapi request" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - missing attribute - should have a null attribute" name="Comments POST Create comment - missing attribute - should have a null attribute" time="0.01">
+    <testcase classname="Comments POST Create comment - missing attribute - should have a null attribute" name="Comments POST Create comment - missing attribute - should have a null attribute" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" name="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" time="0.01">
+    <testcase classname="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" name="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - invalid field - should fail" name="Comments POST Create comment - invalid field - should fail" time="0.016">
+    <testcase classname="Comments POST Create comment - invalid field - should fail" name="Comments POST Create comment - invalid field - should fail" time="0.03">
     </testcase>
-    <testcase classname="Comments PATCH Update a comment - change body and parentComment" name="Comments PATCH Update a comment - change body and parentComment" time="0.014">
+    <testcase classname="Comments PATCH Update a comment - change body and parentComment" name="Comments PATCH Update a comment - change body and parentComment" time="0.011">
     </testcase>
-    <testcase classname="Comments PATCH Update a comment - remove a non-required relationship" name="Comments PATCH Update a comment - remove a non-required relationship" time="0.011">
+    <testcase classname="Comments PATCH Update a comment - remove a non-required relationship" name="Comments PATCH Update a comment - remove a non-required relationship" time="0.01">
     </testcase>
-    <testcase classname="Comments PATCH Update a comment - remove a required relationship - should fail" name="Comments PATCH Update a comment - remove a required relationship - should fail" time="0.008">
+    <testcase classname="Comments PATCH Update a comment - remove a required relationship - should fail" name="Comments PATCH Update a comment - remove a required relationship - should fail" time="0.015">
     </testcase>
   </testsuite>
-  <testsuite name="Comments" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:18" time="1.979" tests="12">
-    <testcase classname="Comments GET Get Comment - Test field filter - Should show only the body attribute" name="Comments GET Get Comment - Test field filter - Should show only the body attribute" time="0.02">
+  <testsuite name="Comments" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:27" time="1.906" tests="12">
+    <testcase classname="Comments GET Get Comment - Test field filter - Should show only the body attribute" name="Comments GET Get Comment - Test field filter - Should show only the body attribute" time="0.025">
     </testcase>
-    <testcase classname="Comments GET List Comments - Test sorting - Should be sorted by body field" name="Comments GET List Comments - Test sorting - Should be sorted by body field" time="0.009">
+    <testcase classname="Comments GET List Comments - Test sorting - Should be sorted by body field" name="Comments GET List Comments - Test sorting - Should be sorted by body field" time="0.01">
     </testcase>
-    <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.007">
+    <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.008">
     </testcase>
-    <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.009">
+    <testcase classname="Comments GET List Comments - Test pagination - Should only show one" name="Comments GET List Comments - Test pagination - Should only show one" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - raw request" name="Comments POST Create comment - raw request" time="0.021">
+    <testcase classname="Comments POST Create comment - raw request" name="Comments POST Create comment - raw request" time="0.019">
     </testcase>
-    <testcase classname="Comments POST Create comment - Jsonapi request" name="Comments POST Create comment - Jsonapi request" time="0.027">
+    <testcase classname="Comments POST Create comment - Jsonapi request" name="Comments POST Create comment - Jsonapi request" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - missing attribute - should have a null attribute" name="Comments POST Create comment - missing attribute - should have a null attribute" time="0.014">
+    <testcase classname="Comments POST Create comment - missing attribute - should have a null attribute" name="Comments POST Create comment - missing attribute - should have a null attribute" time="0.011">
     </testcase>
-    <testcase classname="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" name="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" time="0.01">
+    <testcase classname="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" name="Comments POST Create comment - missing relationship - should have a null data property in the missing relationship" time="0.012">
     </testcase>
-    <testcase classname="Comments POST Create comment - invalid field - should fail" name="Comments POST Create comment - invalid field - should fail" time="0.009">
+    <testcase classname="Comments POST Create comment - invalid field - should fail" name="Comments POST Create comment - invalid field - should fail" time="0.007">
     </testcase>
-    <testcase classname="Comments PATCH Update a comment - change body and parentComment" name="Comments PATCH Update a comment - change body and parentComment" time="0.013">
+    <testcase classname="Comments PATCH Update a comment - change body and parentComment" name="Comments PATCH Update a comment - change body and parentComment" time="0.011">
     </testcase>
     <testcase classname="Comments PATCH Update a comment - remove a non-required relationship" name="Comments PATCH Update a comment - remove a non-required relationship" time="0.01">
     </testcase>
     <testcase classname="Comments PATCH Update a comment - remove a required relationship - should fail" name="Comments PATCH Update a comment - remove a required relationship - should fail" time="0.008">
     </testcase>
   </testsuite>
-  <testsuite name="Users" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:20" time="0.633" tests="6">
+  <testsuite name="Users" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:29" time="0.641" tests="6">
     <testcase classname="Users GET Authenticated - Get all users" name="Users GET Authenticated - Get all users" time="0.024">
     </testcase>
     <testcase classname="Users GET Authenticated - Get all users with their votes and comments - Multiple types include" name="Users GET Authenticated - Get all users with their votes and comments - Multiple types include" time="0.017">
     </testcase>
-    <testcase classname="Users GET Authenticated - Get a user by it&apos;s email - equality filter" name="Users GET Authenticated - Get a user by it&apos;s email - equality filter" time="0.01">
+    <testcase classname="Users GET Authenticated - Get a user by it&apos;s email - equality filter" name="Users GET Authenticated - Get a user by it&apos;s email - equality filter" time="0.039">
     </testcase>
-    <testcase classname="Users POST Create user" name="Users POST Create user" time="0.02">
+    <testcase classname="Users POST Create user" name="Users POST Create user" time="0.015">
     </testcase>
-    <testcase classname="Users PATCH Update a user" name="Users PATCH Update a user" time="0.012">
+    <testcase classname="Users PATCH Update a user" name="Users PATCH Update a user" time="0.011">
     </testcase>
-    <testcase classname="Users DELETE Delete a user" name="Users DELETE Delete a user" time="0.057">
-    </testcase>
-  </testsuite>
-  <testsuite name="Users" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:21" time="0.5" tests="6">
-    <testcase classname="Users GET Authenticated - Get all users" name="Users GET Authenticated - Get all users" time="0.02">
-    </testcase>
-    <testcase classname="Users GET Authenticated - Get all users with their votes and comments - Multiple types include" name="Users GET Authenticated - Get all users with their votes and comments - Multiple types include" time="0.015">
-    </testcase>
-    <testcase classname="Users GET Authenticated - Get a user by it&apos;s email - equality filter" name="Users GET Authenticated - Get a user by it&apos;s email - equality filter" time="0.013">
-    </testcase>
-    <testcase classname="Users POST Create user" name="Users POST Create user" time="0.014">
-    </testcase>
-    <testcase classname="Users PATCH Update a user" name="Users PATCH Update a user" time="0.009">
-    </testcase>
-    <testcase classname="Users DELETE Delete a user" name="Users DELETE Delete a user" time="0.04">
+    <testcase classname="Users DELETE Delete a user" name="Users DELETE Delete a user" time="0.042">
     </testcase>
   </testsuite>
-  <testsuite name="Articles" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:22" time="0.469" tests="7">
-    <testcase classname="Articles GET Get all articles" name="Articles GET Get all articles" time="0.038">
+  <testsuite name="Users" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:30" time="0.497" tests="6">
+    <testcase classname="Users GET Authenticated - Get all users" name="Users GET Authenticated - Get all users" time="0.023">
     </testcase>
-    <testcase classname="Articles GET Gets article by id" name="Articles GET Gets article by id" time="0.008">
+    <testcase classname="Users GET Authenticated - Get all users with their votes and comments - Multiple types include" name="Users GET Authenticated - Get all users with their votes and comments - Multiple types include" time="0.017">
     </testcase>
-    <testcase classname="Articles GET Search Article by %like - Should return all Articles" name="Articles GET Search Article by %like - Should return all Articles" time="0.01">
+    <testcase classname="Users GET Authenticated - Get a user by it&apos;s email - equality filter" name="Users GET Authenticated - Get a user by it&apos;s email - equality filter" time="0.041">
+    </testcase>
+    <testcase classname="Users POST Create user" name="Users POST Create user" time="0.013">
+    </testcase>
+    <testcase classname="Users PATCH Update a user" name="Users PATCH Update a user" time="0.01">
+    </testcase>
+    <testcase classname="Users DELETE Delete a user" name="Users DELETE Delete a user" time="0.025">
+    </testcase>
+  </testsuite>
+  <testsuite name="Articles" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:30" time="0.568" tests="7">
+    <testcase classname="Articles GET Get all articles" name="Articles GET Get all articles" time="0.027">
+    </testcase>
+    <testcase classname="Articles GET Gets article by id" name="Articles GET Gets article by id" time="0.009">
+    </testcase>
+    <testcase classname="Articles GET Search Article by %like - Should return all Articles" name="Articles GET Search Article by %like - Should return all Articles" time="0.014">
     </testcase>
     <testcase classname="Articles GET Search Article by %like - Should return empty" name="Articles GET Search Article by %like - Should return empty" time="0.008">
     </testcase>
-    <testcase classname="Articles GET Search Article by %like - Should return the first Article" name="Articles GET Search Article by %like - Should return the first Article" time="0.007">
+    <testcase classname="Articles GET Search Article by %like - Should return the first Article" name="Articles GET Search Article by %like - Should return the first Article" time="0.008">
     </testcase>
-    <testcase classname="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" name="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" time="0.013">
+    <testcase classname="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" name="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" time="0.017">
     </testcase>
     <testcase classname="Articles GET UNAuthenticated - Get an specific article with it&apos;s author - Should not include author" name="Articles GET UNAuthenticated - Get an specific article with it&apos;s author - Should not include author" time="0.007">
     </testcase>
   </testsuite>
-  <testsuite name="Articles" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:22" time="0.401" tests="7">
-    <testcase classname="Articles GET Get all articles" name="Articles GET Get all articles" time="0.035">
+  <testsuite name="Articles" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:31" time="0.468" tests="7">
+    <testcase classname="Articles GET Get all articles" name="Articles GET Get all articles" time="0.045">
     </testcase>
-    <testcase classname="Articles GET Gets article by id" name="Articles GET Gets article by id" time="0.016">
+    <testcase classname="Articles GET Gets article by id" name="Articles GET Gets article by id" time="0.009">
     </testcase>
     <testcase classname="Articles GET Search Article by %like - Should return all Articles" name="Articles GET Search Article by %like - Should return all Articles" time="0.009">
     </testcase>
-    <testcase classname="Articles GET Search Article by %like - Should return empty" name="Articles GET Search Article by %like - Should return empty" time="0.006">
+    <testcase classname="Articles GET Search Article by %like - Should return empty" name="Articles GET Search Article by %like - Should return empty" time="0.007">
     </testcase>
     <testcase classname="Articles GET Search Article by %like - Should return the first Article" name="Articles GET Search Article by %like - Should return the first Article" time="0.007">
     </testcase>
-    <testcase classname="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" name="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" time="0.013">
+    <testcase classname="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" name="Articles GET Authenticated - Get an specific article with it&apos;s votes and author - Multiple types include" time="0.014">
     </testcase>
-    <testcase classname="Articles GET UNAuthenticated - Get an specific article with it&apos;s author - Should not include author" name="Articles GET UNAuthenticated - Get an specific article with it&apos;s author - Should not include author" time="0.008">
+    <testcase classname="Articles GET UNAuthenticated - Get an specific article with it&apos;s author - Should not include author" name="Articles GET UNAuthenticated - Get an specific article with it&apos;s author - Should not include author" time="0.007">
     </testcase>
   </testsuite>
-  <testsuite name="Session" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:22" time="0.34" tests="2">
-    <testcase classname="Session POST" name="Session POST" time="0.032">
+  <testsuite name="Session" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:32" time="0.387" tests="2">
+    <testcase classname="Session POST" name="Session POST" time="0.041">
+    </testcase>
+    <testcase classname="Session Login - Complete flow" name="Session Login - Complete flow" time="0.048">
+    </testcase>
+  </testsuite>
+  <testsuite name="Session" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:32" time="0.309" tests="2">
+    <testcase classname="Session POST" name="Session POST" time="0.029">
     </testcase>
     <testcase classname="Session Login - Complete flow" name="Session Login - Complete flow" time="0.017">
     </testcase>
   </testsuite>
-  <testsuite name="Session" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:23" time="0.445" tests="2">
-    <testcase classname="Session POST" name="Session POST" time="0.08">
-    </testcase>
-    <testcase classname="Session Login - Complete flow" name="Session Login - Complete flow" time="0.086">
+  <testsuite name="Votes" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:32" time="1.613" tests="1">
+    <testcase classname="Votes GET Gets vote by id" name="Votes GET Gets vote by id" time="0.035">
     </testcase>
   </testsuite>
-  <testsuite name="Votes" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:23" time="1.494" tests="1">
-    <testcase classname="Votes GET Gets vote by id" name="Votes GET Gets vote by id" time="0.041">
+  <testsuite name="Votes" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:34" time="0.382" tests="1">
+    <testcase classname="Votes GET Gets vote by id" name="Votes GET Gets vote by id" time="0.027">
     </testcase>
   </testsuite>
-  <testsuite name="Votes" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:25" time="0.334" tests="1">
-    <testcase classname="Votes GET Gets vote by id" name="Votes GET Gets vote by id" time="0.046">
-    </testcase>
-  </testsuite>
-  <testsuite name="Application" errors="0" failures="0" skipped="0" timestamp="2019-06-06T16:24:25" time="2.035" tests="1">
-    <testcase classname="Application can be instantiated" name="Application can be instantiated" time="0.001">
+  <testsuite name="Application" errors="0" failures="0" skipped="0" timestamp="2019-06-06T18:56:34" time="2.052" tests="1">
+    <testcase classname="Application can be instantiated" name="Application can be instantiated" time="0.002">
     </testcase>
   </testsuite>
 </testsuites>
