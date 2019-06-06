@@ -9,7 +9,7 @@
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
     "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy-app/",
     "run:test-app": "SESSION_KEY=test tsnd tests/test-suite/test-app/",
-    "test": "SESSION_KEY=test jest --forceExit",
+    "test": "SESSION_KEY=test jest --forceExit --runInBand --ci",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
   "repository": {
@@ -45,6 +45,7 @@
     "@types/ws": "^6.0.1",
     "axios": "^0.18.0",
     "jest": "^24.8.0",
+    "jest-junit": "^6.4.0",
     "knex-migrate": "^1.7.2",
     "prettier": "^1.15.3",
     "sqlite3": "^4.0.6",
@@ -57,64 +58,5 @@
     "tslint-config-prettier": "^1.17.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typescript": "^3.4"
-  },
-  "jest": {
-    "globalSetup": "<rootDir>/tests/test-suite/globalSetup.ts",
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "projects": [
-      {
-        "displayName": "unit",
-        "transform": {
-          "^.+\\.(ts)$": "ts-jest"
-        },
-        "globals": {
-          "ts-jest": {
-            "tsConfig": "tsconfig.test.json"
-          }
-        },
-        "testMatch": [
-          "<rootDir>/tests/test-suite/unit/**/?(*.)+(spec|test).ts"
-        ]
-      },
-      {
-        "displayName": "acceptance - snake_case",
-        "setupFilesAfterEnv": [
-          "<rootDir>/tests/test-suite/setup.ts"
-        ],
-        "transform": {
-          "^.+\\.(ts)$": "ts-jest"
-        },
-        "globals": {
-          "TEST_SUITE": "test_snake_case",
-          "ts-jest": {
-            "tsConfig": "tsconfig.test.json"
-          }
-        },
-        "testMatch": [
-          "<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"
-        ]
-      },
-      {
-        "displayName": "acceptance - camelCase",
-        "setupFilesAfterEnv": [
-          "<rootDir>/tests/test-suite/setup.ts"
-        ],
-        "transform": {
-          "^.+\\.(ts)$": "ts-jest"
-        },
-        "globals": {
-          "TEST_SUITE": "test_camelCase",
-          "ts-jest": {
-            "tsConfig": "tsconfig.test.json"
-          }
-        },
-        "testMatch": [
-          "<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"
-        ]
-      }
-    ]
   }
 }
