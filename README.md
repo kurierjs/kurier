@@ -21,12 +21,13 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
   - [The `remove` operation](#the-remove-operation)
   - [Running multiple operations](#running-multiple-operations)
 - [Transport layers](#transport-layers)
-  - [jsonApiKoa](#jsonapikoa)
+  - [HTTP Protocol](#http-protocol)
     - [Using jsonApiKoa](#using-jsonapikoa)
+    - [Using jsonApiExpress](#using-jsonapiexpress)
     - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
     - [Request/response mapping](#requestresponse-mapping)
     - [Bulk operations in HTTP](#bulk-operations-in-http)
-  - [jsonApiWebSocket](#jsonapiwebsocket)
+  - [WebSocket Protocol](#websocket-protocol)
     - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
     - [Executing operations over sockets](#executing-operations-over-sockets)
 - [Processors](#processors)
@@ -61,7 +62,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 - **Operation-driven API:** JSONAPI is transport-layer independent, so it can be used for HTTP, WebSockets or any transport protocol of your choice.
 - **Declarative style for resource definition:** Every queryable object in JSONAPI is a resource, a representation of data that may come from any source, be it a database, an external API, etc. JSONAPI-TS defines these resources in a declarative style.
 - **CRUD database operations:** Baked into JSONAPI-TS, there is an operation processor which takes care of basic CRUD actions by using [Knex](https://knexjs.org/). This allows the framework to support any database engine compatible with Knex. Also includes support for filtering fields by using common SQL operators, sorting and pagination.
-- **Transport layer integrations:** JSONAPI-TS includes a middleware for [Koa](https://koajs.com) to automatically add HTTP endpoints for each declared resource and processor.
+- **Transport layer integrations:** The framework supports JSONAPI operations via WebSockets, and it includes a middleware for [Koa](https://koajs.com) and another for [Express](http://expressjs.com/) to automatically add HTTP endpoints for each declared resource and processor.
 - **Relationships and sideloading:** Resources can be related with `belongsTo` / `hasMany` helpers on their declarations. JSONAPI-TS provides proper, compliant serialization to connect resources and even serve them all together on a single response.
 - **Error handling:** The framework includes some basic error responses to handle cases equivalent to HTTP status codes 401 (Unauthorized), 403 (Forbidden), 404 (Not Found) and 500 (Internal Server Error).
 - **User/Role presence authorization:** By building on top of the decorators syntax, JSONAPI-TS allows you to inject user detection on specific operations or whole processors. The framework uses JSON Web Tokens as a way of verifying if a user is valid for a given operation.
@@ -517,9 +518,11 @@ A bulk request payload is essentially a wrapper around a list of operations:
 
 JSONAPI-TS is built following a decoupled, modular approach, providing somewhat opinionated methodologies regarding how to make the API usable to consumers.
 
-### jsonApiKoa
+### HTTP Protocol
 
-Currently we support integrating with [Koa](https://koajs.com) by providing a `jsonApiKoa` middleware, that can be imported and piped through your Koa server, along with other middlewares.
+Currently, for HTTP, we support integrating with [Koa](https://koajs.com) and [Express](http://expressjs.com/) by providing `jsonApiKoa` and `jsonApiExpress` middlewares, respectively, that can be imported and piped through your Koa or Express server, along with other middlewares.
+
+> ℹ️ Most examples in the docs use the jsonApiKoa middleware, but it's up to you which one you use.
 
 #### Using jsonApiKoa
 
@@ -532,9 +535,20 @@ As seen in the [Getting started](#getting-started) section, once your [JSONAPI a
 api.use(jsonApiKoa(app));
 ```
 
+#### Using jsonApiExpress
+
+Like in the previous example, to pipe the middleware you can simply do:
+
+```ts
+// Assume `api` is an Express server,
+// `app` is a JSONAPI application instance.
+
+api.use(jsonApiExpress(app));
+```
+
 #### Converting operations into HTTP endpoints
 
-The `jsonApiKoa` middleware takes care of mapping the fundamental operation types (`get`, `add`, `update`, `remove`) into valid HTTP verbs and endpoints.
+Both `jsonApiKoa` and `jsonApiExpress` take care of mapping the fundamental operation types (`get`, `add`, `update`, `remove`) into valid HTTP verbs and endpoints.
 
 This is the basic pattern for any endpoint:
 
@@ -646,9 +660,9 @@ The middleware, if successful, will respond with a `204 No Content` HTTP status 
 
 #### Bulk operations in HTTP
 
-The `jsonApiKoa` middleware exposes a `/bulk` endpoint which can be used to execute multiple operations. The request must use the `PATCH` method, using the JSON payload [shown earlier](#running-multiple-operations).
+Both `jsonApiKoa` and `jsonApiExpress` expose a `/bulk` endpoint which can be used to execute multiple operations. The request must use the `PATCH` method, using the JSON payload [shown earlier](#running-multiple-operations).
 
-### jsonApiWebSocket
+### WebSocket Protocol
 
 The framework supports JSONAPI operations via WebSockets, using the [`ws`](http://npmjs.org/package/ws) package.
 
@@ -656,7 +670,7 @@ The framework supports JSONAPI operations via WebSockets, using the [`ws`](http:
 
 #### Using jsonApiWebSocket
 
-The wrapper function `jsonApiWebSocket` takes a `WebSocket.Server` instance, bound to an HTTP server (so you can combine it with the `jsonApiKoa` middleware), and manipulates the `Application` object to wire it up with the `connection` and `message` events provided by `ws`.
+The wrapper function `jsonApiWebSocket` takes a `WebSocket.Server` instance, bound to an HTTP server (so you can combine it with either the `jsonApiKoa` or `jsonApiExpress` middlewares), and manipulates the `Application` object to wire it up with the `connection` and `message` events provided by `ws`.
 
 So, after instantiating your application, you can enable WebSockets support with just a couple of extra lines of code:
 
@@ -915,10 +929,10 @@ It receives a single argument, `options`, which is passed to the `Knex` construc
 
 In addition to the operation handlers, this processor has some other methods that you can use while making custom operations. Note that all operations use these functions, so tread carefully here if you're interested in overriding them.
 
-| Method    | Description                                        |
-| --------- | ---------------------------------------------------- |
-| `getQuery` | Returns an instance of [Knex.QueryBuilder](https://knexjs.org/#Builder), scoped to the table specified by `tableName` (the processor resource's data source) |
-| `tableName`     | Returns the table name for the resource handled by the processor                     |
+| Method      | Description                                                                                                                                                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `getQuery`  | Returns an instance of [Knex.QueryBuilder](https://knexjs.org/#Builder), scoped to the table specified by `tableName` (the processor resource's data source) |
+| `tableName` | Returns the table name for the resource handled by the processor                                                                                             |
 
 Using these two methods and the standard [Knex functions](https://knexjs.org/#Builder-wheres), you can extend a processor anyway you want to.
 
@@ -947,7 +961,7 @@ The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor an
 
 > ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
 
-> ℹ️ A thing to remember, is that JsonApiKoa won't parse the custom operations into endpoints, so to reach the custom operation from a HTTP request, you should use the *bulk* endpoint (or a JsonApiWebsockets operation), or execute the operation inside some of the default methods of the processor (with an if inside a GET, for example).
+> ℹ️ A thing to remember, is that neither JsonApiKoa nor JsonApiExpress will parse the custom operations into endpoints, so to reach the custom operation from a HTTP request, you should use the _bulk_ endpoint (or a JsonApiWebsockets operation), or execute the operation inside some of the default methods of the processor (with an if inside a GET, for example).
 
 ## Serialization
 

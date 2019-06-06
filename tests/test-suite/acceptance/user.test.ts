@@ -1,10 +1,8 @@
-import { SuperTest, Test } from "supertest";
-import * as agent from "supertest-koa-agent";
 import users from "./factories/user";
-import http from "../test-app/http";
 import getAuthenticationData from "./helpers/authenticateUser";
+import testTransportLayer from "./helpers/transportLayers";
 
-const request = agent(http) as SuperTest<Test>;
+const request = testTransportLayer("express");
 
 describe("Users", () => {
   describe("GET", () => {
