@@ -6,7 +6,7 @@ orbs:
   node: circleci/node@1.0.1
 jobs:
   build: # runs not using Workflows must have a `build` job as entry point
-    working_directory: ~/jsonapiexample
+    working_directory: ~/jsonapi
     docker:
       - image: circleci/node:lts
     steps: # a collection of executable commands
@@ -29,8 +29,9 @@ jobs:
           name: Run tests with JUnit as reporter
           command: yarn test --ci --reporters=default --reporters=jest-junit
           environment:
-            JEST_JUNIT_OUTPUT: "tests/junit.xml"
+            JEST_JUNIT_OUTPUT: "reports/junit.xml"
       - store_artifacts: # special step to save test results as as artifact
-          path: tests/junit
+          # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: reports
       - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
-          path: tests/junit
+          path: reports
