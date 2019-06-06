@@ -8,7 +8,8 @@ import {
   ResourceSchemaRelationship,
   EagerLoadedData,
   DEFAULT_PRIMARY_KEY,
-  IJsonApiSerializer
+  IJsonApiSerializer,
+  JsonApiParams
 } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
@@ -106,8 +107,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
     const records: KnexRecord[] = await this.getQuery()
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
-      .modify(queryBuilder => this.optionsBuilder(queryBuilder, op))
-      .select(getColumns(this.resourceClass, this.appInstance.app.serializer, op.params.fields));
+      .modify(queryBuilder => this.optionsBuilder(queryBuilder, params || {}))
+      .select(getColumns(this.resourceClass, this.appInstance.app.serializer, (params || {}).fields));
 
     if (!records.length && id) {
       throw JsonApiErrors.RecordNotExists();
@@ -231,8 +232,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     );
   }
 
-  optionsBuilder(queryBuilder: Knex.QueryBuilder, op: Operation) {
-    const { sort, page } = op.params;
+  optionsBuilder(queryBuilder: Knex.QueryBuilder, params: JsonApiParams) {
+    const { sort, page } = params;
     if (sort) {
       buildSortClause(sort, this.resourceClass, this.appInstance.app.serializer).forEach(({ field, direction }) => {
         queryBuilder.orderBy(field, direction);
