@@ -1,0 +1,46 @@
+# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
+version: 2.1
+
+# Use a package of configuration called an orb, see https://circleci.com/docs/2.0/orb-intro/
+orbs:
+  node: circleci/node@1.0.1
+  # Declare a dependency on the welcome-orb
+
+# Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
+jobs:
+  build: # runs not using Workflows must have a `build` job as entry point
+    working_directory: ~/jsonapiexample
+    docker:
+      - image: circleci/node:lts
+    steps: # a collection of executable commands
+      - checkout
+      - node/install-yarn
+      - run: # special step to save the dependency cache
+          name: show me the money
+          command: ls
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-v1-{{ .Branch }}-
+            - yarn-packages-v1-
+      - run:
+          name: install-stuff
+          command: yarn install
+      - save_cache: # special step to save the dependency cache
+          paths:
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      - run: # run tests
+          name: Run tests with JUnit as reporter
+          command: yarn test --ci --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: "junit.xml"
+      - store_artifacts: # special step to save test results as as artifact
+         # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: junit.xml
+          prefix: tests
+      - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: junit.xml
+      # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
+
