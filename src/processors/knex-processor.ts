@@ -9,7 +9,8 @@ import {
   EagerLoadedData,
   DEFAULT_PRIMARY_KEY,
   IJsonApiSerializer,
-  JsonApiParams
+  JsonApiParams,
+  ResourceSchema
 } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
@@ -192,12 +193,31 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     return this.appInstance.app.serializer.resourceTypeToTableName(this.resourceClass.type);
   }
 
+  getValidAttributes(schema: ResourceSchema, serializer: IJsonApiSerializer) {
+    const { attributes, relationships, primaryKeyName } = schema;
+    const relationshipsKeys = Object.entries(relationships)
+      .filter(([, value]) => value.belongsTo)
+      .map(
+        ([key, value]) =>
+          value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)
+      );
+
+    return Object.keys(attributes)
+      .concat(relationshipsKeys)
+      .concat(primaryKeyName || DEFAULT_PRIMARY_KEY);
+  }
+
   filtersToKnex(queryBuilder, filters: {}) {
     const processedFilters = [];
 
     Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
 
+    const validKeys = this.getValidAttributes(this.resourceClass.schema, this.appInstance.app.serializer);
+
     Object.keys(filters).forEach(key => {
+      if (!validKeys.includes(key)) {
+        throw JsonApiErrors.BadRequest(`${key} is not a valid field to filter`);
+      }
       const matches = String(filters[key]).split("|");
 
       processedFilters.push(
