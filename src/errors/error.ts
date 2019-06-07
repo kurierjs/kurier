@@ -19,8 +19,6 @@ export default class JsonApiError extends Error implements IJsonApiError {
 
     this.status = status;
     this.code = code;
-    if (detail) {
-      this.detail = detail;
-    }
+    this.detail = detail;
   }
 }
