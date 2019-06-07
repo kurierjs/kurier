@@ -14,10 +14,11 @@ export default class JsonApiError extends Error implements IJsonApiError {
     about?: string;
   };
 
-  constructor(status: HttpStatusCode, code: string) {
+  constructor(status: HttpStatusCode, code: string, detail?: string) {
     super(`${status}: ${code}`);
 
     this.status = status;
     this.code = code;
+    this.detail = detail;
   }
 }
