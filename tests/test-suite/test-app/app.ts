@@ -14,8 +14,7 @@ import { ApplicationInstance } from "../../../src";
 const app = new Application({
   namespace: "api",
   types: [Article, Comment, Vote],
-  processors: [ArticleProcessor, VoteProcessor],
-  defaultProcessor: KnexProcessor
+  processors: [ArticleProcessor, VoteProcessor]
 });
 
 app.use(UserManagementAddon, {

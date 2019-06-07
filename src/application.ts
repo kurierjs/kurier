@@ -16,6 +16,7 @@ import ApplicationInstance from "./application-instance";
 import JsonApiSerializer from "./serializers/serializer";
 import Addon from "./addon";
 import { canAccessResource } from "./decorators/authorize";
+import KnexProcessor from "./processors/knex-processor";
 
 export default class Application {
   namespace: string;
@@ -38,7 +39,7 @@ export default class Application {
     this.types = settings.types || [];
     this.processors = settings.processors || [];
     this.services = settings.services || ({} as ApplicationServices);
-    this.defaultProcessor = settings.defaultProcessor || OperationProcessor;
+    this.defaultProcessor = settings.defaultProcessor || KnexProcessor;
     this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
   }
