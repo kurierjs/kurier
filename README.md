@@ -776,12 +776,13 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
           relationships: {}
         };
       } catch {
-        throw JsonApiErrors.UnhandledError();
+        throw JsonApiErrors.UnhandledError("Error while reading file");
       }
     });
   }
 }
 ```
+> ℹ️ Notice that you can provide details (like in the previous example) but it's not mandatory.
 
 You can also create an error by using the `JsonApiError` type:
 
