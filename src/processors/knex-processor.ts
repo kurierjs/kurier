@@ -1,21 +1,21 @@
 import * as Knex from "knex";
+import ApplicationInstance from "../application-instance";
 import JsonApiErrors from "../errors/json-api-errors";
 import Resource from "../resource";
 import {
-  HasId,
-  KnexRecord,
-  Operation,
-  ResourceSchemaRelationship,
-  EagerLoadedData,
   DEFAULT_PRIMARY_KEY,
+  EagerLoadedData,
+  HasId,
   IJsonApiSerializer,
   JsonApiParams,
-  ResourceSchema
+  KnexRecord,
+  Operation,
+  ResourceSchema,
+  ResourceSchemaRelationship
 } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
-import ApplicationInstance from "../application-instance";
 
 const operators = {
   eq: "=",
@@ -59,25 +59,7 @@ const buildSortClause = (sort: string[], resourceClass: typeof Resource, seriali
   });
 };
 
-const getColumns = (resourceClass: typeof Resource, serializer: IJsonApiSerializer, fields = {}): string[] => {
-  const { type, schema } = resourceClass;
-  const { attributes, relationships, primaryKeyName } = schema;
-  const relationshipsKeys = Object.entries(relationships)
-    .filter(([, value]) => value.belongsTo)
-    .map(
-      ([key, value]) =>
-        value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)
-    );
-  const typeFields = (fields[type] || []).filter((key: string) => Object.keys(attributes).includes(key));
-
-  const attributesKeys: string[] = typeFields.length ? typeFields : Object.keys(attributes);
-
-  return [
-    ...attributesKeys.map(key => `${serializer.attributeToColumn(key)} as ${key}`),
-    ...relationshipsKeys,
-    primaryKeyName || DEFAULT_PRIMARY_KEY
-  ];
-};
+// const getColumns =
 
 export default class KnexProcessor<ResourceT extends Resource> extends OperationProcessor<ResourceT> {
   protected knex: Knex.Transaction;
@@ -100,6 +82,26 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     });
   }
 
+  protected getColumns(serializer: IJsonApiSerializer, fields = {}): string[] {
+    const { type, schema } = this.resourceClass;
+    const { attributes, relationships, primaryKeyName } = schema;
+    const relationshipsKeys = Object.entries(relationships)
+      .filter(([, value]) => value.belongsTo)
+      .map(
+        ([key, value]) =>
+          value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)
+      );
+    const typeFields = (fields[type] || []).filter((key: string) => Object.keys(attributes).includes(key));
+
+    const attributesKeys: string[] = typeFields.length ? typeFields : Object.keys(attributes);
+
+    return [
+      ...attributesKeys.map(key => `${serializer.attributeToColumn(key)} as ${key}`),
+      ...relationshipsKeys,
+      primaryKeyName || DEFAULT_PRIMARY_KEY
+    ];
+  }
+
   async get(op: Operation): Promise<HasId[] | HasId> {
     const { params, ref } = op;
     const { id } = ref;
@@ -109,7 +111,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const records: KnexRecord[] = await this.getQuery()
       .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, params || {}))
-      .select(getColumns(this.resourceClass, this.appInstance.app.serializer, (params || {}).fields));
+      .select(this.getColumns(this.appInstance.app.serializer, (params || {}).fields));
 
     if (!records.length && id) {
       throw JsonApiErrors.RecordNotExists();
@@ -164,7 +166,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
     return await this.getQuery()
       .where({ [primaryKey]: id })
-      .select(getColumns(this.resourceClass, this.appInstance.app.serializer))
+      .select(this.getColumns(this.appInstance.app.serializer))
       .first();
   }
 
@@ -185,7 +187,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
     return await this.getQuery()
       .whereIn(primaryKeyName, ids)
-      .select(getColumns(this.resourceClass, this.appInstance.app.serializer))
+      .select(this.getColumns(this.appInstance.app.serializer))
       .first();
   }
 

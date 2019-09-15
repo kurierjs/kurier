@@ -6,14 +6,7 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import {
-  AddonOptions,
-  ApplicationAddons,
-  ApplicationServices,
-  IJsonApiSerializer,
-  Operation,
-  OperationResponse
-} from "./types";
+import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse } from "./types";
 import flatten from "./utils/flatten";
 
 export default class Application {
@@ -111,14 +104,21 @@ export default class Application {
             }
           } as Operation;
         } else if (relationship.belongsTo) {
-          const deserializedOriginalOperation = await this.serializer.deserializeResource(op, resourceClass);
+          const deserializedOriginalOperation = await this.serializer.deserializeResource(
+            { ...op, op: "get" },
+            resourceClass
+          );
+          console.log("Gettified: ", deserializedOriginalOperation);
           const result = (await processor.execute(deserializedOriginalOperation)) as Resource;
 
           relatedOp = {
             ...op,
             ref: {
               type: relatedResourceClass.type,
-              id: result.attributes[this.serializer.relationshipToColumn(op.ref.relationship)] as string
+              id: result.attributes[
+                resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
+                  this.serializer.relationshipToColumn(op.ref.relationship)
+              ] as string
             }
           };
         }
@@ -153,7 +153,8 @@ export default class Application {
 
   async processorFor(
     resourceType: string,
-    applicationInstance: ApplicationInstance
+    applicationInstance: ApplicationInstance,
+    processorType = this.defaultProcessor
   ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
 
@@ -161,14 +162,13 @@ export default class Application {
       this.processors.map(async processor => ((await processor.shouldHandle(resourceType)) ? processor : false))
     );
 
-    // tslint:disable-next-line
     const ProcessorClass = processors.find(p => p !== false);
 
     if (ProcessorClass) {
       return new ProcessorClass(applicationInstance);
     }
 
-    class ResourceProcessor extends this.defaultProcessor<Resource> {
+    class ResourceProcessor extends processorType<Resource> {
       static resourceClass = resourceClass;
     }
 

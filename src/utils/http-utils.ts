@@ -1,14 +1,13 @@
 import * as escapeStringRegexp from "escape-string-regexp";
 import { Request as ExpressRequest } from "express";
 import { Request as KoaRequest } from "koa";
-
+import ApplicationInstance from "../application-instance";
+import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
+import User from "../resources/user";
 import { JsonApiDocument, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
-import ApplicationInstance from "../application-instance";
-import User from "../resources/user";
-import JsonApiError from "../errors/error";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -35,7 +34,7 @@ function urlData(appInstance: ApplicationInstance, path: string) {
     `^(\/+)?((?<namespace>${escapeStringRegexp(
       appInstance.app.namespace
     )})(\/+|$))?(?<resource>[^\\s\/?]+)?(\/+)?((?<id>[^\\s\/?]+)?(\/+)?\(?<relationships>relationships)?(\/+)?)?` +
-    "(?<relationship>[^\\s/?]+)?(/+)?$"
+      "(?<relationship>[^\\s/?]+)?(/+)?$"
   );
 
   const { resource, id, relationships, relationship } = (path.match(urlRegexp) || {})["groups"] || ({} as any);
@@ -60,6 +59,7 @@ async function handleJsonApiEndpoint(
   request: ExpressRequest | KoaRequest
 ): Promise<{ body: JsonApiDocument | JsonApiErrorsDocument; status: number }> {
   const op: Operation = convertHttpRequestToOperation(request);
+
   if (["update", "remove"].includes(op.op) && !op.ref.id) return;
 
   try {

@@ -1,15 +1,14 @@
 import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
-
 import Application from "../application";
 import ApplicationInstance from "../application-instance";
 import {
   authenticate,
-  urlData,
+  convertErrorToHttpResponse,
   handleBulkEndpoint,
   handleJsonApiEndpoint,
-  convertErrorToHttpResponse
+  urlData
 } from "../utils/http-utils";
 
 export default function jsonApiKoa(app: Application, ...middlewares: Middleware[]) {
