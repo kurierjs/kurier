@@ -7,7 +7,7 @@ extended_description: |
   This is the specification of [a profile](http://jsonapi.org/format/1.1/#profiles)
   for the JSON:API specification.
 
-  The url for this profile is `https://jsonapi.org/profiles/ebryn/filtering`.
+  The url for this profile is `https://jsonapi.org/profiles/prototypal/filtering`.
 
   Data filtering is a way to require a specific subset of data from a data source,
   with several different ways to match and evaluate search criteria, similar to what
@@ -64,11 +64,13 @@ minimum_jsonapi_version_explanation: /
   also conforms without breaking changes to the 1.0 version of the JSON:API
   specification.
 
-discussion_url: https://github.com/ebryn/jsonapi-ts
+discussion_url: https://github.com/prototypal/jsonapi-ts
 
 editors:
   - name: Joel A. Villarreal Bertoldi
-    email: joel@prototypal.io
+    email: joel.a.villarreal@gmail.com
+  - name: Santiago Pérsico
+    email: santiagopersico@gmail.com
 
 categories:
   - Filtering
