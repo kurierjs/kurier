@@ -1,6 +1,4 @@
-# jsonapi-ts
-
-> _We need a better name!_
+# Kurier
 
 This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https://jsonapi.org/format/1.1/) + the [Operations proposal spec](https://github.com/json-api/json-api/blob/999e6df77b28549d6c37b163b73c8e9102400020/_format/1.1/index.md#operations).
 
@@ -60,17 +58,17 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 ## Features
 
 - **Operation-driven API:** JSONAPI is transport-layer independent, so it can be used for HTTP, WebSockets or any transport protocol of your choice.
-- **Declarative style for resource definition:** Every queryable object in JSONAPI is a resource, a representation of data that may come from any source, be it a database, an external API, etc. JSONAPI-TS defines these resources in a declarative style.
-- **CRUD database operations:** Baked into JSONAPI-TS, there is an operation processor which takes care of basic CRUD actions by using [Knex](https://knexjs.org/). This allows the framework to support any database engine compatible with Knex. Also includes support for filtering fields by using common SQL operators, sorting and pagination.
+- **Declarative style for resource definition:** Every queryable object in JSONAPI is a resource, a representation of data that may come from any source, be it a database, an external API, etc. Kurier defines these resources in a declarative style.
+- **CRUD database operations:** Baked into Kurier, there is an operation processor which takes care of basic CRUD actions by using [Knex](https://knexjs.org/). This allows the framework to support any database engine compatible with Knex. Also includes support for filtering fields by using common SQL operators, sorting and pagination.
 - **Transport layer integrations:** The framework supports JSONAPI operations via WebSockets, and it includes a middleware for [Koa](https://koajs.com) and another for [Express](http://expressjs.com/) to automatically add HTTP endpoints for each declared resource and processor.
-- **Relationships and sideloading:** Resources can be related with `belongsTo` / `hasMany` helpers on their declarations. JSONAPI-TS provides proper, compliant serialization to connect resources and even serve them all together on a single response.
+- **Relationships and sideloading:** Resources can be related with `belongsTo` / `hasMany` helpers on their declarations. Kurier provides proper, compliant serialization to connect resources and even serve them all together on a single response.
 - **Error handling:** The framework includes some basic error responses to handle cases equivalent to HTTP status codes 401 (Unauthorized), 403 (Forbidden), 404 (Not Found) and 500 (Internal Server Error).
-- **User/Role presence authorization:** By building on top of the decorators syntax, JSONAPI-TS allows you to inject user detection on specific operations or whole processors. The framework uses JSON Web Tokens as a way of verifying if a user is valid for a given operation.
+- **User/Role presence authorization:** By building on top of the decorators syntax, Kurier allows you to inject user detection on specific operations or whole processors. The framework uses JSON Web Tokens as a way of verifying if a user is valid for a given operation.
 - **Extensibility:** Both resources and processors are open classes that you can extend to suit your use case. For example, do you need to serialize an existing, external API into JSONAPI format? Create a `MyExternalApiProcessor` extending from `OperationProcessor` and implement the necessary calls _et voilà!_.
 
 ## Getting started
 
-> ℹ️ The following examples are written in TypeScript.
+> ℹ️ The following examples are written in TypeScript. The package name will soon change!
 
 1. Install `jsonapi-ts` with `npm` or `yarn`:
 
@@ -149,7 +147,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 ## Data flow
 
-This diagram represents how a full request/response cycle works with JSONAPI-TS:
+This diagram represents how a full request/response cycle works with Kurier:
 
 <img src="./docs/data-flow.svg">
 
@@ -259,7 +257,7 @@ For a GET request to `users?include=books` to include the books related to each 
 
 The JSONAPI spec restricts any attribute value to "any valid JSON value".
 
-JSONAPI-TS supports the following primitive types: `String`, `Number`, `Boolean`, `Array` and `Object`. `null` is also a valid value.
+Kurier supports the following primitive types: `String`, `Number`, `Boolean`, `Array` and `Object`. `null` is also a valid value.
 
 Dates are supported in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:MM:SS.sss` + the time zone).
 
@@ -397,7 +395,7 @@ An `add` operation represents the intent of writing a new resource of a given ty
 
 ```json
 // Add a new book. Notice that by default, you don't need
-// to provide an ID. JSONAPI-TS can generate it automatically.
+// to provide an ID. Kurier can generate it automatically.
 // Also, we're relating this new resource to an existing
 // "author" resource.
 
@@ -472,7 +470,7 @@ The response, if successful, will be `typeof void`.
 
 ### Running multiple operations
 
-JSONAPI-TS supports a _bulk_ mode that allows the execution of a list of operations in a single request. This mode is exposed differently according to the transport layer (see the next section for more details on this).
+Kurier supports a _bulk_ mode that allows the execution of a list of operations in a single request. This mode is exposed differently according to the transport layer (see the next section for more details on this).
 
 A bulk request payload is essentially a wrapper around a list of operations:
 
@@ -516,7 +514,7 @@ A bulk request payload is essentially a wrapper around a list of operations:
 
 ## Transport layers
 
-JSONAPI-TS is built following a decoupled, modular approach, providing somewhat opinionated methodologies regarding how to make the API usable to consumers.
+Kurier is built following a decoupled, modular approach, providing somewhat opinionated methodologies regarding how to make the API usable to consumers.
 
 ### HTTP Protocol
 
@@ -690,7 +688,7 @@ httpServer.use(jsonApiKoa(app));
 // Create a WebSockets server.
 const ws = new WebSocketServer({ server: httpServer });
 
-// Let JSONAPI-TS connect your API.
+// Let Kurier connect your API.
 jsonApiWebSocket(ws, app);
 ```
 
@@ -704,7 +702,7 @@ Unlike its HTTP counterpart, `jsonApiWebSocket` works with [bulk requests](#runn
 
 A processor is responsable of executing JSONAPI operations for certain resource types. If you're familiar with the Model-View-Controller pattern, processor can be somewhat compared to the `C` in `MVC`.
 
-JSONAPI-TS includes two built-in processors:
+Kurier includes two built-in processors:
 
 - an abstract `OperationProcessor` which defines an API capable of executing the fundamental operations on a resource;
 - a concrete `KnexProcessor`, which is a Knex-powered DB-capable implementation of the `OperationProcessor`.
@@ -910,7 +908,7 @@ class CommentProcessor<T extends Comment> extends KnexProcessor<T> {
 }
 ```
 
-Any computed properties you define will be included in the resource on any operation. **Do not** declare these computed properties in the resource's schema, as JSONAPI-TS will interpret them as columns in a table and fail due to non-existing columns.
+Any computed properties you define will be included in the resource on any operation. **Do not** declare these computed properties in the resource's schema, as Kurier will interpret them as columns in a table and fail due to non-existing columns.
 
 ## The `KnexProcessor` class
 
@@ -1012,7 +1010,7 @@ const app = new Application({
 });
 ```
 
-JSONAPI-TS exports the following string utilities:
+Kurier exports the following string utilities:
 
 | Function          | Example                                  |
 | ----------------- | ---------------------------------------- |
@@ -1026,7 +1024,7 @@ JSONAPI-TS exports the following string utilities:
 
 ## Authentication and authorization
 
-JSONAPI-TS supports authentication and authorization capabilities by using [JSON Web Tokens](https://www.jsonwebtoken.io/). Basically, it allows you to allow or deny operation execution based on user/role presence in a token.
+Kurier supports authentication and authorization capabilities by using [JSON Web Tokens](https://www.jsonwebtoken.io/). Basically, it allows you to allow or deny operation execution based on user/role presence in a token.
 
 For this feature to work, you'll need at least to:
 
@@ -1080,7 +1078,7 @@ export default class BookProcessor extends KnexProcessor<Book> {
 
 ### Using the `UserManagement` addon
 
-In order to put all the pieces together, JSONAPI-TS provides an [addon](#what-is-an-addon) to manage both user and session concerns.
+In order to put all the pieces together, Kurier provides an [addon](#what-is-an-addon) to manage both user and session concerns.
 
 You'll need to define at least two functions:
 
@@ -1138,7 +1136,7 @@ app.use(UserManagementAddon, {
 If you don't want to use loose functions like this, you can create a `UserProcessor` that implements these functions and pass it to the addon options as `userProcessor`:
 
 ```ts
-// Note that MyVeryOwnUserProcessor extends from JSONAPI-TS's own UserProcessor.
+// Note that MyVeryOwnUserProcessor extends from Kurier's own UserProcessor.
 import { UserProcessor, Operation } from "@ebryn/jsonapi-ts";
 import User from "./resources/user";
 
@@ -1325,7 +1323,7 @@ const app = new Application({
 
 ## Extending the framework
 
-Beyond the fact that JSONAPI-TS allows you to extend any of its primitives, the framework provides a simple yet effective way of injecting custom behavior with an _addon system_.
+Beyond the fact that Kurier allows you to extend any of its primitives, the framework provides a simple yet effective way of injecting custom behavior with an _addon system_.
 
 ### What is an addon?
 
