@@ -1,1 +1,2 @@
-theme: readthedocs
+theme:
+    name: readthedocs
