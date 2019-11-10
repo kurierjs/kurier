@@ -59,13 +59,7 @@ async function handleJsonApiEndpoint(
   request: ExpressRequest | KoaRequest
 ): Promise<{ body: JsonApiDocument | JsonApiErrorsDocument; status: number }> {
   const op: Operation = convertHttpRequestToOperation(request);
-  if (["update", "remove"].includes(op.op) && !op.ref.id) {
-    const error = JsonApiErrors.BadRequest(`${op.op} is not allowed without a defined primary key`);
-    return {
-      body: convertErrorToHttpResponse(error),
-      status: error.status
-    };
-  }
+
   try {
     const [result]: OperationResponse[] = await appInstance.app.executeOperations([op], appInstance);
     return {
