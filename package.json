@@ -7,8 +7,8 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc -b",
     "build:dummy": "rm -rf dist/ && tsc -p tsconfig.dummy.json",
-    "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd tests/dummy-app/",
-    "run:test-app": "SESSION_KEY=test tsnd tests/test-suite/test-app/",
+    "run:dummy": "SESSION_KEY=f0d87076b63d5c2732e282064fe6bebc tsnd --pretty --project ./tsconfig.test.json tests/dummy-app/",
+    "run:test-app": "SESSION_KEY=test tsnd --pretty --project ./tsconfig.test.json tests/test-suite/test-app/",
     "test": "SESSION_KEY=test jest --forceExit --runInBand --ci",
     "prepublishOnly": "rm -rf dist/ && tsc -b"
   },
