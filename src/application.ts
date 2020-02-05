@@ -6,7 +6,7 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse } from "./types";
+import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship } from "./types";
 import flatten from "./utils/flatten";
 
 export default class Application {
@@ -77,7 +77,7 @@ export default class Application {
 
   async executeOperation(op: Operation, processor: OperationProcessor<Resource>): Promise<OperationResponse> {
     const resourceClass = await this.resourceFor(op.ref.type);
-
+    console.log('OP-REF', op.ref)
     if (op.ref.relationship) {
       const relationship = resourceClass.schema.relationships[op.ref.relationship];
       const relatedResourceClass = relationship.type();
@@ -86,6 +86,11 @@ export default class Application {
         let relatedOp: Operation;
 
         if (relationship.hasMany) {
+          const relatedResourceClassRelationships = Object.entries(relatedResourceClass.schema.relationships);
+          let relatedResourceRelationshipToBaseResource: [string, ResourceSchemaRelationship] = relatedResourceClassRelationships
+            .find(([_relName, relData]) => relData.type().type === op.ref.type)
+
+
           relatedOp = {
             ...op,
             ref: {
@@ -95,20 +100,21 @@ export default class Application {
               ...op.params,
               filter: {
                 ...op.params.filter,
-                [relationship.foreignKeyName ||
-                this.serializer.relationshipToColumn(
-                  op.ref.relationship,
-                  relatedResourceClass.schema.primaryKeyName
-                )]: op.ref.id
+                [
+                  relatedResourceRelationshipToBaseResource[1].foreignKeyName ||
+                  this.serializer.relationshipToColumn(
+                    relatedResourceRelationshipToBaseResource[0],
+                    relatedResourceClass.schema.primaryKeyName
+                  )]: op.ref.id
               }
             }
           } as Operation;
+          console.log('HasMany - Added Operation', relatedOp)
         } else if (relationship.belongsTo) {
           const deserializedOriginalOperation = await this.serializer.deserializeResource(
             { ...op, op: "get" },
             resourceClass
           );
-          console.log("Gettified: ", deserializedOriginalOperation);
           const result = (await processor.execute(deserializedOriginalOperation)) as Resource;
 
           relatedOp = {
@@ -117,10 +123,11 @@ export default class Application {
               type: relatedResourceClass.type,
               id: result.attributes[
                 resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
-                  this.serializer.relationshipToColumn(op.ref.relationship)
+                this.serializer.relationshipToColumn(op.ref.relationship)
               ] as string
             }
           };
+          console.log('BelongsTo - Added Operation', relatedOp)
         }
 
         const deserializedOperation = await this.serializer.deserializeResource(relatedOp, relatedResourceClass);
