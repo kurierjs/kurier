@@ -87,9 +87,8 @@ export default class Application {
 
         if (relationship.hasMany) {
           const relatedResourceClassRelationships = Object.entries(relatedResourceClass.schema.relationships);
-          let relatedResourceRelationshipToBaseResource: [string, ResourceSchemaRelationship] = relatedResourceClassRelationships
-            .find(([_relName, relData]) => relData.type().type === op.ref.type)
-
+          let [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
+            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type)
 
           relatedOp = {
             ...op,
@@ -101,11 +100,9 @@ export default class Application {
               filter: {
                 ...op.params.filter,
                 [
-                  relatedResourceRelationshipToBaseResource[1].foreignKeyName ||
-                  this.serializer.relationshipToColumn(
-                    relatedResourceRelationshipToBaseResource[0],
-                    relatedResourceClass.schema.primaryKeyName
-                  )]: op.ref.id
+                  relatedRelationship.foreignKeyName ||
+                  this.serializer.relationshipToColumn(relatedRelationshipName, relatedResourceClass.schema.primaryKeyName)
+                ]: op.ref.id
               }
             }
           } as Operation;
