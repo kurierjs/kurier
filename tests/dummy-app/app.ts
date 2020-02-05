@@ -6,15 +6,18 @@ import {
   UserManagementAddon,
   UserManagementAddonOptions
 } from "./jsonapi-ts";
-import ArticleProcessor from "./processors/article";
+
 import Article from "./resources/article";
 import User from "./resources/user";
 import Comment from "./resources/comment";
 import Vote from "./resources/vote";
-import VoteProcessor from "./processors/vote";
+
 import knexfile from "./../data/knexfile";
 import login from "./callbacks/login";
-import MyVeryOwnUserProcessor from "./processors/user";
+
+import UserProcessor from "./processors/user";
+import ArticleProcessor from "./processors/article";
+import VoteProcessor from "./processors/vote";
 
 const app = new Application({
   namespace: "api",
@@ -25,7 +28,7 @@ const app = new Application({
 
 app.use(UserManagementAddon, {
   userResource: User,
-  userProcessor: MyVeryOwnUserProcessor,
+  userProcessor: UserProcessor,
   userLoginCallback: login,
   async userRolesProvider(this: ApplicationInstance, user: User) {
     return ["Admin"];
