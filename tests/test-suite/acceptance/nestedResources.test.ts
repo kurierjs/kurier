@@ -30,11 +30,19 @@ describe("Articles", () => {
       expect(result.status).toEqual(200);
     });
   });
-  
+
   describe("GET", () => {
     it("Get 1st vote article (BelongsTo)", async () => {
       const result = await request.get(`/votes/1/article`);
       expect(result.body).toEqual(nested.get.articleOf1stVote);
+      expect(result.status).toEqual(200);
+    });
+  });
+
+  describe("GET", () => {
+    it("Get ParentComment of 1st Comment (Recursive BelongsTo)", async () => {
+      const result = await request.get(`/comments/1/parentComment`);
+      expect(result.body).toEqual(nested.get.parentCommentOf1stComment);
       expect(result.status).toEqual(200);
     });
   });

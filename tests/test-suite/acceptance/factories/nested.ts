@@ -19,6 +19,30 @@ export default {
     },
     articleOf1stVote: {
       "data": article.toGet.response[0]
+    },
+    parentCommentOf1stComment: {
+      "data": {
+        "id": 2,
+        "type": "comment",
+        "attributes": {
+          "body": "hello2",
+          "type": "not_spam"
+        },
+        "relationships": {
+          "author": {
+            "data": {
+              "id": 2,
+              "type": "user"
+            }
+          },
+          "parentComment": {
+            "data": {
+              "id": 3,
+              "type": "comment"
+            }
+          }
+        }
+      }
     }
   }
 };
