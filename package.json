@@ -1,5 +1,5 @@
 {
-  "name": "@ebryn/jsonapi-ts",
+  "name": "kurier",
   "version": "0.1.46",
   "description": "",
   "main": "dist/index.js",
