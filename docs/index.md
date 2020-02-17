@@ -68,82 +68,82 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 ## Getting started
 
-> ℹ️ The following examples are written in TypeScript. The package name will soon change!
+> ℹ️ The following examples are written in TypeScript.
 
 1. Install `kurier` with `npm` or `yarn`:
 
-   ```
-    npm i kurier
-   ```
+```
+npm i kurier
+```
 
-   ```
-    yarn add kurier
-   ```
+```
+yarn add kurier
+```
 
 2. Create a Resource:
 
-   ```ts
-   // resources/author.ts
-   import { Resource } from "kurier";
+```ts
+// resources/author.ts
+import { Resource } from "kurier";
 
-   export default class Author extends Resource {
-     static schema = {
-       attributes: {
-         firstName: String,
-         lastName: String
-       },
-       relationships: {}
-     };
-   }
-   ```
+export default class Author extends Resource {
+  static schema = {
+    attributes: {
+      firstName: String,
+      lastName: String
+    },
+    relationships: {}
+  };
+}
+```
 
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
-   ```ts
-   import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
-   import Koa from "koa";
+```ts
+  import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
+  import Koa from "koa";
 
-   import Author from "./resources/author";
+  import Author from "./resources/author";
 
-   const app = new Application({
-     namespace: "api",
-     types: [Author],
-     defaultProcessor: new KnexProcessor(/* knex options */)
-   });
+  const app = new Application({
+    namespace: "api",
+    types: [Author],
+    defaultProcessor: new KnexProcessor(/* knex options */)
+  });
 
-   const api = new Koa();
+  const api = new Koa();
 
-   api.use(jsonApi(app));
+  api.use(jsonApi(app));
 
-   api.listen(3000);
-   ```
+  api.listen(3000);
+```
 
 4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
-   ```js
-   {
-     "data": [],
-     "included": []
-   }
-   ```
+```js
+  {
+    "data": [],
+    "included": []
+  }
+```
 
 5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
-   ```js
-   {
-     "data": [
-       {
-         "id": 1,
-         "type": "author",
-         "attributes": {
-           "firstName": "John",
-           "lastName": "Katzenbach"
-         }
-       }
-     ],
-     "included": []
-   }
-   ```
+```js
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "author",
+      "attributes": {
+        "firstName": "John",
+        "lastName": "Katzenbach"
+      }
+    }
+  ],
+  "included": []
+}
+```
 
 ## Data flow
 
@@ -293,7 +293,7 @@ A `get` operation can retrieve:
 
 - all resources of a given type:
 
-  ```js
+```js
   // Get all books.
 
   {
@@ -306,7 +306,7 @@ A `get` operation can retrieve:
 
 - a subset of resources of given type which satisfy a certain criteria:
 
-  ```js
+```js
   // Get all books with a price greater than 100.
 
   {
