@@ -68,8 +68,6 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 ## Getting started
 
-> ℹ️ The following examples are written in TypeScript. The package name will soon change!
-
 1. Install `kurier` with `npm` or `yarn`:
 
 ```bash
