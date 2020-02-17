@@ -1,6 +1,6 @@
 {
-  "name": "@ebryn/jsonapi-ts",
-  "version": "0.1.46",
+  "name": "kurier",
+  "version": "1.0.0-alpha1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,14 +14,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ebryn/jsonapi-ts.git"
+    "url": "git+https://github.com/kurierjs/kurier.git"
   },
-  "author": "Erik Bryn",
+  "author": "The Kurier.js Team",
+  "contributors": [
+    "Joel A. Villarreal Bertoldi",
+    "Santiago Pérsico",
+    "Ryan Tablada",
+    "Erik Bryn",
+    "Alexey Kulakov",
+    "Maciej Kwaśniak"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ebryn/jsonapi-ts/issues"
+    "url": "https://github.com/kurierjs/kurier/issues"
   },
-  "homepage": "https://github.com/ebryn/jsonapi-ts#readme",
+  "homepage": "https://github.com/kurierjs/kurier#readme",
   "dependencies": {
     "compose-middleware": "^5.0.1",
     "ember-cli-string-utils": "^1.1.0",
