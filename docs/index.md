@@ -70,21 +70,21 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 > ℹ️ The following examples are written in TypeScript. The package name will soon change!
 
-1. Install `jsonapi-ts` with `npm` or `yarn`:
+1. Install `kurier` with `npm` or `yarn`:
 
-   ```bash
-   $ npm i @ebryn/jsonapi-ts
+   ```
+    npm i kurier
    ```
 
-   ```bash
-   $ yarn add @ebryn/jsonapi-ts
+   ```
+    yarn add kurier
    ```
 
 2. Create a Resource:
 
    ```ts
    // resources/author.ts
-   import { Resource } from "@ebryn/jsonapi-ts";
+   import { Resource } from "kurier";
 
    export default class Author extends Resource {
      static schema = {
@@ -100,7 +100,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
    ```ts
-   import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "@ebryn/jsonapi-ts";
+   import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
    import Koa from "koa";
 
    import Author from "./resources/author";
@@ -120,7 +120,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
-   ```json
+   ```js
    {
      "data": [],
      "included": []
@@ -129,7 +129,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
-   ```json
+   ```js
    {
      "data": [
        {
@@ -185,7 +185,7 @@ This is how our _Book_ resource would look like, without relationships:
 
 ```ts
 // resources/book.ts
-import { Resource } from "@ebryn/jsonapi-ts";
+import { Resource } from "kurier";
 import User from "./user";
 import Comment from "./comment";
 
@@ -293,7 +293,7 @@ A `get` operation can retrieve:
 
 - all resources of a given type:
 
-  ```json
+  ```js
   // Get all books.
 
   {
@@ -306,7 +306,7 @@ A `get` operation can retrieve:
 
 - a subset of resources of given type which satisfy a certain criteria:
 
-  ```json
+  ```js
   // Get all books with a price greater than 100.
 
   {
@@ -324,7 +324,7 @@ A `get` operation can retrieve:
 
 - a single, uniquely identified resource of a given type:
 
-  ```json
+  ```js
   // Get a single book.
 
   {
@@ -352,7 +352,7 @@ The following filter operations are supported:
 
 Results can also be sorted, paginated or partially retrieved using `params.sort`, `params.page` and `params.fields` respectively:
 
-```json
+```js
 // Get the first 5 books' name, sorted by name.
 
 {
@@ -373,7 +373,7 @@ Results can also be sorted, paginated or partially retrieved using `params.sort`
 
 Also, if the resource being retrieved is related to other resources, it's possible to sideload the related resources using `params.include`:
 
-```json
+```js
 // Get all books and their respective authors.
 
 {
@@ -393,7 +393,7 @@ The response, if successful, will be a list of one or more resources, mathing th
 
 An `add` operation represents the intent of writing a new resource of a given type into the data store.
 
-```json
+```js
 // Add a new book. Notice that by default, you don't need
 // to provide an ID. Kurier can generate it automatically.
 // Also, we're relating this new resource to an existing
@@ -429,7 +429,7 @@ The response, if successful, will be a single resource object, with either a gen
 
 An `update` operation represents the intent of changing some or all of the data for an existing resource of a given type from the data store.
 
-```json
+```js
 // Increase the price of "Learning JSONAPI" to 200.
 
 {
@@ -454,7 +454,7 @@ The response, if successful, will be a single resource object, reflecting the ch
 
 A `delete` operation represents the intent to destroy an existing resources in the data store.
 
-```json
+```js
 // Remove the "Learning JSONAPI" book.
 
 {
@@ -578,7 +578,7 @@ Any operation can return the following error codes:
 
 ##### `get` operations
 
-```bash
+```
 # Get all books.
 GET /books
 
@@ -600,7 +600,7 @@ The middleware, if successful, will respond with a `200 OK` HTTP status code.
 
 ##### `add` operations
 
-```bash
+```
 # Add a new book.
 POST /books
 Content-Type: application/json; charset=utf-8
@@ -629,7 +629,7 @@ The middleware, if successful, will respond with a `201 Created` HTTP status cod
 
 ##### `update` operations
 
-```bash
+```
 # Increase the price of "Learning JSONAPI" to 200.
 PUT /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 Content-Type: application/json; charset=utf-8
@@ -674,7 +674,7 @@ So, after instantiating your application, you can enable WebSockets support with
 
 ```ts
 import { Server as WebSocketServer } from "ws";
-import { jsonApiWebSocket } from "@ebryn/jsonapi-ts";
+import { jsonApiWebSocket } from "kurier";
 
 // Assume an app has been configured with its resources
 // and processors, etc.
@@ -735,7 +735,7 @@ Let's assume for example your data source is the filesystem. For each `type`, yo
 You could implement a generic `ReadOnlyProcessor` with something like this:
 
 ```ts
-import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { OperationProcessor, Operation } from "kurier";
 import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
@@ -757,7 +757,7 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
 What happens if in the previous example something goes wrong? For example, a record in our super filesystem-based storage does not contain valid JSON? We can create an error response using try/catch and `JsonApiErrors`:
 
 ```ts
-import { OperationProcessor, Operation, JsonApiErrors, Resource } from "@ebryn/jsonapi-ts";
+import { OperationProcessor, Operation, JsonApiErrors, Resource } from "kurier";
 import { readdirSync, readFileSync } from "fs";
 import { resolve as resolvePath, basename } from "path";
 
@@ -780,13 +780,14 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
   }
 }
 ```
+
 > ℹ️ Notice that you can provide details (like in the previous example) but it's not mandatory.
 
 You can also create an error by using the `JsonApiError` type:
 
 ```ts
 // Assumes you've imported HttpStatusCodes and JsonApiError
-// from @ebryn/jsonapi-ts.
+// from kurier.
 
 throw {
   // At the very least, you must declare a status and a code.
@@ -811,7 +812,7 @@ Our ReadOnlyProcessor class is a fair example of how to extend the OperationProc
 Let's assume we have a `Moment` resource:
 
 ```ts
-import { Resource } from "@ebryn/jsonapi-ts";
+import { Resource } from "kurier";
 
 export default class Moment extends Resource {
   static schema = {
@@ -827,7 +828,7 @@ export default class Moment extends Resource {
 All you need to do is extend the Processor, set the generic type to `Moment`, and bind the processor to the resource:
 
 ```ts
-import { OperationProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { OperationProcessor, Operation } from "kurier";
 import Moment from "../resources/moment";
 
 export default class MomentProcessor extends OperationProcessor<Moment> {
@@ -940,7 +941,7 @@ Using these two methods and the standard [Knex functions](https://knexjs.org/#Bu
 Like the `OperationProcessor` class, the `KnexProcessor` can be extended to support custom operations. Suppose we want to count how many books an author has. We could implement a `count()` method.
 
 ```ts
-import { KnexProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { KnexProcessor, Operation } from "kurier";
 import { Book, BookCount } from "./resources";
 
 export default class BookProcessor extends KnexProcessor<Book> {
@@ -990,7 +991,7 @@ You can modify the serializer's behavior to adapt to an existing database by ove
 import {
   JsonApiSerializer,
   camelize, capitalize, classify, dasherize, underscore, pluralize, singularize
-} from "@ebyrn/jsonapi-ts";
+} from "kurier";
 
 export default MySerializer extends JsonApiSerializer {
   // Overrides here...
@@ -1038,7 +1039,7 @@ For this feature to work, you'll need at least to:
 A minimal, bare-bones declaration of an `User` resource could look something like this:
 
 ```ts
-import { User as JsonApiUser, Password } from "@ebryn/jsonapi-ts";
+import { User as JsonApiUser, Password } from "kurier";
 
 export default class User extends JsonApiUser {
   static schema = {
@@ -1061,7 +1062,7 @@ Note that the resource must extend from `JsonApiUser` instead of `Resource`.
 Now, for any processor you have in your API, for example, our BookProcessor, we can use `@Authorize` to reject execution if there's no user detected:
 
 ```ts
-import { KnexProcessor, Operation, Authorize } from "@ebryn/jsonapi-ts";
+import { KnexProcessor, Operation, Authorize } from "kurier";
 import { Book } from "./resources";
 
 export default class BookProcessor extends KnexProcessor<Book> {
@@ -1120,7 +1121,7 @@ Once you've got these functions, you can apply the `UserManagementAddon` like th
 
 ```ts
 // ...other imports...
-import { UserManagementAddon, UserManagementAddonOptions } from "@ebryn/jsonapi-ts";
+import { UserManagementAddon, UserManagementAddonOptions } from "kurier";
 import { login, encryptPassword, generateId } from "./user-callbacks";
 import User from "./resources/user";
 
@@ -1137,7 +1138,7 @@ If you don't want to use loose functions like this, you can create a `UserProces
 
 ```ts
 // Note that MyVeryOwnUserProcessor extends from Kurier's own UserProcessor.
-import { UserProcessor, Operation } from "@ebryn/jsonapi-ts";
+import { UserProcessor, Operation } from "kurier";
 import User from "./resources/user";
 
 export default class MyVeryOwnUserProcessor<T extends User> extends UserProcessor<T> {
@@ -1180,7 +1181,7 @@ For example, a role provider could look like this:
 `role-provider.ts`
 
 ```ts
-import { ApplicationInstance, User } from "@ebryn/jsonapi-ts";
+import { ApplicationInstance, User } from "kurier";
 
 export default async function roleProvider(this: ApplicationInstance, user: User): Promise<string[]> {
   const userRoleProcessor = this.processorFor("userRole");
@@ -1211,7 +1212,7 @@ app.use(UserManagementAddon, {
 You might want to restrict an operation to a specific subset of users who match a certain criteria. For that purpose, you can augment the `@Authorize` decorator with the `IfUser()` helper:
 
 ```ts
-import { KnexProcessor, Operation, Authorize, IfUser } from "@ebryn/jsonapi-ts";
+import { KnexProcessor, Operation, Authorize, IfUser } from "kurier";
 import { Book } from "./resources";
 
 export default class BookProcessor extends KnexProcessor<Book> {
@@ -1267,7 +1268,7 @@ The last piece of the framework is the `Application` object. This component wrap
 It's what orchestrates, routes and executes operations. In code, we're talking about something like this:
 
 ```ts
-import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "@ebryn/jsonapi-ts";
+import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
 import Koa from "koa";
 
 import Author from "./resources/author";
