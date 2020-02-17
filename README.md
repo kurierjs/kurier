@@ -70,14 +70,14 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 > ℹ️ The following examples are written in TypeScript. The package name will soon change!
 
-1. Install `jsonapi-ts` with `npm` or `yarn`:
+1. Install `kurier` with `npm` or `yarn`:
 
-   ```bash
-   $ npm i kurier
+   ```
+    npm i kurier
    ```
 
-   ```bash
-   $ yarn add kurier
+   ```
+    yarn add kurier
    ```
 
 2. Create a Resource:
@@ -120,7 +120,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
-   ```json
+   ```js
    {
      "data": [],
      "included": []
@@ -129,7 +129,7 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
-   ```json
+   ```js
    {
      "data": [
        {
@@ -293,7 +293,7 @@ A `get` operation can retrieve:
 
 - all resources of a given type:
 
-  ```json
+  ```js
   // Get all books.
 
   {
@@ -306,7 +306,7 @@ A `get` operation can retrieve:
 
 - a subset of resources of given type which satisfy a certain criteria:
 
-  ```json
+  ```js
   // Get all books with a price greater than 100.
 
   {
@@ -324,7 +324,7 @@ A `get` operation can retrieve:
 
 - a single, uniquely identified resource of a given type:
 
-  ```json
+  ```js
   // Get a single book.
 
   {
@@ -352,7 +352,7 @@ The following filter operations are supported:
 
 Results can also be sorted, paginated or partially retrieved using `params.sort`, `params.page` and `params.fields` respectively:
 
-```json
+```js
 // Get the first 5 books' name, sorted by name.
 
 {
@@ -373,7 +373,7 @@ Results can also be sorted, paginated or partially retrieved using `params.sort`
 
 Also, if the resource being retrieved is related to other resources, it's possible to sideload the related resources using `params.include`:
 
-```json
+```js
 // Get all books and their respective authors.
 
 {
@@ -393,7 +393,7 @@ The response, if successful, will be a list of one or more resources, mathing th
 
 An `add` operation represents the intent of writing a new resource of a given type into the data store.
 
-```json
+```js
 // Add a new book. Notice that by default, you don't need
 // to provide an ID. Kurier can generate it automatically.
 // Also, we're relating this new resource to an existing
@@ -429,7 +429,7 @@ The response, if successful, will be a single resource object, with either a gen
 
 An `update` operation represents the intent of changing some or all of the data for an existing resource of a given type from the data store.
 
-```json
+```js
 // Increase the price of "Learning JSONAPI" to 200.
 
 {
@@ -454,7 +454,7 @@ The response, if successful, will be a single resource object, reflecting the ch
 
 A `delete` operation represents the intent to destroy an existing resources in the data store.
 
-```json
+```js
 // Remove the "Learning JSONAPI" book.
 
 {
@@ -578,7 +578,7 @@ Any operation can return the following error codes:
 
 ##### `get` operations
 
-```bash
+```
 # Get all books.
 GET /books
 
@@ -600,7 +600,7 @@ The middleware, if successful, will respond with a `200 OK` HTTP status code.
 
 ##### `add` operations
 
-```bash
+```
 # Add a new book.
 POST /books
 Content-Type: application/json; charset=utf-8
@@ -629,7 +629,7 @@ The middleware, if successful, will respond with a `201 Created` HTTP status cod
 
 ##### `update` operations
 
-```bash
+```
 # Increase the price of "Learning JSONAPI" to 200.
 PUT /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 Content-Type: application/json; charset=utf-8
@@ -991,7 +991,7 @@ You can modify the serializer's behavior to adapt to an existing database by ove
 import {
   JsonApiSerializer,
   camelize, capitalize, classify, dasherize, underscore, pluralize, singularize
-} from "@ebyrn/jsonapi-ts";
+} from "kurier";
 
 export default MySerializer extends JsonApiSerializer {
   // Overrides here...
