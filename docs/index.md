@@ -68,81 +68,81 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 ## Getting started
 
-> ℹ️ The following examples are written in TypeScript.
+> ℹ️ The following examples are written in TypeScript. The package name will soon change!
 
 1. Install `kurier` with `npm` or `yarn`:
 
-```
-npm i kurier
+```bash
+  npm i kurier
 ```
 
-```
-yarn add kurier
+```bash
+  yarn add kurier
 ```
 
 2. Create a Resource:
 
 ```ts
-// resources/author.ts
-import { Resource } from "kurier";
+   // resources/author.ts
+   import { Resource } from "kurier";
 
-export default class Author extends Resource {
-  static schema = {
-    attributes: {
-      firstName: String,
-      lastName: String
-    },
-    relationships: {}
-  };
-}
+   export default class Author extends Resource {
+     static schema = {
+       attributes: {
+         firstName: String,
+         lastName: String
+       },
+       relationships: {}
+     };
+   }
 ```
 
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
 ```ts
-  import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
-  import Koa from "koa";
+   import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
+   import Koa from "koa";
 
-  import Author from "./resources/author";
+   import Author from "./resources/author";
 
-  const app = new Application({
-    namespace: "api",
-    types: [Author],
-    defaultProcessor: new KnexProcessor(/* knex options */)
-  });
+   const app = new Application({
+     namespace: "api",
+     types: [Author],
+     defaultProcessor: new KnexProcessor(/* knex options */)
+   });
 
-  const api = new Koa();
+   const api = new Koa();
 
-  api.use(jsonApi(app));
+   api.use(jsonApi(app));
 
-  api.listen(3000);
+   api.listen(3000);
 ```
 
 4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
 ```js
-  {
-    "data": [],
-    "included": []
-  }
+   {
+     "data": [],
+     "included": []
+   }
 ```
 
 5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
 ```js
-{
-  "data": [
-    {
-      "id": 1,
-      "type": "author",
-      "attributes": {
-        "firstName": "John",
-        "lastName": "Katzenbach"
-      }
-    }
-  ],
-  "included": []
-}
+   {
+     "data": [
+       {
+         "id": 1,
+         "type": "author",
+         "attributes": {
+           "firstName": "John",
+           "lastName": "Katzenbach"
+         }
+       }
+     ],
+     "included": []
+   }
 ```
 
 ## Data flow
@@ -302,7 +302,7 @@ A `get` operation can retrieve:
       "type": "book"
     }
   }
-  ```
+```
 
 - a subset of resources of given type which satisfy a certain criteria:
 
@@ -320,11 +320,11 @@ A `get` operation can retrieve:
       }
     }
   }
-  ```
+```
 
 - a single, uniquely identified resource of a given type:
 
-  ```js
+```js
   // Get a single book.
 
   {
@@ -334,7 +334,7 @@ A `get` operation can retrieve:
       "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
     }
   }
-  ```
+```
 
 The following filter operations are supported:
 
@@ -1085,7 +1085,7 @@ You'll need to define at least two functions:
 
 - **A `login` callback which allows a user to identify itself with their credentials.** Internally, it receives an `add` operation for the `session` resource and an attribute hash containing user data. This callback must return a boolean and somehow compare if the user and password (or whatever identification means you need) are a match:
 
-  ```ts
+```ts
   // Assume `hash` is a function that takes care of hashing a plain-text
   // password with a given salt.
   export default async function login(op: Operation, user: ResourceAttributes) {
@@ -1094,11 +1094,11 @@ You'll need to define at least two functions:
       hash(op.data.attributes.password, process.env.SESSION_KEY) === user.password
     );
   }
-  ```
+```
 
 - **An `encryptPassword` callback which takes care of transforming the plain-text password when the API receives a request to create a new user.** Internally, it receives an `add` operation for the `user` resource. This callback must return an object containing a key with the column name for your password field, with a value of an encrypted version of your password, using a cryptographic algorithm of your choice:
 
-  ```ts
+```ts
   // Assume `hash` is a function that takes care of hashing a plain-text
   // password with a given salt.
   export default async function encryptPassword(op: Operation) {
@@ -1106,7 +1106,7 @@ You'll need to define at least two functions:
       password: hash(op.data.attributes.password, process.env.SESSION_KEY)
     };
   }
-  ```
+```
 
 Optionally, you can define a `generateId` callback, which must return a string with a unique ID, used when a new user is being registered. An example of it could be:
 
