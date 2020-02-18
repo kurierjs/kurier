@@ -11,7 +11,8 @@ import {
   KnexRecord,
   Operation,
   ResourceSchema,
-  ResourceSchemaRelationship
+  ResourceSchemaRelationship,
+  ResourceSchemaRelationships
 } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
@@ -59,6 +60,25 @@ const buildSortClause = (sort: string[], resourceClass: typeof Resource, seriali
   });
 };
 
+
+const parseOperationIncludedRelationships = (operationIncludes: string[], resourceRelationships: ResourceSchemaRelationships): {
+  relationships: ResourceSchemaRelationships, nestedRelationships: { [key: string]: ResourceSchemaRelationships }
+} => {
+  const includes = operationIncludes.map((relationship: string) => relationship.split('.'));
+
+  const relationships = pick(resourceRelationships, includes.map(nestedInclude => nestedInclude[0]));
+
+  const nestedRelationships = includes
+    .filter(include => include.length > 1)
+    .reduce((acumRelationships, [nestedOrigin, nestedRelationshipName]) => ({
+      ...acumRelationships,
+      [nestedOrigin]: {
+        [nestedRelationshipName]: relationships[nestedOrigin].type().schema.relationships[nestedRelationshipName]
+      }
+    }), {});
+  return { relationships, nestedRelationships }
+}
+
 // const getColumns =
 
 export default class KnexProcessor<ResourceT extends Resource> extends OperationProcessor<ResourceT> {
@@ -74,9 +94,13 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   async eagerLoad(op: Operation, result: ResourceT | ResourceT[]) {
-    const include = op.params ? op.params.include : [];
-    const relationships = pick(this.resourceClass.schema.relationships, include);
+    if (!op.params || !op.params.include) {
+      return {};
+    }
 
+    const { relationships, nestedRelationships } = parseOperationIncludedRelationships(op.params.include, this.resourceClass.schema.relationships)
+    console.log('EAGERLOAD-> Nested Relationships Schemas: ', nestedRelationships);
+    // TODO: Eagerly Load nested Relationships from here
     return promiseHashMap(relationships, (key: string) => {
       return this.eagerFetchRelationship(key, result);
     });
@@ -268,18 +292,22 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   async getRelationships(op: Operation, record: HasId, eagerLoadedData: EagerLoadedData) {
-    const include = op.params ? op.params.include : [];
-    const relationships = pick(this.resourceClass.schema.relationships, include);
-
-    return promiseHashMap(relationships, (key: string) => {
+    if (!op.params || !op.params.include) {
+      return {};
+    }
+    const { relationships, nestedRelationships } = parseOperationIncludedRelationships(op.params.include, this.resourceClass.schema.relationships);
+    // TODO: This is the other place to intervene to parse the eagerly loaded relationships (probably).
+    console.log('GETRELATIONSHIPS-> parsed:', relationships, nestedRelationships);
+    const fetchedRelationships = await promiseHashMap(relationships, (key: string) => {
       if (relationships[key] instanceof Function) {
-        return relationships[key].call(this, record);
+        return (relationships[key] as unknown as Function).call(this, record);
+        // Question (@Joel): is this OK?, why would relationships[key] be a Function?
       }
-
-      const relationshipSchema = this.resourceClass.schema.relationships[key];
-
-      return this.fetchRelationship(key, relationshipSchema, record, eagerLoadedData);
+      return this.fetchRelationship(key, relationships[key], record, eagerLoadedData);
     });
+
+    console.log('GETRELATIONSHIPS-> FINAL:', fetchedRelationships);
+    return fetchedRelationships;
   }
 
   async eagerFetchRelationship(key: string, result: ResourceT | ResourceT[]): Promise<KnexRecord[] | void> {
@@ -322,7 +350,13 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
         .select(`${foreignTableName}.*`);
     }
   }
-
+  /**
+   * Filters and formats relationships from eagerly fetched data.
+   * @param key relationship to fetch
+   * @param relationship relationshipSchema to fetch 
+   * @param record base fetched resource
+   * @param eagerLoadedData eagerly fetched data where the relationship is fetched from
+   */
   async fetchRelationship(
     key: string,
     relationship: ResourceSchemaRelationship,
