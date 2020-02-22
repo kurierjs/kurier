@@ -1,4 +1,4 @@
-import { UserProcessor, Operation, Authorize, IfUserDoesNotMatches } from "../jsonapi-ts";
+import { UserProcessor, Operation, Authorize, IfUserDoesNotHaveRole } from "../jsonapi-ts";
 import User from "../resources/user";
 import encryptPassword from "../callbacks/encrypt-password";
 
@@ -25,7 +25,7 @@ export default class MyVeryOwnUserProcessor<T extends User> extends UserProcesso
     }
   };
 
-  @Authorize(IfUserDoesNotMatches("roles", ["foo"]))
+  @Authorize(IfUserDoesNotHaveRole("foo"))
   public async get(op: Operation) {
     return super.get(op);
   }

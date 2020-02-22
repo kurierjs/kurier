@@ -3,6 +3,7 @@ import { HasId, Operation, EagerLoadedData } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
+import { JsonApiErrors } from "..";
 
 export default class OperationProcessor<ResourceT extends Resource> {
   static resourceClass: typeof Resource;
@@ -23,7 +24,13 @@ export default class OperationProcessor<ResourceT extends Resource> {
   constructor(public appInstance: ApplicationInstance) { }
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
+
     const action: string = op.op;
+
+    if (["update", "remove"].includes(action) && !op.ref.id) {
+      throw JsonApiErrors.BadRequest(`${action} is not allowed without a defined primary key`);
+    }
+
     const result = this[action] && (await this[action].call(this, op));
     let eagerLoadedData = {};
 

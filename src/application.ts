@@ -1,22 +1,13 @@
 import * as Knex from "knex";
-
-import OperationProcessor from "./processors/operation-processor";
-import Resource from "./resource";
-import {
-  Operation,
-  OperationResponse,
-  ApplicationServices,
-  IJsonApiSerializer,
-  ApplicationAddons,
-  AddonOptions
-} from "./types";
-import flatten from "./utils/flatten";
-
-import ApplicationInstance from "./application-instance";
-import JsonApiSerializer from "./serializers/serializer";
 import Addon from "./addon";
+import ApplicationInstance from "./application-instance";
 import { canAccessResource } from "./decorators/authorize";
 import KnexProcessor from "./processors/knex-processor";
+import OperationProcessor from "./processors/operation-processor";
+import Resource from "./resource";
+import JsonApiSerializer from "./serializers/serializer";
+import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship } from "./types";
+import flatten from "./utils/flatten";
 
 export default class Application {
   namespace: string;
@@ -86,6 +77,64 @@ export default class Application {
 
   async executeOperation(op: Operation, processor: OperationProcessor<Resource>): Promise<OperationResponse> {
     const resourceClass = await this.resourceFor(op.ref.type);
+    console.log('OP-REF', op.ref)
+    if (op.ref.relationship) {
+      const relationship = resourceClass.schema.relationships[op.ref.relationship];
+      const relatedResourceClass = relationship.type();
+
+      if (relatedResourceClass) {
+        let relatedOp: Operation;
+
+        if (relationship.hasMany) {
+          const relatedResourceClassRelationships = Object.entries(relatedResourceClass.schema.relationships);
+          let [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
+            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type)
+
+          relatedOp = {
+            ...op,
+            ref: {
+              type: relatedResourceClass.type
+            },
+            params: {
+              ...op.params,
+              filter: {
+                ...op.params.filter,
+                [
+                  relatedRelationship.foreignKeyName ||
+                  this.serializer.relationshipToColumn(relatedRelationshipName, relatedResourceClass.schema.primaryKeyName)
+                ]: op.ref.id
+              }
+            }
+          } as Operation;
+          console.log('HasMany - Added Operation', relatedOp)
+        } else if (relationship.belongsTo) {
+          const deserializedOriginalOperation = await this.serializer.deserializeResource(
+            { ...op, op: "get" },
+            resourceClass
+          );
+          const result = (await processor.execute(deserializedOriginalOperation)) as Resource;
+
+          relatedOp = {
+            ...op,
+            ref: {
+              type: relatedResourceClass.type,
+              id: result.attributes[
+                resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
+                this.serializer.relationshipToColumn(op.ref.relationship)
+              ] as string
+            }
+          };
+          console.log('BelongsTo - Added Operation', relatedOp)
+        }
+
+        const deserializedOperation = await this.serializer.deserializeResource(relatedOp, relatedResourceClass);
+        const relatedProcessor = await this.processorFor(relatedResourceClass.type, processor.appInstance);
+        const result = await relatedProcessor.execute(deserializedOperation);
+
+        return this.buildOperationResponse(result, processor.appInstance);
+      }
+    }
+
     const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
     const result = await processor.execute(deserializedOperation);
 
@@ -108,7 +157,8 @@ export default class Application {
 
   async processorFor(
     resourceType: string,
-    applicationInstance: ApplicationInstance
+    applicationInstance: ApplicationInstance,
+    processorType = this.defaultProcessor
   ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
 
@@ -116,14 +166,13 @@ export default class Application {
       this.processors.map(async processor => ((await processor.shouldHandle(resourceType)) ? processor : false))
     );
 
-    // tslint:disable-next-line
     const ProcessorClass = processors.find(p => p !== false);
 
     if (ProcessorClass) {
       return new ProcessorClass(applicationInstance);
     }
 
-    class ResourceProcessor extends this.defaultProcessor<Resource> {
+    class ResourceProcessor extends processorType<Resource> {
       static resourceClass = resourceClass;
     }
 

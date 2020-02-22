@@ -79,7 +79,9 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           type: schemaRelationships[relationship.name].type().type
         }
       }),
-      data.relationships as any
+      Object.entries(data.relationships)
+        .reduce((includedDirectRelationships, [relName, relData]) =>
+          ({ ...includedDirectRelationships, [relName]: (relData as any).direct }), {})
     );
 
     data.attributes = unpick(
@@ -153,32 +155,64 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
 
     Object.keys(data.relationships)
       .filter(relationshipName => data.relationships[relationshipName])
-      .map(relationshipName => ({ relationshipName, resources: flatten([data.relationships[relationshipName]]) }))
-      .forEach(({ relationshipName, resources }: { relationshipName: string; resources: Resource[] }) => {
+      .map(relationshipName => ({ relationshipName, resources: data.relationships[relationshipName] }))
+      .forEach(({ relationshipName, resources }: { relationshipName: string, resources: any }) => {
+        const { direct: directResources, nested: nestedResources } = resources;
         const relatedResourceClass = schemaRelationships[relationshipName].type();
         const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
         includedData.push(
-          ...resources
-            .filter(resource => resource[pkName])
-            .map(resource => ({
-              ...this.serializeResource(
-                new relatedResourceClass({
-                  id: resource[pkName],
-                  attributes: unpick(resource, [
-                    pkName,
-                    ...Object.keys(relatedResourceClass.schema.attributes).filter(
-                      attribute => relatedResourceClass.schema.attributes[attribute] === Password
-                    )
-                  ])
-                }),
-                relatedResourceClass
-              ),
-              type: relatedResourceClass.type
-            }))
+          ...(directResources).map(resource => {
+            if (resource[pkName]) {
+              return {
+                ...this.serializeResource(
+                  new relatedResourceClass({
+                    id: resource[pkName],
+                    attributes: unpick(resource, [
+                      pkName,
+                      ...Object.keys(relatedResourceClass.schema.attributes).filter(
+                        attribute => relatedResourceClass.schema.attributes[attribute] === Password
+                      )
+                    ])
+                  }),
+                  relatedResourceClass
+                ),
+                type: relatedResourceClass.type
+              }
+            }
+          }),
         );
-      });
 
+        if (nestedResources) {
+          includedData.push(
+            ...Object.entries(nestedResources).map(([subRelationName, nestedRelationData]) => {
+              const subResourceClass = relatedResourceClass.schema.relationships[subRelationName].type();
+              const subPkName = subResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+              return (nestedRelationData as any[]).map(resource => {
+                if (resource[subPkName]) {
+                  return {
+                    ...this.serializeResource(
+                      new subResourceClass({
+                        id: resource[subPkName],
+                        attributes: unpick(resource, [
+                          subPkName,
+                          ...Object.keys(subResourceClass.schema.attributes).filter(
+                            attribute => subResourceClass.schema.attributes[attribute] === Password
+                          )
+                        ]),
+                        relationships: nestedResources.filter
+                      }),
+                      subResourceClass
+                    ),
+                    type: subResourceClass.type
+                  }
+                }
+              });
+            })
+          );
+        }
+
+      })
     return [...new Set(includedData.map((item: Resource) => `${item.type}_${item.id}`))].map(typeId =>
       includedData.find((item: Resource) => `${item.type}_${item.id}` === typeId)
     );
