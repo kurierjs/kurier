@@ -15,6 +15,7 @@ export default {
     connection: {
       filename: join(__dirname, "snake_case", "test.sqlite3")
     },
+    esm: true,
     extension: "ts",
     useNullAsDefault: true,
     seeds: {
@@ -29,6 +30,7 @@ export default {
     connection: {
       filename: join(__dirname, "camelCase", "test.sqlite3")
     },
+    esm: true,
     extension: "ts",
     useNullAsDefault: true,
     seeds: {
