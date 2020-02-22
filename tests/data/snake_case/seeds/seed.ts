@@ -1,5 +1,4 @@
-import * as Knex from "knex";
-exports.seed = (knex: Knex) => {
+exports.seed = (knex) => {
   const initialData = [
     {
       tableName: 'users',

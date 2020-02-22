@@ -68,21 +68,19 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
 
 ## Getting started
 
-> ℹ️ The following examples are written in TypeScript. The package name will soon change!
-
 1. Install `kurier` with `npm` or `yarn`:
 
-   ```
-    npm i kurier
-   ```
+```bash
+  npm i kurier
+```
 
-   ```
-    yarn add kurier
-   ```
+```bash
+  yarn add kurier
+```
 
 2. Create a Resource:
 
-   ```ts
+```ts
    // resources/author.ts
    import { Resource } from "kurier";
 
@@ -95,11 +93,11 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
        relationships: {}
      };
    }
-   ```
+```
 
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
-   ```ts
+```ts
    import { Application, jsonApiKoa as jsonApi, KnexProcessor } from "kurier";
    import Koa from "koa";
 
@@ -116,20 +114,20 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
    api.use(jsonApi(app));
 
    api.listen(3000);
-   ```
+```
 
 4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
-   ```js
+```json
    {
      "data": [],
      "included": []
    }
-   ```
+```
 
 5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
-   ```js
+```json
    {
      "data": [
        {
@@ -143,13 +141,13 @@ This is a TypeScript framework to create APIs following the [1.1 Spec of JSONAPI
      ],
      "included": []
    }
-   ```
+```
 
 ## Data flow
 
 This diagram represents how a full request/response cycle works with Kurier:
 
-<img src="./docs/data-flow.svg">
+<img src="./data-flow.svg">
 
 ## Resources
 
@@ -160,7 +158,6 @@ A resource can be understood as follows:
 > Any information that can be named can be a resource: a document or image, a temporal service (e.g. “today’s weather in Los Angeles”), a collection of other resources, a non-virtual object (e.g. a person), and so on. In other words, (...) A resource is a conceptual mapping to a set of entities (...).
 
 <p align="right"><sup><i><b>Source:</b> <a href="https://www.ics.uci.edu/~fielding/pubs/dissertation/fielding_dissertation.pdf">Architectural Styles and the Design of Network-based Software Architectures"; Fielding, R.; 2000; p. 88</a></i></sup></p>
-
 A resource is comprised of:
 
 #### A unique identifier
@@ -235,7 +232,7 @@ The expected foreign key depends on the serializer, and the type of relationship
 
 A relationship should be defined on its two ends. For example, on the example, with the above code in the _Book_ resource definition, a GET request to `books?include=author`, would include in the response the related user for each book, but for the inverse filter, in the _User_ resource schema definition, we should include:
 
-```
+```json
   static schema = {
    attributes: { /* ... */ },
     relationships: {
@@ -293,7 +290,7 @@ A `get` operation can retrieve:
 
 - all resources of a given type:
 
-  ```js
+```json
   // Get all books.
 
   {
@@ -302,11 +299,11 @@ A `get` operation can retrieve:
       "type": "book"
     }
   }
-  ```
+```
 
 - a subset of resources of given type which satisfy a certain criteria:
 
-  ```js
+```json
   // Get all books with a price greater than 100.
 
   {
@@ -320,11 +317,11 @@ A `get` operation can retrieve:
       }
     }
   }
-  ```
+```
 
 - a single, uniquely identified resource of a given type:
 
-  ```js
+```json
   // Get a single book.
 
   {
@@ -334,7 +331,7 @@ A `get` operation can retrieve:
       "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
     }
   }
-  ```
+```
 
 The following filter operations are supported:
 
@@ -352,7 +349,7 @@ The following filter operations are supported:
 
 Results can also be sorted, paginated or partially retrieved using `params.sort`, `params.page` and `params.fields` respectively:
 
-```js
+```json
 // Get the first 5 books' name, sorted by name.
 
 {
@@ -373,7 +370,7 @@ Results can also be sorted, paginated or partially retrieved using `params.sort`
 
 Also, if the resource being retrieved is related to other resources, it's possible to sideload the related resources using `params.include`:
 
-```js
+```json
 // Get all books and their respective authors.
 
 {
@@ -393,7 +390,7 @@ The response, if successful, will be a list of one or more resources, mathing th
 
 An `add` operation represents the intent of writing a new resource of a given type into the data store.
 
-```js
+```json
 // Add a new book. Notice that by default, you don't need
 // to provide an ID. Kurier can generate it automatically.
 // Also, we're relating this new resource to an existing
@@ -429,7 +426,7 @@ The response, if successful, will be a single resource object, with either a gen
 
 An `update` operation represents the intent of changing some or all of the data for an existing resource of a given type from the data store.
 
-```js
+```json
 // Increase the price of "Learning JSONAPI" to 200.
 
 {
@@ -454,7 +451,7 @@ The response, if successful, will be a single resource object, reflecting the ch
 
 A `delete` operation represents the intent to destroy an existing resources in the data store.
 
-```js
+```json
 // Remove the "Learning JSONAPI" book.
 
 {
@@ -474,7 +471,7 @@ Kurier supports a _bulk_ mode that allows the execution of a list of operations 
 
 A bulk request payload is essentially a wrapper around a list of operations:
 
-```js
+```json
 {
   "meta": {
     // ...
@@ -550,7 +547,7 @@ Both `jsonApiKoa` and `jsonApiExpress` take care of mapping the fundamental oper
 
 This is the basic pattern for any endpoint:
 
-```
+```http
 <verb> /:type[/:id][?params...]
 ```
 
@@ -578,7 +575,7 @@ Any operation can return the following error codes:
 
 ##### `get` operations
 
-```
+```bash
 # Get all books.
 GET /books
 
@@ -600,7 +597,7 @@ The middleware, if successful, will respond with a `200 OK` HTTP status code.
 
 ##### `add` operations
 
-```
+```json
 # Add a new book.
 POST /books
 Content-Type: application/json; charset=utf-8
@@ -629,7 +626,7 @@ The middleware, if successful, will respond with a `201 Created` HTTP status cod
 
 ##### `update` operations
 
-```
+```json
 # Increase the price of "Learning JSONAPI" to 200.
 PUT /books/ef70e4a4-5016-467b-958d-449ead0ce08e
 Content-Type: application/json; charset=utf-8
@@ -676,13 +673,11 @@ So, after instantiating your application, you can enable WebSockets support with
 import { Server as WebSocketServer } from "ws";
 import { jsonApiWebSocket } from "kurier";
 
-// Assume an app has been configured with its resources
+// Assumes an app has been configured with its resources
 // and processors, etc.
-// .
-// .
-// .
-// Also, assume `httpServer` is a Koa server,
-// `app` is a JSONAPI application instance.
+
+// Also, assumes httpServer is a Koa server,
+// app is a JSONAPI application instance.
 httpServer.use(jsonApiKoa(app));
 
 // Create a WebSockets server.
@@ -700,7 +695,7 @@ Unlike its HTTP counterpart, `jsonApiWebSocket` works with [bulk requests](#runn
 
 ### What is a processor?
 
-A processor is responsable of executing JSONAPI operations for certain resource types. If you're familiar with the Model-View-Controller pattern, processor can be somewhat compared to the `C` in `MVC`.
+A processor is responsible of executing JSONAPI operations for certain resource types. If you're familiar with the Model-View-Controller pattern, processor can be somewhat compared to the `C` in `MVC`.
 
 Kurier includes two built-in processors:
 
@@ -833,8 +828,7 @@ import Moment from "../resources/moment";
 
 export default class MomentProcessor extends OperationProcessor<Moment> {
   // This property binds the processor to the resource. This way the JSONAPI
-  // application knows how to resolve operations for the `Moment`
-  // resource.
+  // application knows how to resolve operations for the `Moment` resource.
   public resourceClass = Moment;
 
   // Notice that the return type is `Moment` and not a generic.
@@ -923,7 +917,6 @@ It maps operations to queries like this:
 | `add`     | `INSERT`, supporting `RETURNING`                     |
 | `update`  | `UPDATE`, supporting `WHERE`                         |
 | `remove`  | `DELETE`, supporting `WHERE`                         |
-|           |                                                      |
 
 It receives a single argument, `options`, which is passed to the `Knex` constructor. See the [Knex documentation](https://knexjs.org/#Installation-client) for detailed examples.
 
@@ -957,7 +950,7 @@ export default class BookProcessor extends KnexProcessor<Book> {
 }
 ```
 
-The call to `super.get(op)` allows to reuse the behavior of the KnexProcessor and then do other actions around it.
+The call to `super.get(op)` allows to reuse the behaviour of the KnexProcessor and then do other actions around it.
 
 > ℹ️ Naturally, there are better ways to do a count. This is just an example to show the extensibility capabilities of the processor.
 
@@ -969,7 +962,7 @@ When converting a request or an operation into a database query, there are sever
 
 ### The JsonApiSerializer class
 
-This class implements the default serialization behavior for the framework through several functions.
+This class implements the default serialization behaviour for the framework through several functions.
 
 Let's use our [Book resource](#declaring-a-resource) as an example.
 
@@ -983,7 +976,7 @@ Let's use our [Book resource](#declaring-a-resource) as an example.
 
 ### Extending the serializer
 
-You can modify the serializer's behavior to adapt to an existing database by overriding the previously described functions and then passing it to the App:
+You can modify the serializer's behaviour to adapt to an existing database by overriding the previously described functions and then passing it to the App:
 
 `serializer.ts`
 
@@ -1085,7 +1078,7 @@ You'll need to define at least two functions:
 
 - **A `login` callback which allows a user to identify itself with their credentials.** Internally, it receives an `add` operation for the `session` resource and an attribute hash containing user data. This callback must return a boolean and somehow compare if the user and password (or whatever identification means you need) are a match:
 
-  ```ts
+```ts
   // Assume `hash` is a function that takes care of hashing a plain-text
   // password with a given salt.
   export default async function login(op: Operation, user: ResourceAttributes) {
@@ -1094,11 +1087,11 @@ You'll need to define at least two functions:
       hash(op.data.attributes.password, process.env.SESSION_KEY) === user.password
     );
   }
-  ```
+```
 
 - **An `encryptPassword` callback which takes care of transforming the plain-text password when the API receives a request to create a new user.** Internally, it receives an `add` operation for the `user` resource. This callback must return an object containing a key with the column name for your password field, with a value of an encrypted version of your password, using a cryptographic algorithm of your choice:
 
-  ```ts
+```ts
   // Assume `hash` is a function that takes care of hashing a plain-text
   // password with a given salt.
   export default async function encryptPassword(op: Operation) {
@@ -1106,7 +1099,7 @@ You'll need to define at least two functions:
       password: hash(op.data.attributes.password, process.env.SESSION_KEY)
     };
   }
-  ```
+```
 
 Optionally, you can define a `generateId` callback, which must return a string with a unique ID, used when a new user is being registered. An example of it could be:
 
@@ -1244,13 +1237,13 @@ These are the available helpers:
 
 In order for authorization to work, whichever app is consuming the JSONAPI exposed via HTTP will need to send the token created with the `SessionProcessor` in an `Authorization` header, like this:
 
-```
+```http
 Authorization: Bearer JWT_HASH_GOES_HERE
 ```
 
 For authorization with websockets, the token should be provided inside a _meta_ object property, like this:
 
-```
+```json
 {
   "meta":{
     "token":"JWT_HASH_GOES_HERE"

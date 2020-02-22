@@ -10,5 +10,5 @@
     "sourceMap": true,
     "experimentalDecorators": true
   },
-  "include": ["src/**/*", "tests/**/*"]
+  "include": ["src/**/*", "tests/test-suite/**/*", "tests/data/**/*"]
 }
