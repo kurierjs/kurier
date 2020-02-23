@@ -36,13 +36,14 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
     if (result !== undefined) {
       eagerLoadedData = await this.eagerLoad(op, result);
-      eagerLoadedData = await this.computeRelationshipProperties(await this.resourceFor(op.ref.type), op, eagerLoadedData);
+      eagerLoadedData = await this.computeRelationshipProperties(op, eagerLoadedData);
     }
 
     return this.convertToResources(op, result, eagerLoadedData);
   }
 
-  async computeRelationshipProperties(baseResourceClass, op, eagerLoadedData) {
+  async computeRelationshipProperties(op, eagerLoadedData) {
+    const baseResourceClass = await this.resourceFor(op.ref.type);
     for (const relationship in eagerLoadedData) {
       if (eagerLoadedData.hasOwnProperty(relationship)) {
 
