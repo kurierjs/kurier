@@ -1,3 +1,73 @@
+export const users = [{
+  "id": 1,
+  "type": "user",
+  "attributes": {
+    "username": "me",
+    "email": "me@me.com",
+    "friends": [
+      {
+        "name": "Joel"
+      },
+      {
+        "name": "Ryan"
+      }
+    ],
+    "coolFactor": 3,
+    "roles": [
+      "user",
+      "author",
+      "voter"
+    ]
+  },
+  "relationships": {}
+},
+{
+  "id": 2,
+  "type": "user",
+  "attributes": {
+    "username": "username2",
+    "email": "me2@me.com",
+    "friends": [
+      {
+        "name": "Joel"
+      },
+      {
+        "name": "Ryan"
+      }
+    ],
+    "coolFactor": 3,
+    "roles": [
+      "user",
+      "author",
+      "voter"
+    ]
+  },
+  "relationships": {}
+},
+{
+  "id": 3,
+  "type": "user",
+  "attributes": {
+    "username": "username3",
+    "email": "me3@me.com",
+    "friends": [
+      {
+        "name": "Joel"
+      },
+      {
+        "name": "Ryan"
+      }
+    ],
+    "coolFactor": 3,
+    "roles": [
+      "user",
+      "author",
+      "voter"
+    ]
+  },
+  "relationships": {}
+}];
+
 export default {
   forCreation: {
     request: {
