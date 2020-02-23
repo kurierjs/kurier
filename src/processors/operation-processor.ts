@@ -111,6 +111,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
       this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData)
     ]);
 
+    // TODO: ISSUE #183: the filter for computed properties should be implemented here (I think)
+
     return new resourceClass({
       relationships,
       id: record[resourceClass.schema.primaryKeyName || "id"],
