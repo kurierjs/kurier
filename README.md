@@ -15,8 +15,6 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 ## Getting started
 
-> ℹ️ The following examples are written in TypeScript.
-
 1. Install the package with `npm` or `yarn`:
 
    ```bash
