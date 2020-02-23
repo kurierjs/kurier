@@ -1,5 +1,9 @@
-export const getFactoryObject = (array: any[], key: string = 'id') => (id: string | number): any =>
-  array.find(object => object[key] == id)
+import { Resource } from "../../../../src"
 
-export const getFactoryObjects = (array: any[], key: string = 'id') => (ids: (string | number)[]): any[] =>
-  array.filter(object => ids.includes(object[key]))
+export const getFactoryObject =
+  (array: any[], key: string = 'id') => (id: string | number): Resource =>
+    array.find(object => object[key] == id);
+
+export const getFactoryObjects =
+  (array: any[], key: string = 'id') => (ids: (string | number)[]): Resource[] =>
+    array.filter(object => ids.includes(object[key]))
