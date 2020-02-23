@@ -220,7 +220,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
           throw JsonApiErrors.BadRequest(`${key} is not a valid field to filter`);
         } else {
           // TODO: ISSUE #183: remove this throw here, and put a return; to just skip this key when it appears.
-          throw JsonApiErrors.BadRequest(`${key} is a computed property, and as such, can't be filtered (yet)`);
+          throw JsonApiErrors.BadRequest(`${key} is a computed property, and as such, can't be filtered`);
         }
       }
       const matches = String(filters[key]).split("|");
