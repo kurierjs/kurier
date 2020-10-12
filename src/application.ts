@@ -234,7 +234,11 @@ export default class Application {
 
       const resource = await this.resourceFor(data[0].type);
 
-      return data.map(record => this.serializer.serializeResource(record, resource));
+      return data.filter(
+        record => !record.preventSerialization
+      ).map(
+        record => this.serializer.serializeResource(record, resource)
+      );
     }
 
     const resource = await this.resourceFor(data.type);
