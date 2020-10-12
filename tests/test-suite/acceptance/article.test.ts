@@ -36,6 +36,12 @@ describe("Articles", () => {
       expect(result.body).toEqual({ data: [articles.toGet.response[0]] });
     });
 
+    it("Search Article by VoteCount - Should return the first Article", async () => {
+      const result = await request.get("/articles?filter[voteCount]=ge:2");
+      expect(result.status).toEqual(200);
+      expect(result.body).toEqual({ data: [articles.toGet.response[0]] });
+    });
+
     it("Authenticated - Get an specific article with it's votes and author - Multiple types include", async () => {
       const authData = await getAuthenticationData();
       const result = await request.get("/articles/1?include=author,votes").set("Authorization", authData.token);
