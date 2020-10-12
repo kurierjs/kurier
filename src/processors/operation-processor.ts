@@ -55,8 +55,6 @@ export default class OperationProcessor<ResourceT extends Resource> {
     const typeFields = op.params && op.params.fields && op.params.fields[resourceClass.type];
     const attributes = typeFields ? pick(this.attributes, typeFields) : this.attributes;
 
-    console.log(attributes);
-
     return promiseHashMap(attributes, key => attributes[key].call(this, record));
   }
 
