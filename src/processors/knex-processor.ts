@@ -17,19 +17,7 @@ import {
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
-
-const operators = {
-  eq: "=",
-  ne: "!=",
-  lt: "<",
-  gt: ">",
-  le: "<=",
-  ge: ">=",
-  like: "like",
-  nlike: "not like",
-  in: "in",
-  nin: "not in"
-};
+import { KnexOperators as operators } from "../utils/operators";
 
 const getWhereMethod = (value: string, operator: string) => {
   if (value !== "null") {
@@ -246,7 +234,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       .concat(primaryKeyName || DEFAULT_PRIMARY_KEY);
   }
 
-  filtersToKnex(queryBuilder, filters: {}) {
+  filtersToKnex(queryBuilder: Knex.QueryBuilder, filters: {}) {
     const processedFilters = [];
 
     Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
@@ -254,14 +242,14 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const validKeys = this.getValidAttributes(this.resourceClass.schema, this.appInstance.app.serializer);
 
     Object.keys(filters).forEach(key => {
-      if (!validKeys.includes(key)) {
-        if (!Object.keys(this.attributes).includes(key)) {
-          throw JsonApiErrors.BadRequest(`${key} is not a valid field to filter`);
-        } else {
-          // TODO: ISSUE #183: remove this throw here, and put a return; to just skip this key when it appears.
-          throw JsonApiErrors.BadRequest(`${key} is a computed property, and as such, can't be filtered`);
-        }
+      if (key in this.attributes) {
+        return;
       }
+
+      if (!validKeys.includes(key)) {
+        throw JsonApiErrors.BadRequest(`${key} is not a valid field to filter`);
+      }
+
       const matches = String(filters[key]).split("|");
 
       processedFilters.push(
@@ -357,7 +345,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     if (!op.params || !op.params.include) {
       return {};
     }
-    
+
     return eagerLoadedData;
   }
 }
