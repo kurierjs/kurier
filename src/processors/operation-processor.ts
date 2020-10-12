@@ -132,7 +132,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
     }
 
     const record = { ...records };
-    let resourceClass = await this.resourceFor(op.ref.type);
+    const resourceClass = await this.resourceFor(op.ref.type);
+
     const [attributes, computedAttributes, relationships, relationshipAttributes] = await Promise.all([
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
