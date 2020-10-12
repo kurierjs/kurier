@@ -84,7 +84,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   constructor(appInstance: ApplicationInstance) {
     super(appInstance);
-    this.knex = appInstance.transaction;
+    this.knex = appInstance.transaction as Knex.Transaction;
   }
 
   getQuery(): Knex.QueryBuilder {
@@ -357,7 +357,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     if (!op.params || !op.params.include) {
       return {};
     }
-    
+
     return eagerLoadedData;
   }
 }
