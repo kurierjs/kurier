@@ -6,7 +6,7 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship } from "./types";
+import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction } from "./types";
 import flatten from "./utils/flatten";
 
 export default class Application {
@@ -141,11 +141,14 @@ export default class Application {
     return this.buildOperationResponse(result, processor.appInstance);
   }
 
-  async createTransaction(): Promise<Knex.Transaction | undefined> {
+  async createTransaction(): Promise<Knex.Transaction | NoOpTransaction> {
     const { knex }: { knex?: Knex } = this.services;
 
     if (!knex) {
-      return;
+      return {
+        commit: () => { },
+        rollback: () => { }
+      }
     }
 
     return new Promise(resolve =>

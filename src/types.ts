@@ -191,3 +191,8 @@ export interface IAddon {
 }
 export type AddonOptions = { [key: string]: any };
 export type ApplicationAddons = { addon: typeof Addon; options: AddonOptions }[];
+
+export type NoOpTransaction = {
+  commit(): void;
+  rollback(): void;
+}
