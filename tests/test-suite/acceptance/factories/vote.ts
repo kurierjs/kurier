@@ -90,8 +90,22 @@ const results = {
         attributes: {
           username: "me",
           email: "me@me.com",
+          coolFactor: 3,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          friends: [
+              {
+                "name": "Joel",
+              },
+              {
+                "name": "Ryan",
+              },
+            ],
+          roles: [
+              "user",
+              "author",
+              "voter",
+            ],
         },
         relationships: {}
       },
@@ -101,7 +115,8 @@ const results = {
         attributes: {
           body: "this is test 1",
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          voteCount: 2
         },
         relationships: {
           author: {

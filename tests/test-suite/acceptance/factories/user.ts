@@ -289,7 +289,8 @@ export default {
         attributes: {
           body: "this is test 1",
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          voteCount: 2
         },
         relationships: {
           author: {

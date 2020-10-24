@@ -128,8 +128,22 @@ export default {
         attributes: {
           username: "me",
           email: "me@me.com",
+          coolFactor: 3,
           createdAt: null,
-          updatedAt: null
+          updatedAt: null,
+          friends: [
+              {
+                "name": "Joel",
+              },
+              {
+                "name": "Ryan",
+              },
+            ],
+          roles: [
+              "user",
+              "author",
+              "voter",
+            ],
         },
         relationships: {}
       },
