@@ -1,10 +1,16 @@
-import { camelize, underscore, classify, pluralize } from "../utils/string";
-import { IJsonApiSerializer, DEFAULT_PRIMARY_KEY, ResourceRelationshipData, Operation } from "../types";
-import Resource from "../resource";
-import unpick from "../utils/unpick";
-import pick from "../utils/pick";
 import Password from "../attribute-types/password";
-import flatten from "../utils/flatten";
+import Resource from "../resource";
+import {
+  DEFAULT_PRIMARY_KEY,
+  EagerLoadedData,
+  IJsonApiSerializer,
+  Operation,
+  ResourceRelationshipData,
+  ResourceRelationshipDescriptor
+} from "../types";
+import pick from "../utils/pick";
+import { camelize, classify, pluralize, underscore } from "../utils/string";
+import unpick from "../utils/unpick";
 
 export default class JsonApiSerializer implements IJsonApiSerializer {
   resourceTypeToTableName(resourceType: string): string {
@@ -79,9 +85,14 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           type: schemaRelationships[relationship.name].type().type
         }
       }),
-      Object.entries(data.relationships)
-        .reduce((includedDirectRelationships, [relName, relData]) =>
-          ({ ...includedDirectRelationships, [relName]: (relData as any).direct }), {})
+      Object.entries(data.relationships as EagerLoadedData).reduce(
+        (includedDirectRelationships, [relName, relData]: [string, ResourceRelationshipDescriptor]) => ({
+          ...includedDirectRelationships,
+          [relName]: relData.direct,
+          ...relData.nested
+        }),
+        {}
+      )
     );
 
     data.attributes = unpick(
@@ -156,13 +167,13 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     Object.keys(data.relationships)
       .filter(relationshipName => data.relationships[relationshipName])
       .map(relationshipName => ({ relationshipName, resources: data.relationships[relationshipName] }))
-      .forEach(({ relationshipName, resources }: { relationshipName: string, resources: any }) => {
+      .forEach(({ relationshipName, resources }: { relationshipName: string; resources: any }) => {
         const { direct: directResources, nested: nestedResources } = resources;
         const relatedResourceClass = schemaRelationships[relationshipName].type();
         const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
         includedData.push(
-          ...(directResources).map(resource => {
+          ...directResources.map(resource => {
             if (resource[pkName]) {
               return {
                 ...this.serializeResource(
@@ -178,9 +189,9 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                   relatedResourceClass
                 ),
                 type: relatedResourceClass.type
-              }
+              };
             }
-          }),
+          })
         );
 
         if (nestedResources) {
@@ -205,14 +216,13 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                       subResourceClass
                     ),
                     type: subResourceClass.type
-                  }
+                  };
                 }
               });
             })
           );
         }
-
-      })
+      });
     return [...new Set(includedData.map((item: Resource) => `${item.type}_${item.id}`))].map(typeId =>
       includedData.find((item: Resource) => `${item.type}_${item.id}` === typeId)
     );
