@@ -47,6 +47,61 @@ export const articles = [{
   }
 }]
 
+export const articlesWithExtraData = [{
+  "id": 1,
+  "type": "article",
+  "attributes": {
+    "body": "this is test 1",
+    "voteCount": 2,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  "relationships": {
+    "author": {
+      "data": {
+        "id": 1,
+        "type": "user"
+      }
+    }
+  }
+},
+{
+  "id": 2,
+  "type": "article",
+  "attributes": {
+    "body": "this is test 2",
+    "voteCount": 0,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  "relationships": {
+    "author": {
+      "data": {
+        "id": 2,
+        "type": "user"
+      }
+    }
+  }
+},
+{
+  "id": 3,
+  "type": "article",
+  "attributes": {
+    "body": "this is test 3",
+    "voteCount": 1,
+    "createdAt": null,
+    "updatedAt": null
+  },
+  "relationships": {
+    "author": {
+      "data": {
+        "id": 2,
+        "type": "user"
+      }
+    }
+  }
+}]
+
 
 export default {
   toGet: {
