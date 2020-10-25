@@ -1,3 +1,69 @@
+export const comments = [
+  {
+      "id": 1,
+      "type": "comment",
+      "attributes": {
+          "body": "hello",
+          "type": "not_spam"
+      },
+      "relationships": {
+          "author": {
+              "data": {
+                  "id": 1,
+                  "type": "user"
+              }
+          },
+          "parentComment": {
+              "data": {
+                  "id": 2,
+                  "type": "comment"
+              }
+          }
+      }
+  },
+  {
+      "id": 2,
+      "type": "comment",
+      "attributes": {
+          "body": "hello2",
+          "type": "not_spam"
+      },
+      "relationships": {
+          "author": {
+              "data": {
+                  "id": 2,
+                  "type": "user"
+              }
+          },
+          "parentComment": {
+              "data": {
+                  "id": 3,
+                  "type": "comment"
+              }
+          }
+      }
+  },
+  {
+      "id": 3,
+      "type": "comment",
+      "attributes": {
+          "body": "hello3",
+          "type": "spam"
+      },
+      "relationships": {
+          "author": {
+              "data": {
+                  "id": 1,
+                  "type": "user"
+              }
+          },
+          "parentComment": {
+              "data": null
+          }
+      }
+  }
+]
+
 export default {
   forCreation: {
     requests: {

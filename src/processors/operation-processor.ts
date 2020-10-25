@@ -24,7 +24,6 @@ export default class OperationProcessor<ResourceT extends Resource> {
   constructor(public appInstance: ApplicationInstance) { }
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
-
     const action: string = op.op;
 
     if (["update", "remove"].includes(action) && !op.ref.id) {
@@ -36,9 +35,79 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
     if (result !== undefined) {
       eagerLoadedData = await this.eagerLoad(op, result);
+      eagerLoadedData = await this.computeRelationshipProperties(op, eagerLoadedData);
     }
 
     return this.convertToResources(op, result, eagerLoadedData);
+  }
+
+  async computeRelationshipProperties(op, eagerLoadedData) {
+    const baseResourceClass = await this.resourceFor(op.ref.type);
+    for (const relationship in eagerLoadedData) {
+      if (!(relationship in eagerLoadedData)) {
+        continue;
+      }
+
+      const relationResourceClass =
+        baseResourceClass.schema.relationships[relationship] &&
+        baseResourceClass.schema.relationships[relationship].type();
+
+      if (!relationResourceClass) {
+        continue;
+      }
+
+      eagerLoadedData[relationship].direct = await this.computeDirectRelationsProps(
+        op,
+        eagerLoadedData[relationship].direct,
+        relationResourceClass
+      );
+
+      eagerLoadedData[relationship].nested = await this.computeNestedRelationsProps(
+        op,
+        eagerLoadedData[relationship].nested,
+        relationResourceClass
+      );
+    }
+    return eagerLoadedData;
+  }
+
+  async computeDirectRelationsProps(op: Operation, directRelations, relationResourceClass) {
+    const resourceProcessor = await this.processorFor(relationResourceClass.type);
+
+    for (const includedRelationResource in directRelations) {
+      if (!(includedRelationResource in directRelations)) {
+        continue;
+      }
+      const value = directRelations[includedRelationResource];
+      const computed = await resourceProcessor.getComputedProperties(op, relationResourceClass, value, {});
+      directRelations[includedRelationResource] = { ...value, ...computed };
+    }
+    return directRelations;
+  }
+
+  async computeNestedRelationsProps(op: Operation, nestedRelations, baseRelationResourceClass) {
+    for (const includedNestedRelation in nestedRelations) {
+      if (!(includedNestedRelation in nestedRelations)) {
+        continue;
+      }
+      const includedRelationElements = nestedRelations[includedNestedRelation];
+      const nestedRelationResourceClass =
+        baseRelationResourceClass.schema.relationships[includedNestedRelation] &&
+        baseRelationResourceClass.schema.relationships[includedNestedRelation].type();
+
+      const nestedResourceProcessor = await this.processorFor(nestedRelationResourceClass.type);
+
+      includedRelationElements.map(async (value, index) => {
+        const computed = await nestedResourceProcessor.getComputedProperties(
+          op,
+          nestedRelationResourceClass,
+          includedRelationElements,
+          {}
+        );
+        nestedRelations[includedNestedRelation][index] = { ...value, ...computed };
+      });
+    }
+    return nestedRelations;
   }
 
   async eagerLoad(op: Operation, result: ResourceT | ResourceT[]) {
