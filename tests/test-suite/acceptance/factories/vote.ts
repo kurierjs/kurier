@@ -91,8 +91,6 @@ const results = {
           username: "me",
           email: "me@me.com",
           coolFactor: 3,
-          createdAt: null,
-          updatedAt: null,
           friends: [
               {
                 "name": "Joel",
@@ -114,8 +112,6 @@ const results = {
         type: "article",
         attributes: {
           body: "this is test 1",
-          createdAt: null,
-          updatedAt: null,
           voteCount: 2
         },
         relationships: {
