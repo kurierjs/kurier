@@ -6,7 +6,7 @@ const baseUnitTest = {
   displayName: "unit",
   globals: {
     "ts-jest": {
-      tsConfig: "tsconfig.test.json"
+      tsconfig: "tsconfig.test.json"
     }
   },
   testMatch: ["<rootDir>/tests/test-suite/unit/**/?(*.)+(spec|test).ts"]
@@ -24,7 +24,7 @@ module.exports = {
       globals: {
         TEST_SUITE: "test_camelCase",
         "ts-jest": {
-          tsConfig: "tsconfig.test.json"
+          tsconfig: "tsconfig.test.json"
         }
       },
       testMatch: ["<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"],
@@ -36,7 +36,7 @@ module.exports = {
       globals: {
         TEST_SUITE: "test_snake_case",
         "ts-jest": {
-          tsConfig: "tsconfig.test.json"
+          tsconfig: "tsconfig.test.json"
         }
       },
       testMatch: ["<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"],
