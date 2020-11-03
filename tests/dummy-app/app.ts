@@ -11,6 +11,7 @@ import Article from "./resources/article";
 import User from "./resources/user";
 import Comment from "./resources/comment";
 import Vote from "./resources/vote";
+import Random from "./resources/random";
 
 import knexfile from "./../data/knexfile";
 import login from "./callbacks/login";
@@ -18,11 +19,12 @@ import login from "./callbacks/login";
 import UserProcessor from "./processors/user";
 import ArticleProcessor from "./processors/article";
 import VoteProcessor from "./processors/vote";
+import RandomProcessor from "./processors/random";
 
 const app = new Application({
   namespace: "api",
-  types: [Article, Comment, Vote],
-  processors: [ArticleProcessor, VoteProcessor],
+  types: [Article, Comment, Vote, Random],
+  processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor
 });
 

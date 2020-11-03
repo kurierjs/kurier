@@ -1,49 +1,42 @@
-import articles from "./factories/article";
-import getAuthenticationData from "./helpers/authenticateUser";
 import testTransportLayer from "./helpers/transportLayers";
-import nested from "./factories/nested";
+import getAuthenticationData from "./helpers/authenticateUser";
+import nested from "./factories/nestedResources";
 
 const request = testTransportLayer("koa");
 
-describe("Articles", () => {
+describe("Nested Resources", () => {
 
   describe("GET", () => {
-    it("Get 1st article votes (hasMany)(Multiple Results)", async () => {
-      const result = await request.get(`/articles/1/votes`);
-      expect(result.body).toEqual(nested.get.votesOf1stArticle);
+    it("Get the 1st article'Author and his Votes (*-1-*)", async () => {
+      const authData = await getAuthenticationData();
+      const result = await request.get("/articles/1?include=author.votes")
+        .set("Authorization", authData.token);
       expect(result.status).toEqual(200);
+      expect(result.body).toEqual(nested.get.authorAndAuthorVotesOf1stArticle);
     });
-  });
 
-  describe("GET", () => {
-    it("Get 2nd article vote (hasMany)(empty)", async () => {
-      const result = await request.get(`/articles/2/votes`);
-      expect(result.body).toEqual(nested.get.votesOf2ndArticle);
+    it("Get the 2nd User's articles and their Votes (1-*-*)", async () => {
+      const authData = await getAuthenticationData();
+      const result = await request.get("/users/2?include=articles.votes")
+        .set("Authorization", authData.token);
       expect(result.status).toEqual(200);
+      expect(result.body).toEqual(nested.get.articlesAndArticlesVotsOf2ndUser);
     });
-  });
 
-  describe("GET", () => {
-    it("Get 3rd article vote (hasMany)(Single Result)", async () => {
-      const result = await request.get(`/articles/3/votes`);
-      expect(result.body).toEqual(nested.get.votesOf3rdArticle);
+    it("Get the 1nd Comment parent's Comment's author (1-1-*)", async () => {
+      const authData = await getAuthenticationData();
+      const result = await request.get("/comment/1?include=parentComment.author")
+        .set("Authorization", authData.token);
       expect(result.status).toEqual(200);
+      expect(result.body).toEqual(nested.get.parentCommentAndParentCommentsAuthorOf1stComment);
     });
-  });
 
-  describe("GET", () => {
-    it("Get 1st vote article (BelongsTo)", async () => {
-      const result = await request.get(`/votes/1/article`);
-      expect(result.body).toEqual(nested.get.articleOf1stVote);
+    it("Get the 1nd Comment's parent's comment parent's comment (1-1-1)", async () => {
+      const authData = await getAuthenticationData();
+      const result = await request.get("/comment/1?include=parentComment.parentComment")
+        .set("Authorization", authData.token);
       expect(result.status).toEqual(200);
-    });
-  });
-
-  describe("GET", () => {
-    it("Get ParentComment of 1st Comment (Recursive BelongsTo)", async () => {
-      const result = await request.get(`/comments/1/parentComment`);
-      expect(result.body).toEqual(nested.get.parentCommentOf1stComment);
-      expect(result.status).toEqual(200);
+      expect(result.body).toEqual(nested.get.parentCommentAndParentCommentsParentCommentOf1stComment);
     });
   });
 

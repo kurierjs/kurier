@@ -4,14 +4,14 @@ import * as Knex from "knex";
 import Application from "./application";
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
-import { Operation, OperationResponse } from "./types";
+import { Operation, OperationResponse, NoOpTransaction } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
 import JsonApiError from "./errors/error";
 
 export default class ApplicationInstance {
   public user: User;
-  public transaction: Knex.Transaction;
+  public transaction: Knex.Transaction | NoOpTransaction;
 
   constructor(public app: Application) { }
 

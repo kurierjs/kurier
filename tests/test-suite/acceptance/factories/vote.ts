@@ -90,8 +90,20 @@ const results = {
         attributes: {
           username: "me",
           email: "me@me.com",
-          createdAt: null,
-          updatedAt: null
+          coolFactor: 3,
+          friends: [
+              {
+                "name": "Joel",
+              },
+              {
+                "name": "Ryan",
+              },
+            ],
+          roles: [
+              "user",
+              "author",
+              "voter",
+            ],
         },
         relationships: {}
       },
@@ -100,8 +112,7 @@ const results = {
         type: "article",
         attributes: {
           body: "this is test 1",
-          createdAt: null,
-          updatedAt: null
+          voteCount: 2
         },
         relationships: {
           author: {

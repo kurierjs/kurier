@@ -1,3 +1,52 @@
+export const articles = [{
+  "id": 1,
+  "type": "article",
+  "attributes": {
+    "body": "this is test 1",
+    "voteCount": 2
+  },
+  "relationships": {
+    "author": {
+      "data": {
+        "id": 1,
+        "type": "user"
+      }
+    }
+  }
+},
+{
+  "id": 2,
+  "type": "article",
+  "attributes": {
+    "body": "this is test 2",
+    "voteCount": 0
+  },
+  "relationships": {
+    "author": {
+      "data": {
+        "id": 2,
+        "type": "user"
+      }
+    }
+  }
+},
+{
+  "id": 3,
+  "type": "article",
+  "attributes": {
+    "body": "this is test 3",
+    "voteCount": 1
+  },
+  "relationships": {
+    "author": {
+      "data": {
+        "id": 2,
+        "type": "user"
+      }
+    }
+  }
+}]
+
 export default {
   toGet: {
     response: [
@@ -78,8 +127,20 @@ export default {
         attributes: {
           username: "me",
           email: "me@me.com",
-          createdAt: null,
-          updatedAt: null
+          coolFactor: 3,
+          friends: [
+              {
+                "name": "Joel",
+              },
+              {
+                "name": "Ryan",
+              },
+            ],
+          roles: [
+              "user",
+              "author",
+              "voter",
+            ],
         },
         relationships: {}
       },
