@@ -11,6 +11,19 @@ type PrimitiveValue = string | number | boolean | object;
 const match = (actual: AttributeValue) => (item: PrimitiveValue) => (actual as any[]).includes(item);
 const ACCESS_RULES = Symbol("accessRules");
 
+// This is a replacement function for Array.every().
+// For some odd reason, there are type conflicts with AttributeValue
+// starting with TypeScript >= 4.x.
+const every = (expected: AttributeValue[], actual: AttributeValue) => {
+  for (let index = 0; index < expected.length; index += 1) {
+    if (!match(actual)(expected[index])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function conditionsPass(
   appInstance: ApplicationInstance,
   { attribute, value, operator = "some" }: AttributeValueMatch
@@ -25,11 +38,11 @@ function conditionsPass(
       }
 
       if (operator === "every") {
-        return expected.every(match(actual));
+        return every(expected, actual);
       }
 
       if (operator === "not") {
-        return !expected.every(match(actual));
+        return !every(expected, actual);
       }
     }
 
@@ -52,7 +65,7 @@ function conditionsPass(
 }
 
 function authorizeMiddleware(operation: Function, conditions: AttributeValueMatch[]) {
-  const callback = function(this: OperationProcessor<Resource>) {
+  const callback = function (this: OperationProcessor<Resource>) {
     if (!this.appInstance.user) {
       throw JsonApiErrors.Unauthorized();
     }
