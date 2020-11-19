@@ -126,7 +126,7 @@ export type AttributeValueMatch = {
   operator?: "not" | "some" | "every";
 };
 
-export type ResourceSchema = {
+export interface ResourceSchema {
   primaryKeyName?: string;
   attributes: ResourceSchemaAttributes;
   relationships: ResourceSchemaRelationships;
@@ -134,7 +134,7 @@ export type ResourceSchema = {
 
 export type PasswordConstructor = typeof Password;
 
-export type ResourceSchemaAttributes = {
+export interface ResourceSchemaAttributes {
   [key: string]:
     | StringConstructor
     | NumberConstructor
@@ -148,7 +148,7 @@ export type ResourceSchemaRelationships = {
   [key: string]: ResourceSchemaRelationship;
 };
 
-export type ResourceSchemaRelationship = {
+export interface ResourceSchemaRelationship {
   type: () => typeof Resource;
   hasMany?: boolean;
   belongsTo?: boolean;
