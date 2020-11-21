@@ -161,6 +161,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       return data.map(record => this.serializeIncludedResources(record, resourceType));
     }
 
+    if (data.preventSerialization) { return [] }
+
     const schemaRelationships = resourceType.schema.relationships;
     const includedData = [];
 

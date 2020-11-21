@@ -209,7 +209,7 @@ export default class Application {
         return new Promise(async resolve => {
           const result = await canAccessResource(resource, "get", appInstance);
 
-          if (result && !resource.preventSerialization) {
+          if (result) {
             included.push(resource);
           }
 
