@@ -16,6 +16,8 @@ export default class Resource {
   attributes: ResourceAttributes;
   relationships: ResourceRelationships;
 
+  preventSerialization?: boolean;
+
   constructor({
     id,
     attributes,

@@ -4,6 +4,7 @@ import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
 import { JsonApiErrors } from "..";
+import { FunctionalOperators as operators, OperatorName } from "../utils/operators";
 
 export default class OperationProcessor<ResourceT extends Resource> {
   static resourceClass: typeof Resource;
@@ -121,10 +122,38 @@ export default class OperationProcessor<ResourceT extends Resource> {
     eagerLoadedData: EagerLoadedData
   ) {
     const typeFields = op.params && op.params.fields && op.params.fields[resourceClass.type];
-
     const attributes = typeFields ? pick(this.attributes, typeFields) : this.attributes;
 
     return promiseHashMap(attributes, key => attributes[key].call(this, record));
+  }
+
+  async matchesComputedFilters(op: Operation, computedAttributes) {
+    if (!op.params.filter) {
+      return true;
+    }
+
+    const requestedFilters = Object.keys(op.params.filter);
+
+    if (!requestedFilters.length) {
+      return true;
+    }
+
+    for (const filterAttribute of requestedFilters) {
+      if (filterAttribute in computedAttributes) {
+        const filter = op.params.filter[filterAttribute];
+        let operator: OperatorName = "eq";
+        let expected = filter;
+        if (filter.includes(":")) {
+          [operator, expected] = filter.split(":") as [OperatorName, string];
+        }
+        const filterResult = operators[operator](computedAttributes[filterAttribute], expected);
+        if (!filterResult) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   async getAttributes(op: Operation, resourceClass: typeof Resource, record: HasId, eagerLoadedData: EagerLoadedData) {
@@ -173,6 +202,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
     const record = { ...records };
     const resourceClass = await this.resourceFor(op.ref.type);
+
     const [attributes, computedAttributes, relationships, relationshipAttributes] = await Promise.all([
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
@@ -180,9 +210,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
       this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData)
     ]);
 
-    // TODO: ISSUE #183: the filter for computed properties should be implemented here (I think)
-
-    return new resourceClass({
+    const resource = new resourceClass({
       relationships,
       id: record[resourceClass.schema.primaryKeyName || "id"],
       attributes: {
@@ -191,6 +219,14 @@ export default class OperationProcessor<ResourceT extends Resource> {
         ...computedAttributes
       }
     });
+
+    const passesFilters = await this.matchesComputedFilters(op, computedAttributes);
+
+    if (!passesFilters) {
+      resource.preventSerialization = true;
+    }
+
+    return resource;
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {

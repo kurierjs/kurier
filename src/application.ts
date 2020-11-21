@@ -77,7 +77,7 @@ export default class Application {
 
   async executeOperation(op: Operation, processor: OperationProcessor<Resource>): Promise<OperationResponse> {
     const resourceClass = await this.resourceFor(op.ref.type);
-    console.log('OP-REF', op.ref)
+
     if (op.ref.relationship) {
       const relationship = resourceClass.schema.relationships[op.ref.relationship];
       const relatedResourceClass = relationship.type();
@@ -106,7 +106,6 @@ export default class Application {
               }
             }
           } as Operation;
-          console.log('HasMany - Added Operation', relatedOp)
         } else if (relationship.belongsTo) {
           const deserializedOriginalOperation = await this.serializer.deserializeResource(
             { ...op, op: "get" },
@@ -124,7 +123,6 @@ export default class Application {
               ] as string
             }
           };
-          console.log('BelongsTo - Added Operation', relatedOp)
         }
 
         const deserializedOperation = await this.serializer.deserializeResource(relatedOp, relatedResourceClass);
@@ -237,7 +235,11 @@ export default class Application {
 
       const resource = await this.resourceFor(data[0].type);
 
-      return data.map(record => this.serializer.serializeResource(record, resource));
+      return data.filter(
+        record => !record.preventSerialization
+      ).map(
+        record => this.serializer.serializeResource(record, resource)
+      );
     }
 
     const resource = await this.resourceFor(data.type);
