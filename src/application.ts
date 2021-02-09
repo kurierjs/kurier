@@ -35,7 +35,7 @@ export default class Application {
     this.serializer = new (settings.serializer || JsonApiSerializer)();
   }
 
-  use(addon: typeof Addon, options?: AddonOptions) {
+  use(addon: typeof Addon, options: AddonOptions = {}) {
     if (this.addons.find(installedAddon => installedAddon.addon === addon)) {
       return;
     }
@@ -52,7 +52,7 @@ export default class Application {
     applicationInstance.transaction = await this.createTransaction();
 
     try {
-      const result = await Promise.all(
+      const result: OperationResponse[] = await Promise.all(
         ops
           .map(async op => {
             const processor = await applicationInstance.processorFor(op.ref.type);
@@ -62,7 +62,7 @@ export default class Application {
             }
           })
           .filter(Boolean)
-      );
+      ) as OperationResponse[];
 
       await applicationInstance.transaction.commit();
 
@@ -71,7 +71,7 @@ export default class Application {
       await applicationInstance.transaction.rollback(error);
       throw error;
     } finally {
-      applicationInstance.transaction = null;
+      applicationInstance.transaction = {} as NoOpTransaction;
     }
   }
 
@@ -83,12 +83,12 @@ export default class Application {
       const relatedResourceClass = relationship.type();
 
       if (relatedResourceClass) {
-        let relatedOp: Operation;
+        let relatedOp: Operation = {} as Operation;
 
         if (relationship.hasMany) {
           const relatedResourceClassRelationships = Object.entries(relatedResourceClass.schema.relationships);
           let [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
-            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type)
+            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type) as [string, ResourceSchemaRelationship];
 
           relatedOp = {
             ...op,
@@ -98,7 +98,7 @@ export default class Application {
             params: {
               ...op.params,
               filter: {
-                ...op.params.filter,
+                ...(op.params || {}).filter,
                 [
                   relatedRelationship.foreignKeyName ||
                   this.serializer.relationshipToColumn(relatedRelationshipName, relatedResourceClass.schema.primaryKeyName)
@@ -125,8 +125,8 @@ export default class Application {
           };
         }
 
-        const deserializedOperation = await this.serializer.deserializeResource(relatedOp, relatedResourceClass);
-        const relatedProcessor = await this.processorFor(relatedResourceClass.type, processor.appInstance);
+        const deserializedOperation = this.serializer.deserializeResource(relatedOp, relatedResourceClass);
+        const relatedProcessor = await this.processorFor(relatedResourceClass.type, processor.appInstance) as OperationProcessor<Resource>;
         const result = await relatedProcessor.execute(deserializedOperation);
 
         return this.buildOperationResponse(result, processor.appInstance);
@@ -181,14 +181,14 @@ export default class Application {
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {
-    return this.types.find(({ type }) => type && type === resourceType);
+    return this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
   }
 
   async buildOperationResponse(
     data: Resource | Resource[] | void,
     appInstance: ApplicationInstance
   ): Promise<OperationResponse> {
-    let resourceType: string;
+    let resourceType: string | null;
 
     if (Array.isArray(data)) {
       resourceType = data[0] ? data[0].type : null;
@@ -198,11 +198,11 @@ export default class Application {
       resourceType = null;
     }
 
-    const allIncluded = flatten(
-      await this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType))
+    const allIncluded: Resource[] = !resourceType ? [] : flatten(
+      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []
     );
 
-    const included = [];
+    const included: Resource[] = [];
 
     await Promise.all(
       allIncluded.map((resource: Resource) => {

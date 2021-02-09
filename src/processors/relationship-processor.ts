@@ -15,7 +15,7 @@ export default class RelationshipProcessor<ResourceT extends Resource> extends K
   }
 
   public async get(op: Operation) {
-    return op.meta.belongsTo
+    return op.meta?.belongsTo
       ? super.get({
           op: "get",
           ref: {
@@ -24,8 +24,8 @@ export default class RelationshipProcessor<ResourceT extends Resource> extends K
           params: {
             fields: {
               [this.resourceClass.type]: [
-                this.resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
-                  this.appInstance.app.serializer.relationshipToColumn(op.ref.relationship)
+                this.resourceClass.schema.relationships[`${op.ref.relationship}`].foreignKeyName ||
+                  this.appInstance.app.serializer.relationshipToColumn(`${op.ref.relationship}`)
               ]
             }
           }

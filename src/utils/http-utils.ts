@@ -19,7 +19,7 @@ const STATUS_MAPPING = {
 
 async function authenticate(appInstance: ApplicationInstance, request: ExpressRequest | KoaRequest) {
   const authHeader = request.headers.authorization;
-  let currentUser: User;
+  let currentUser: User | undefined;
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const [, token] = authHeader.split(" ");
@@ -65,12 +65,12 @@ async function handleJsonApiEndpoint(
     return {
       body: convertOperationResponseToHttpResponse(request, result),
       status: STATUS_MAPPING[request.method]
-    };
+    } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   } catch (error) {
     return {
       body: convertErrorToHttpResponse(error),
       status: error.status || 500
-    };
+    } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   }
 }
 
@@ -97,11 +97,11 @@ function convertHttpRequestToOperation(req: ExpressRequest | KoaRequest): Operat
 function convertOperationResponseToHttpResponse(
   req: ExpressRequest | KoaRequest,
   operation: OperationResponse
-): JsonApiDocument {
+): JsonApiDocument | undefined {
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(req.method)) {
-    return { data: operation.data, included: operation.included };
+    return { data: operation.data, included: operation.included } as JsonApiDocument;
   }
 }
 

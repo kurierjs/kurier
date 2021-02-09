@@ -45,10 +45,10 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     const primaryKey = resourceType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const schemaRelationships = resourceType.schema.relationships;
     op.data.attributes = Object.keys(schemaRelationships)
-      .filter(relName => schemaRelationships[relName].belongsTo && op.data.relationships.hasOwnProperty(relName))
+      .filter(relName => schemaRelationships[relName].belongsTo && op.data?.relationships.hasOwnProperty(relName))
       .reduce((relationAttributes, relName) => {
         const key = schemaRelationships[relName].foreignKeyName || this.relationshipToColumn(relName, primaryKey);
-        const value = (<ResourceRelationshipData>op.data.relationships[relName].data).id;
+        const value = (<ResourceRelationshipData>op.data?.relationships[relName].data).id;
 
         return {
           ...relationAttributes,
@@ -65,7 +65,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       .filter(relName => schemaRelationships[relName].belongsTo)
       .filter(
         relName =>
-          data.attributes.hasOwnProperty(schemaRelationships[relName].foreignKeyName) ||
+          data.attributes.hasOwnProperty(`${schemaRelationships[relName].foreignKeyName}`) ||
           data.attributes.hasOwnProperty(
             this.relationshipToColumn(relName, schemaRelationships[relName].type().schema.primaryKeyName)
           )
@@ -149,7 +149,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
 
     relationships.type = resourceType.type;
 
-    return pick(relationships, ["id", "type"]) as ResourceRelationshipData[];
+    return pick<Resource, ResourceRelationshipData[]>(relationships, ["id", "type"]);
   }
 
   serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource) {
@@ -164,13 +164,13 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     if (data.preventSerialization) { return [] }
 
     const schemaRelationships = resourceType.schema.relationships;
-    const includedData = [];
+    const includedData: (Resource | undefined)[] = [];
 
     Object.keys(data.relationships)
       .filter(relationshipName => data.relationships[relationshipName])
-      .map(relationshipName => ({ relationshipName, resources: data.relationships[relationshipName] }))
-      .forEach(({ relationshipName, resources }: { relationshipName: string; resources: any }) => {
-        const { direct: directResources, nested: nestedResources } = resources;
+      .map(relationshipName => ({ relationshipName, resources: data.relationships[relationshipName] as ResourceRelationshipDescriptor }))
+      .forEach(({ relationshipName, resources }: { relationshipName: string; resources: ResourceRelationshipDescriptor }) => {
+        const { direct: directResources = [], nested: nestedResources = [] } = resources;
         const relatedResourceClass = schemaRelationships[relationshipName].type();
         const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
@@ -191,7 +191,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                   relatedResourceClass
                 ),
                 type: relatedResourceClass.type
-              };
+              } as Resource;
             }
           })
         );
@@ -201,7 +201,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
             ...Object.entries(nestedResources).map(([subRelationName, nestedRelationData]) => {
               const subResourceClass = relatedResourceClass.schema.relationships[subRelationName].type();
               const subPkName = subResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-              return (nestedRelationData as any[]).map(resource => {
+              return nestedRelationData.map((resource: Resource) => {
                 if (resource[subPkName]) {
                   return {
                     ...this.serializeResource(
@@ -213,12 +213,13 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                             attribute => subResourceClass.schema.attributes[attribute] === Password
                           )
                         ]),
-                        relationships: nestedResources.filter
+                        // A drunk Santiago walks in the bar...
+                        relationships: {} // nestedResources.filter
                       }),
                       subResourceClass
                     ),
                     type: subResourceClass.type
-                  };
+                  } as Resource;
                 }
               });
             })

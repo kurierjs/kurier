@@ -28,7 +28,7 @@ function conditionsPass(
   appInstance: ApplicationInstance,
   { attribute, value, operator = "some" }: AttributeValueMatch
 ) {
-  const actual: AttributeValue = appInstance.user.attributes[attribute];
+  const actual: AttributeValue = appInstance.user?.attributes[attribute] as AttributeValue;
   const expected = value;
 
   if (Array.isArray(actual)) {
@@ -92,7 +92,7 @@ export default function authorize(...conditions: AttributeValueMatch[]) {
 }
 
 export async function canAccessResource(resource: Resource, operationName: string, appInstance: ApplicationInstance) {
-  const processor = await appInstance.processorFor(resource.type);
+  const processor = await appInstance.processorFor(resource.type) as OperationProcessor<Resource>;
   const accessRules = processor[operationName][ACCESS_RULES] || [];
 
   if (!accessRules.length) {

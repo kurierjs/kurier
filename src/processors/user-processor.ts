@@ -3,6 +3,7 @@ import { Operation, HasId, DEFAULT_PRIMARY_KEY } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
 import Password from "../attribute-types/password";
+import Resource from "../resource";
 
 export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   public static resourceClass = User;
@@ -17,22 +18,26 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   }
 
   async add(op: Operation): Promise<HasId> {
-    const fields = Object.keys(op.data.attributes)
+    const fields = Object.keys(op.data?.attributes as { [key: string]: Function })
       .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
-      .map(attribute => ({ [attribute]: op.data.attributes[attribute] }))
+      .map(attribute => ({ [attribute]: op.data?.attributes[attribute] }))
       .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
 
     const id = await this.generateId();
 
     const encryptedPassword = await this.encryptPassword(op);
 
-    op.data.attributes = {
-      ...fields,
-      ...encryptedPassword
-    };
-    op.data.id = id;
-
-    return super.add(op);
+    return super.add({
+      ...op,
+      data: {
+        ...op.data,
+        id,
+        attributes: {
+          ...fields,
+          ...encryptedPassword
+        }
+      } as Resource
+    });
   }
 
   @Authorize()

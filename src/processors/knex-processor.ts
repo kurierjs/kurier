@@ -57,7 +57,7 @@ const parseOperationIncludedRelationships = (
 } => {
   const includes = operationIncludes.map((relationship: string) => relationship.split("."));
 
-  const relationships = pick(resourceRelationships, includes.map(nestedInclude => nestedInclude[0]));
+  const relationships = pick<ResourceSchemaRelationships, ResourceSchemaRelationships>(resourceRelationships, includes.map(nestedInclude => nestedInclude[0]));
 
   const nestedRelationships = includes
     .filter(include => include.length > 1)
@@ -189,13 +189,14 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   async update(op: Operation): Promise<HasId> {
     const { params, ref } = op;
+    const data = op.data as Resource;
     const { id } = ref;
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
-    const dataToUpdate = Object.keys(op.data.attributes)
+    const dataToUpdate = Object.keys(data.attributes)
       .map(attribute => ({
-        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute]
       }))
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
@@ -216,15 +217,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   async add(op: Operation): Promise<HasId> {
     const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+    const data = op.data as Resource;
 
-    const dataToInsert = Object.keys(op.data.attributes)
+    const dataToInsert = Object.keys(data.attributes)
       .map(attribute => ({
-        [this.appInstance.app.serializer.attributeToColumn(attribute)]: op.data.attributes[attribute]
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute]
       }))
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
-    if (op.data.id) {
-      dataToInsert[primaryKeyName] = op.data.id;
+    if (data.id) {
+      dataToInsert[primaryKeyName] = data.id;
     }
 
     const ids = await this.getQuery().insert(dataToInsert, primaryKeyName);
@@ -254,7 +256,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   filtersToKnex(queryBuilder: Knex.QueryBuilder, filters: {}) {
-    const processedFilters = [];
+    const processedFilters: { method: string, column: string, operator: string, value: string }[] = [];
 
     Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
 
@@ -294,7 +296,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
                 ? key
                 : this.appInstance.app.serializer.attributeToColumn(key)
           };
-        })
+        }) as { method: string, column: string, operator: string, value: string }[]
       );
     });
 
