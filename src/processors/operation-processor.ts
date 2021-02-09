@@ -122,13 +122,13 @@ export default class OperationProcessor<ResourceT extends Resource> {
     eagerLoadedData: EagerLoadedData
   ) {
     const typeFields = op.params && op.params.fields && op.params.fields[resourceClass.type];
-    const attributes = typeFields ? pick(this.attributes, typeFields) : this.attributes;
+    const attributes: { [key: string]: Function } = typeFields ? pick(this.attributes, typeFields) : this.attributes;
 
     return promiseHashMap(attributes, key => attributes[key].call(this, record));
   }
 
   async matchesComputedFilters(op: Operation, computedAttributes) {
-    if (!op.params.filter) {
+    if (!op.params || !op.params.filter) {
       return true;
     }
 
@@ -165,9 +165,9 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
   async getRelationships(op: Operation, record: HasId, eagerLoadedData: EagerLoadedData) {
     const include = op.params ? op.params.include : [];
-    const relationships = pick(this.relationships, include);
+    const relationships: { [key: string]: Function } = pick(this.relationships, include);
 
-    return promiseHashMap(relationships, key => {
+    return promiseHashMap(relationships, (key: string) => {
       return relationships[key].call(this, record);
     });
   }
@@ -234,7 +234,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   }
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource>> {
-    return this.appInstance.processorFor(resourceType);
+    return this.appInstance.processorFor(resourceType) as Promise<OperationProcessor<Resource>>;
   }
 
   async get(op: Operation): Promise<HasId[] | HasId> {

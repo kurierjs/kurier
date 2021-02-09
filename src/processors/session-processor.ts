@@ -19,9 +19,9 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
   }
 
   public async add(op: Operation): Promise<HasId> {
-    const fields = Object.keys(op.data.attributes)
+    const fields = Object.keys(op.data?.attributes as { [key: string]: Function })
       .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
-      .map(attribute => ({ [attribute]: op.data.attributes[attribute] }))
+      .map(attribute => ({ [attribute]: op.data?.attributes[attribute] }))
       .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
 
     if (Object.keys(fields).length === 0) {
@@ -58,13 +58,13 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
         id: userId,
         attributes: {
           ...userAttributes
-        },
+        } as { [key: string]: Function },
         relationships: {}
       },
       userType
     );
 
-    const token = sign(secureData, process.env.SESSION_KEY, {
+    const token = sign(secureData, process.env.SESSION_KEY as string, {
       subject: String(userId),
       expiresIn: "1d"
     });

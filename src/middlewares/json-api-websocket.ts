@@ -1,7 +1,7 @@
 import { Server } from "ws";
 
 import Application from "../application";
-import { JsonApiDocument } from "../types";
+import { JsonApiDocument, Operation } from "../types";
 import ApplicationInstance from "../application-instance";
 
 export default function jsonApiWebSocket(websocketServer: Server, app: Application) {
@@ -22,7 +22,7 @@ export default function jsonApiWebSocket(websocketServer: Server, app: Applicati
         }
 
         // Execute and reply.
-        const response = await appInstance.app.executeOperations(operations, appInstance);
+        const response = await appInstance.app.executeOperations(operations as Operation[], appInstance);
 
         connection.send(
           JSON.stringify({

@@ -40,14 +40,14 @@ const defaults: UserManagementAddonOptions = {
         "Your password is NOT being encrypted. Implement this callback in your addon configuration."
     );
 
-    return { password: op.data.attributes.password };
+    return { password: op.data?.attributes.password.toString() } as ResourceAttributes;
   },
   usernameRequestParameter: "username",
   passwordRequestParameter: "password"
 };
 
 export default class UserManagementAddon extends Addon {
-  constructor(public readonly app: Application, public readonly options?: UserManagementAddonOptions) {
+  constructor(public readonly app: Application, public readonly options: UserManagementAddonOptions = {} as UserManagementAddonOptions) {
     super(app);
     this.options = { ...defaults, ...options };
   }
@@ -59,26 +59,30 @@ export default class UserManagementAddon extends Addon {
     this.app.services.permissions = this.options.userPermissionsProvider;
 
     this.app.types.push(this.options.userResource, sessionResourceType);
-    this.app.processors.push(this.createUserProcessor(), this.createSessionProcessor(sessionResourceType));
+    this.app.processors.push((this.createUserProcessor() as unknown) as typeof JsonApiUserProcessor, this.createSessionProcessor(sessionResourceType));
   }
 
   private createUserProcessor() {
     const { userProcessor, userEncryptPasswordCallback, userGenerateIdCallback } = this.options;
 
-    let generateIdCallback = async () => undefined;
-    let encryptPasswordCallback = async (op: Operation) => ({});
+    let generateIdCallback = async () => "";
+    let encryptPasswordCallback = async (op: Operation) => ({} as ResourceAttributes);
 
     if (userProcessor === JsonApiUserProcessor) {
       generateIdCallback = userGenerateIdCallback || generateIdCallback;
-      encryptPasswordCallback = userEncryptPasswordCallback;
+      encryptPasswordCallback = userEncryptPasswordCallback as (op: Operation) => Promise<ResourceAttributes>;
     } else {
-      generateIdCallback = userProcessor.prototype["generateId"];
-      encryptPasswordCallback = userProcessor.prototype["encryptPassword"];
+      generateIdCallback = userProcessor?.prototype["generateId"] as () => Promise<string>;
+      encryptPasswordCallback = userProcessor?.prototype["encryptPassword"] as (op: Operation) => Promise<ResourceAttributes>;
     }
 
     return (options =>
-      class UserProcessor<T extends User> extends options.userProcessor<T> {
+      class UserProcessor<T extends User> extends (options.userProcessor || JsonApiUserProcessor)<T> {
         public static resourceClass = options.userResource;
+
+        static async shouldHandle(resourceType: string): Promise<boolean> {
+          return this.resourceClass && resourceType === this.resourceClass.type;
+        }
 
         protected async generateId() {
           return generateIdCallback.bind(this)();
@@ -96,7 +100,7 @@ export default class UserManagementAddon extends Addon {
         public static resourceClass = sessionResourceType as typeof Session;
 
         protected async login(op: Operation, userDataSource: ResourceAttributes): Promise<boolean> {
-          return options.userLoginCallback(op, userDataSource);
+          return (options.userLoginCallback || ((_, __) => true))(op, userDataSource);
         }
       })(this.options);
   }
@@ -111,8 +115,8 @@ export default class UserManagementAddon extends Addon {
         public static schema = {
           attributes: {
             token: String,
-            [options.usernameRequestParameter]: String,
-            [options.passwordRequestParameter]: Password
+            [options.usernameRequestParameter as string]: String,
+            [options.passwordRequestParameter as string]: Password
           },
           relationships: {
             user: {

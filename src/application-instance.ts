@@ -7,10 +7,9 @@ import OperationProcessor from "./processors/operation-processor";
 import { Operation, OperationResponse, NoOpTransaction } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
-import JsonApiError from "./errors/error";
 
 export default class ApplicationInstance {
-  public user: User;
+  public user: User | undefined;
   public transaction: Knex.Transaction | NoOpTransaction;
 
   constructor(public app: Application) { }
@@ -51,8 +50,14 @@ export default class ApplicationInstance {
 
     const data = <Resource>user.data;
 
-    data.attributes["roles"] = await this.app.services.roles.bind(this)(user.data as User);
-    data.attributes["permissions"] = await this.app.services.permissions.bind(this)(user.data as User);
+    if (this.app.services.roles) {
+      data.attributes["roles"] = await this.app.services.roles.bind(this)(user.data as User);
+    }
+
+    if (this.app.services.permissions) {
+      data.attributes["permissions"] = await this.app.services.permissions.bind(this)(user.data as User);
+    }
+
     await this.transaction.commit();
     return data;
   }
