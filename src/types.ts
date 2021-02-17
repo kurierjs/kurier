@@ -202,3 +202,7 @@ export type NoOpTransaction = {
   commit(): void;
   rollback(): void;
 }
+
+export type TransportLayerOptions = {
+  httpBodyPayload?: string;
+}

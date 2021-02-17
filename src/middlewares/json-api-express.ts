@@ -35,5 +35,5 @@ export default function jsonApiExpress(app: Application) {
     return next();
   };
 
-  return compose([express.json(), jsonApiExpress]);
+  return compose([express.json({ limit: app.transportLayerOptions?.httpBodyPayload }), jsonApiExpress]);
 }

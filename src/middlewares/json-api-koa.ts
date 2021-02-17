@@ -36,5 +36,10 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
     return next();
   };
 
-  return compose([koaBody({ json: true }), ...middlewares, jsonApiKoa]);
+  const koaBodySettings = {
+    json: true,
+    jsonLimit: app.transportLayerOptions?.httpBodyPayload
+  };
+
+  return compose([koaBody(koaBodySettings), ...middlewares, jsonApiKoa]);
 }
