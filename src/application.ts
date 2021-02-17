@@ -6,7 +6,7 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction } from "./types";
+import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions } from "./types";
 import flatten from "./utils/flatten";
 
 export default class Application {
@@ -17,6 +17,7 @@ export default class Application {
   serializer: IJsonApiSerializer;
   services: ApplicationServices;
   addons: ApplicationAddons;
+  transportLayerOptions: TransportLayerOptions;
 
   constructor(settings: {
     namespace?: string;
@@ -25,6 +26,7 @@ export default class Application {
     defaultProcessor?: typeof OperationProcessor;
     serializer?: typeof JsonApiSerializer;
     services?: {};
+    transportLayerOptions?: TransportLayerOptions;
   }) {
     this.namespace = settings.namespace || "";
     this.types = settings.types || [];
@@ -33,6 +35,9 @@ export default class Application {
     this.defaultProcessor = settings.defaultProcessor || KnexProcessor;
     this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
+    this.transportLayerOptions = settings.transportLayerOptions || {
+      httpBodyPayload: '1mb'
+    };
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
