@@ -107,7 +107,7 @@ function convertOperationResponseToHttpResponse(
 
 function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument {
   const isJsonApiError = error && error.status;
-  if (!isJsonApiError) console.error("JSONAPI-TS: ", error);
+  if (!isJsonApiError) console.error("Kurier: ", error);
 
   const jsonApiError = isJsonApiError ? error : JsonApiErrors.UnhandledError();
   if ((!process.env.NODE_ENV || process.env.NODE_ENV !== "production") && error.stack && !isJsonApiError) {
