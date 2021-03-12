@@ -88,6 +88,8 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 Check out our [updated docs at ReadTheDocs](https://kurier.readthedocs.io/en/latest/). There you will find more info and examples.
 
+If you are looking for a more in-depth reference into how to consume kurier-powered APIs, you can look into our [Filtering Rules Spec](https://github.com/kurierjs/kurier/blob/master/profiles/filtering.md#concepts).
+
 ## License
 
 [MIT](./license)
