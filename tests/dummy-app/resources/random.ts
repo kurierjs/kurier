@@ -1,4 +1,4 @@
-import { Resource } from "../jsonapi-ts";
+import { Resource } from "../kurier";
 
 export default class Random extends Resource {
   static schema = {

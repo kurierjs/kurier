@@ -1,7 +1,7 @@
 import app from "./app";
 import * as Koa from "koa";
 import * as express from "express";
-import { jsonApiKoa, jsonApiExpress } from "./jsonapi-ts";
+import { jsonApiKoa, jsonApiExpress } from "./kurier";
 
 const koaApp = new Koa();
 koaApp.use(jsonApiKoa(app));

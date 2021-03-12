@@ -1,4 +1,4 @@
-import { JsonApiSerializer, pluralize } from "./../jsonapi-ts";
+import { JsonApiSerializer, pluralize } from "./../kurier";
 
 export default class Serializer extends JsonApiSerializer {
   resourceTypeToTableName(resourceType: string): string {

@@ -1,6 +1,6 @@
 import Random from "../resources/random";
-import { OperationProcessor, HasId, Operation } from "../jsonapi-ts";
-import { JsonApiErrors } from "../jsonapi-ts";
+import { OperationProcessor, HasId, Operation } from "../kurier";
+import { JsonApiErrors } from "../kurier";
 
 const randomDataGenerator = {
   number: () => ({ randomNumber: Math.random() }),

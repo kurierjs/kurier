@@ -1,4 +1,4 @@
-import { Operation, HasId, Authorize, KnexProcessor } from "../jsonapi-ts";
+import { Operation, HasId, Authorize, KnexProcessor } from "../kurier";
 import signAndTimestampOperation from "../utils/sign-and-timestamp";
 import User from "../resources/user";
 import Vote from "../resources/vote";

@@ -1,4 +1,4 @@
-import { Resource } from "../jsonapi-ts";
+import { Resource } from "../kurier";
 import User from "./user";
 import Vote from "./vote";
 

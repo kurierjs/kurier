@@ -1,5 +1,5 @@
 import Random from "../resources/random";
-import { OperationProcessor, HasId, Operation } from "../jsonapi-ts";
+import { OperationProcessor, HasId, Operation } from "../kurier";
 import jsonApiErrors from "../../../src/errors/json-api-errors";
 
 const randomDataGenerator = {
