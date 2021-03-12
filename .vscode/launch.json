@@ -21,6 +21,24 @@
       "cwd": "${workspaceRoot}",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": ["<node_internals>/**/*", "node_modules/**/*", "tests/test-suite"]
+    },
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Launch Test-App",
+      "args": ["tests/test-suite/test-app/"],
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "sourceMaps": true,
+      "env": {
+        "DEBUG": "*",
+        "SESSION_KEY":"test",
+        "TS_NODE_PROJECT":"./tsconfig.test.json",
+        "TS_NODE_PRETTY":"true",
+        "LOAD_MAP": "true"
+      },
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**/*", "node_modules/**/*","tests/dummy-app"]
     }
   ]
 }
