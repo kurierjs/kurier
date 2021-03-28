@@ -5,22 +5,40 @@
   "version": "0.3.0",
   "configurations": [
     {
-      "type": "node",
+      "type": "pwa-node",
       "request": "launch",
       "name": "Launch Dummy",
-      "protocol": "inspector",
-      "args": [
-        "./tests/dummy-app/index.ts"
-      ],
-      "cwd": "${workspaceRoot}",
-      "runtimeArgs": [
-        "-r",
-        "ts-node/register"
-      ],
+      "args": ["tests/dummy-app/"],
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "sourceMaps": true,
       "env": {
-        "DEBUG": "*"
+        "DEBUG": "*",
+        "SESSION_KEY":"f0d87076b63d5c2732e282064fe6bebc",
+        "TS_NODE_PROJECT":"./tsconfig.test.json",
+        "TS_NODE_PRETTY":"true",
+        "LOAD_MAP": "true"
       },
-      "internalConsoleOptions": "openOnSessionStart"
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**/*", "node_modules/**/*", "tests/test-suite"]
+    },
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Launch Test-App",
+      "args": ["tests/test-suite/test-app/"],
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+      "sourceMaps": true,
+      "env": {
+        "DEBUG": "*",
+        "SESSION_KEY":"test",
+        "TS_NODE_PROJECT":"./tsconfig.test.json",
+        "TS_NODE_PRETTY":"true",
+        "LOAD_MAP": "true"
+      },
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": ["<node_internals>/**/*", "node_modules/**/*","tests/dummy-app"]
     }
   ]
 }
