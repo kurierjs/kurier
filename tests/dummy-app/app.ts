@@ -5,7 +5,7 @@ import {
   KnexProcessor,
   UserManagementAddon,
   UserManagementAddonOptions
-} from "./jsonapi-ts";
+} from "./kurier";
 
 import Article from "./resources/article";
 import User from "./resources/user";

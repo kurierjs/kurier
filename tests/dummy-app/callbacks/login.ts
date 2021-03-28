@@ -1,4 +1,4 @@
-import { Operation, ResourceAttributes } from "../jsonapi-ts";
+import { Operation, ResourceAttributes } from "../kurier";
 import hash from "../utils/hash";
 
 export default async (op: Operation, user: ResourceAttributes) => {

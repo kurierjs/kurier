@@ -1,13 +1,13 @@
 ---
 name: Filtering
 short_description: |
-  Rules for filtering data, as implemented by the JSONAPI-TS framework.
+  Rules for filtering data, as implemented by the Kurier framework.
 
 extended_description: |
   This is the specification of [a profile](http://jsonapi.org/format/1.1/#profiles)
   for the JSON:API specification.
 
-  The url for this profile is `https://jsonapi.org/profiles/kurier/filtering`.
+  The url for this profile is not yet defined.
 
   Data filtering is a way to require a specific subset of data from a data source,
   with several different ways to match and evaluate search criteria, similar to what

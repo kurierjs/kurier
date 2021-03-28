@@ -1,4 +1,4 @@
-import { Resource } from "../jsonapi-ts";
+import { Resource } from "../kurier";
 import User from "./user";
 
 export default class Comment extends Resource {

@@ -1,5 +1,5 @@
 import { Server } from "ws";
-import { jsonApiWebSocket } from "./jsonapi-ts";
+import { jsonApiWebSocket } from "./kurier";
 import app from "./app";
 import { koaApp, expressApp } from "./http";
 

@@ -1,4 +1,4 @@
-import { Operation, Resource } from "../jsonapi-ts";
+import { Operation, Resource } from "../kurier";
 import User from "../resources/user";
 
 export default function signAndTimestampOperation(op: Operation, resourceType: typeof Resource, user: User) {

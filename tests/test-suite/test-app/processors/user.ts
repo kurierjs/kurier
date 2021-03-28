@@ -1,4 +1,4 @@
-import { UserProcessor, Operation, Authorize, IfUserDoesNotHaveRole } from "../jsonapi-ts";
+import { UserProcessor, Operation, Authorize, IfUserDoesNotHaveRole } from "../kurier";
 import User from "../resources/user";
 import encryptPassword from "../callbacks/encrypt-password";
 

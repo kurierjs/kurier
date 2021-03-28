@@ -1,4 +1,4 @@
-import { User as JsonApiUser, Password } from "../jsonapi-ts";
+import { User as JsonApiUser, Password } from "../kurier";
 import Article from "./article";
 import Comment from "./comment";
 import Vote from "./vote";

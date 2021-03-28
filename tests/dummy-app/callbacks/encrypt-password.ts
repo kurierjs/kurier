@@ -1,4 +1,4 @@
-import { Operation } from "../jsonapi-ts";
+import { Operation } from "../kurier";
 import hash from "../utils/hash";
 
 export default async (op: Operation) => ({
