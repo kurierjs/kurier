@@ -13,7 +13,7 @@ import Comment from "./resources/comment";
 import Vote from "./resources/vote";
 import Random from "./resources/random";
 
-import knexfile from "./../data/knexfile";
+import knexfile from "./dummy-data/knexfile";
 import login from "./callbacks/login";
 
 import UserProcessor from "./processors/user";

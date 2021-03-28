@@ -1,4 +1,4 @@
-import knexfile from "../data/knexfile";
+import knexfile from "./test-data/knexfile";
 import * as Knex from "knex";
 import app from "./test-app/app";
 

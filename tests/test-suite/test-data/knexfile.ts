@@ -2,14 +2,6 @@
 import { join } from "path";
 
 export default {
-  development: {
-    client: "sqlite3",
-    connection: {
-      filename: join(__dirname, "dev.sqlite3")
-    },
-    useNullAsDefault: true,
-    debug: true
-  },
   test_snake_case: {
     client: "sqlite3",
     connection: {

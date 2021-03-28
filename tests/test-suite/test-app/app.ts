@@ -7,7 +7,7 @@ import {
   UserManagementAddonOptions
 } from "./kurier";
 
-import knexfile from "./../../data/knexfile";
+import knexfile from "./../test-data/knexfile";
 
 import login from "./callbacks/login";
 
