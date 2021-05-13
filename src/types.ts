@@ -37,7 +37,7 @@ export type ResourceRelationships = {
 
 export type ResourceRelationship = {
   meta?: Meta;
-  links?: Links;
+  links?: DefaultLinks;
   data?: ResourceRelationshipData | ResourceRelationshipData[];
 };
 
@@ -53,7 +53,7 @@ export type Link = string | {
   meta?: Meta;
 };
 
-export type Links = {
+export type DefaultLinks = {
   self?: Link;
   related?: Link;
 };
@@ -69,7 +69,7 @@ export type ErrorLinks = {
   about?: string;
 }
 
-export type DocumentLinks = Links & PaginationLinks;
+export type DocumentLinks = DefaultLinks & PaginationLinks;
 
 export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> = {
   data: ResourceT | ResourceT[];
@@ -116,7 +116,7 @@ export type Operation = {
     relationship?: string;
   };
   params?: JsonApiParams;
-  links?: Links;
+  links?: DefaultLinks;
   meta?: Meta;
 };
 

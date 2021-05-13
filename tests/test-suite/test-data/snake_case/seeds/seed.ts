@@ -31,6 +31,18 @@ exports.seed = (knex) => {
         { _id: 2, body: "hello2", type: "not_spam", author_id: 2, parent_comment_id: 3 },
         { _id: 3, body: "hello3", type: "spam", author_id: 1 }
       ]
+    },
+    {
+      tableName: 'links',
+      values: [
+        { _id: 1, url: "https://example.com/1" },
+        { _id: 2, url: "https://example.com/2" },
+        { _id: 3, url: "https://example.com/3" },
+        { _id: 4, url: "https://example.com/4" },
+        { _id: 5, url: "https://example.com/5" },
+        { _id: 6, url: "https://example.com/6" },
+        { _id: 7, url: "https://example.com/7" },
+      ]
     }
   ];
   return Promise.all(initialData.map(({ tableName, values }) => knex(tableName).insert(values))).then(() => { });

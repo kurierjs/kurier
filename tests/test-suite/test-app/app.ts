@@ -16,6 +16,7 @@ import User from "./resources/user";
 import Comment from "./resources/comment";
 import Vote from "./resources/vote";
 import Random from "./resources/random";
+import Link from "./resources/link";
 
 import UserProcessor from "./processors/user";
 import ArticleProcessor from "./processors/article";
@@ -24,7 +25,7 @@ import RandomProcessor from "./processors/random";
 
 const app = new Application({
   namespace: "api",
-  types: [Article, Comment, Vote, Random],
+  types: [Article, Comment, Vote, Random, Link],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor
 });
