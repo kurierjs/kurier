@@ -101,7 +101,7 @@ function convertOperationResponseToHttpResponse(
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(req.method)) {
-    return { data: operation.data, included: operation.included } as JsonApiDocument;
+    return { data: operation.data, included: operation.included, links: operation.links } as JsonApiDocument;
   }
 }
 

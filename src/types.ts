@@ -46,15 +46,37 @@ export type ResourceRelationshipData = {
   id: string;
 };
 
-export type Meta = {
-  [key: string]: AttributeValue;
+export type Meta = Record<string, AttributeValue>;
+
+export type Link = string | {
+  href: string;
+  meta?: Meta;
 };
+
+export type Links = {
+  self?: Link;
+  related?: Link;
+};
+
+export type PaginationLinks = {
+  first?: Link;
+  last?: Link;
+  prev?: Link;
+  next?: Link;
+};
+
+export type ErrorLinks = {
+  about?: string;
+}
+
+export type DocumentLinks = Links & PaginationLinks;
 
 export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> = {
   data: ResourceT | ResourceT[];
   meta?: Meta;
   operations?: Operation[];
   included?: RelatedResourcesT[];
+  links?: DocumentLinks;
 };
 
 export type JsonApiErrorsDocument = {
@@ -72,9 +94,7 @@ export interface IJsonApiError {
     pointer?: string;
     parameter?: string;
   };
-  links?: {
-    about?: string;
-  };
+  links?: ErrorLinks;
 }
 
 export type JsonApiParams = {
@@ -83,16 +103,6 @@ export type JsonApiParams = {
   filter?: { [key: string]: string };
   page?: { [key: string]: number };
   fields?: { [key: string]: string[] };
-};
-
-export type Links = {
-  self: string | Link;
-  related?: string | Link;
-};
-
-export type Link = {
-  href: string;
-  meta?: Meta;
 };
 
 export type Operation = {
@@ -113,6 +123,7 @@ export type Operation = {
 export type OperationResponse = {
   data: Resource | Resource[] | null;
   included?: Resource[];
+  links?: DocumentLinks;
 };
 
 export type KnexRecord = {
