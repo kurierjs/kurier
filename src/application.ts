@@ -223,9 +223,19 @@ export default class Application {
       })
     );
 
+    const links = {
+      self: ""
+    }
+
     const serializedResources = await this.serializeResources(data);
 
-    return included.length ? { included, data: serializedResources } : { data: serializedResources };
+    // return included.length ? { included, data: serializedResources } : { data: serializedResources };
+
+    return {
+      data: serializedResources,
+      ...(included.length ? { included } : {}),
+      links
+    };
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
