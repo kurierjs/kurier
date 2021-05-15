@@ -1,7 +1,7 @@
 
 exports.up = async (knex) => {
   await knex.schema.createTable("links", table => {
-    table.increments("_id").primary();
+    table.increments("id").primary();
     table.string("url");
   });
 }

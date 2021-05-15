@@ -35,13 +35,13 @@ exports.seed = (knex) => {
     {
       tableName: 'links',
       values: [
-        { _id: 1, url: "https://example.com/1" },
-        { _id: 2, url: "https://example.com/2" },
-        { _id: 3, url: "https://example.com/3" },
-        { _id: 4, url: "https://example.com/4" },
-        { _id: 5, url: "https://example.com/5" },
-        { _id: 6, url: "https://example.com/6" },
-        { _id: 7, url: "https://example.com/7" },
+        { id: 1, url: "http://example.com/1" },
+        { id: 2, url: "http://example.com/2" },
+        { id: 3, url: "http://example.com/3" },
+        { id: 4, url: "http://example.com/4" },
+        { id: 5, url: "http://example.com/5" },
+        { id: 6, url: "http://example.com/6" },
+        { id: 7, url: "http://example.com/7" },
       ]
     }
   ];
