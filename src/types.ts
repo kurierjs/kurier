@@ -124,6 +124,7 @@ export type OperationResponse = {
   data: Resource | Resource[] | null;
   included?: Resource[];
   links?: DocumentLinks;
+  meta?: Meta;
 };
 
 export type KnexRecord = {
