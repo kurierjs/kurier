@@ -1,6 +1,4 @@
 import * as Knex from "knex";
-import { Request as ExpressRequest } from "express";
-import { Request as KoaRequest } from "koa";
 
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
@@ -9,10 +7,10 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions } from "./types";
+import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions, JsonApiParams } from "./types";
 import flatten from "./utils/flatten";
-import { format } from 'url';
 import { ApplicationSettings } from ".";
+import { getToManyLinks, getToOneLinks } from "./utils/links";
 
 export default class Application {
   namespace: string;
@@ -133,14 +131,14 @@ export default class Application {
         const relatedProcessor = await this.processorFor(relatedResourceClass.type, processor.appInstance) as OperationProcessor<Resource>;
         const result = await relatedProcessor.execute(deserializedOperation);
 
-        return this.buildOperationResponse(result, processor.appInstance);
+        return this.buildOperationResponse(result, processor.appInstance, op.params);
       }
     }
 
     const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
     const result = await processor.execute(deserializedOperation);
 
-    return this.buildOperationResponse(result, processor.appInstance);
+    return this.buildOperationResponse(result, processor.appInstance, op.params);
   }
 
   async createTransaction(): Promise<Knex.Transaction | NoOpTransaction> {
@@ -190,7 +188,8 @@ export default class Application {
 
   async buildOperationResponse(
     data: Resource | Resource[] | void,
-    appInstance: ApplicationInstance
+    appInstance: ApplicationInstance,
+    params?: JsonApiParams,
   ): Promise<OperationResponse> {
     let resourceType: string | null;
 
@@ -222,7 +221,7 @@ export default class Application {
       })
     );
 
-    const serializedResources = await this.serializeResources(data, appInstance);
+    const serializedResources = await this.serializeResources(data, appInstance, params);
 
     return {
       ...serializedResources,
@@ -230,7 +229,7 @@ export default class Application {
     };
   }
 
-  async serializeResources(data: Resource | Resource[] | void, appInstance: ApplicationInstance) {
+  async serializeResources(data: Resource | Resource[] | void, appInstance: ApplicationInstance, params?: JsonApiParams,) {
     if (!data) {
       return {
         data: null
@@ -244,11 +243,8 @@ export default class Application {
         };
       }
 
-      const resource = await this.resourceFor(data[0].type);
-
-      const links = {
-        self: format({ protocol: appInstance.baseUrl?.protocol, host: appInstance.baseUrl?.host, pathname: `${data[0].type}`})
-      }
+      const resourceType = data[0].type;
+      const resource = await this.resourceFor(resourceType);
 
       return {
         data: data.filter(
@@ -256,19 +252,15 @@ export default class Application {
         ).map(
           record => this.serializer.serializeResource(record, resource)
         ),
-        links
+        links: getToManyLinks(resourceType, appInstance.baseUrl, params)
       };
     }
 
     const resource = await this.resourceFor(data.type);
 
-    const links = {
-      self: format({ protocol: appInstance.baseUrl?.protocol, host: appInstance.baseUrl?.host, pathname: `${data.type}/${data.id}`})
-    }
-
     return {
       data: this.serializer.serializeResource(data, resource),
-      links,
+      links: getToOneLinks(data.type, data.id, appInstance.baseUrl, params),
     };
   }
 }

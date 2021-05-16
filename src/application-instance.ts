@@ -11,7 +11,7 @@ import User from "./resources/user";
 export default class ApplicationInstance {
   public user: User | undefined;
   public transaction: Knex.Transaction | NoOpTransaction;
-  public baseUrl?: URL;
+  public baseUrl?: URL | undefined;
 
   constructor(public app: Application, baseUrl?: URL) {
     if (!app.baseUrl && !baseUrl) {
