@@ -1,4 +1,5 @@
 import * as Knex from "knex";
+import { JsonApiSerializer, OperationProcessor } from ".";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import Password from "./attribute-types/password";
@@ -180,6 +181,17 @@ export type ResourceRelationshipDescriptor = {
   direct: KnexRecord[] | undefined;
   nested: KnexRecord[] | undefined;
 };
+
+export type ApplicationSettings = {
+  namespace?: string;
+  types?: typeof Resource[];
+  processors?: typeof OperationProcessor[];
+  defaultProcessor?: typeof OperationProcessor;
+  serializer?: typeof JsonApiSerializer;
+  services?: {};
+  transportLayerOptions?: TransportLayerOptions;
+  baseUrl?: URL;
+}
 
 export type ApplicationServices = {
   knex?: Knex;

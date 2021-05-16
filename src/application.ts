@@ -1,4 +1,7 @@
 import * as Knex from "knex";
+import { Request as ExpressRequest } from "express";
+import { Request as KoaRequest } from "koa";
+
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import { canAccessResource } from "./decorators/authorize";
@@ -8,6 +11,8 @@ import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
 import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions } from "./types";
 import flatten from "./utils/flatten";
+import { format } from 'url';
+import { ApplicationSettings } from ".";
 
 export default class Application {
   namespace: string;
@@ -18,16 +23,9 @@ export default class Application {
   services: ApplicationServices;
   addons: ApplicationAddons;
   transportLayerOptions: TransportLayerOptions;
+  baseUrl?: URL;
 
-  constructor(settings: {
-    namespace?: string;
-    types?: typeof Resource[];
-    processors?: typeof OperationProcessor[];
-    defaultProcessor?: typeof OperationProcessor;
-    serializer?: typeof JsonApiSerializer;
-    services?: {};
-    transportLayerOptions?: TransportLayerOptions;
-  }) {
+  constructor(settings: ApplicationSettings) {
     this.namespace = settings.namespace || "";
     this.types = settings.types || [];
     this.processors = settings.processors || [];
@@ -38,6 +36,7 @@ export default class Application {
     this.transportLayerOptions = settings.transportLayerOptions || {
       httpBodyPayload: '1mb'
     };
+    this.baseUrl = settings.baseUrl;
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
@@ -52,7 +51,7 @@ export default class Application {
 
   async executeOperations(
     ops: Operation[],
-    applicationInstance = new ApplicationInstance(this)
+    applicationInstance = new ApplicationInstance(this),
   ): Promise<OperationResponse[]> {
     applicationInstance.transaction = await this.createTransaction();
 
@@ -211,7 +210,7 @@ export default class Application {
 
     await Promise.all(
       allIncluded.map((resource: Resource) => {
-        return new Promise(async resolve => {
+        return new Promise<void>(async resolve => {
           const result = await canAccessResource(resource, "get", appInstance);
 
           if (result) {
@@ -223,41 +222,53 @@ export default class Application {
       })
     );
 
-    const links = {
-      self: ""
-    }
-
-    const serializedResources = await this.serializeResources(data);
-
-    // return included.length ? { included, data: serializedResources } : { data: serializedResources };
+    const serializedResources = await this.serializeResources(data, appInstance);
 
     return {
-      data: serializedResources,
+      ...serializedResources,
       ...(included.length ? { included } : {}),
-      links
     };
   }
 
-  async serializeResources(data: Resource | Resource[] | void) {
+  async serializeResources(data: Resource | Resource[] | void, appInstance: ApplicationInstance) {
     if (!data) {
-      return null;
+      return {
+        data: null
+      };
     }
 
     if (Array.isArray(data)) {
       if (!data.length) {
-        return [];
+        return {
+          data: []
+        };
       }
 
       const resource = await this.resourceFor(data[0].type);
 
-      return data.filter(
-        record => !record.preventSerialization
-      ).map(
-        record => this.serializer.serializeResource(record, resource)
-      );
+      const links = {
+        self: format({ protocol: appInstance.baseUrl?.protocol, host: appInstance.baseUrl?.host, pathname: `${data[0].type}`})
+      }
+
+      return {
+        data: data.filter(
+          record => !record.preventSerialization
+        ).map(
+          record => this.serializer.serializeResource(record, resource)
+        ),
+        links
+      };
     }
 
     const resource = await this.resourceFor(data.type);
-    return this.serializer.serializeResource(data, resource);
+
+    const links = {
+      self: format({ protocol: appInstance.baseUrl?.protocol, host: appInstance.baseUrl?.host, pathname: `${data.type}/${data.id}`})
+    }
+
+    return {
+      data: this.serializer.serializeResource(data, resource),
+      links,
+    };
   }
 }

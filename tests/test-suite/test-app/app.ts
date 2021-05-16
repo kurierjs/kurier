@@ -27,7 +27,7 @@ const app = new Application({
   namespace: "api",
   types: [Article, Comment, Vote, Random, Link],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
-  defaultProcessor: KnexProcessor
+  defaultProcessor: KnexProcessor,
 });
 
 app.use(UserManagementAddon, {

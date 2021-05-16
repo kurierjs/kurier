@@ -6,7 +6,6 @@ import { jsonApiKoa, jsonApiExpress } from "./kurier";
 const koaApp = new Koa();
 koaApp.use(async (ctx, next) => {
   if (ctx.req.url === '/favicon.ico') {
-    console.log(ctx.req);
     ctx.res.statusCode = 404;
     ctx.res.end();
   } else {
@@ -16,7 +15,14 @@ koaApp.use(async (ctx, next) => {
 koaApp.use(jsonApiKoa(app));
 
 const expressApp = express();
-// todo skip favicon
+expressApp.use(async (req, res, next) => {
+  if (req.url === '/favicon.ico') {
+    res.statusCode = 404;
+    res.end();
+  } else {
+    await next();
+  }
+});
 expressApp.use(jsonApiExpress(app));
 
 export { expressApp, koaApp };

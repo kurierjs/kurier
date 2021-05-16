@@ -13,7 +13,12 @@ import {
 
 export default function jsonApiExpress(app: Application) {
   const jsonApiExpress = async (req: express.Request, res: express.Response, next: () => any) => {
-    const appInstance = new ApplicationInstance(app);
+    const baseUrl = new URL(`${req.protocol}://${req.get("host")}`);
+    const appInstance = new ApplicationInstance(app, baseUrl);
+
+    if (!app.baseUrl) {
+      app.baseUrl = new URL(`${req.protocol}://${req.get("host")}`);
+    }
 
     try {
       await authenticate(appInstance, req);
