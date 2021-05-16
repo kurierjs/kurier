@@ -52,7 +52,7 @@ export const links = [
 
 export default {
   toGet: {
-    response: {
+    response: (baseUrl: string) => ({
       data: [
         {
           id: 1,
@@ -64,8 +64,8 @@ export default {
         }
       ],
       links: {
-        self: "http://localhost:3001/links?page[number]=0&page[size]=1",
+        self: `${baseUrl}/link?page%5Bnumber%5D=0&page%5Bsize%5D=1`,
       }
-    }
+    })
   }
 };

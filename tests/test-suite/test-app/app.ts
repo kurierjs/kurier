@@ -28,6 +28,7 @@ const app = new Application({
   types: [Article, Comment, Vote, Random, Link],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor,
+  baseUrl: process.env.NODE_ENV === 'test' ? new URL('http://localhost:3000') : undefined
 });
 
 app.use(UserManagementAddon, {
