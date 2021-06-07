@@ -27,6 +27,7 @@ export type OperationDecorator = (
 // Generic types for JSONAPI document structure.
 
 export type AttributeValue = string | number | boolean | string[] | number[] | boolean[] | object | object[];
+export type ComputedValue = (this: any, record: HasId) => Promise<AttributeValue>;
 
 export type ResourceAttributes = {
   [key: string]: AttributeValue;
@@ -48,6 +49,7 @@ export type ResourceRelationshipData = {
 };
 
 export type Meta = Record<string, AttributeValue>;
+export type ComputedMeta = Record<string, ComputedValue>;
 
 export type Link = string | {
   href: string;

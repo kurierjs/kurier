@@ -1,5 +1,5 @@
 import Resource from "../resource";
-import { HasId, Operation, EagerLoadedData } from "../types";
+import { HasId, Operation, EagerLoadedData, ComputedMeta } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
@@ -21,6 +21,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
   protected attributes = {};
   protected relationships = {};
+  protected meta: ComputedMeta;
 
   constructor(public appInstance: ApplicationInstance) { }
 
@@ -191,6 +192,14 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return pick(record, relationshipKeys);
   }
 
+  async getMeta(record: HasId) {
+    if (this.meta) {
+      return promiseHashMap(this.meta, key => this.meta[key].call(this, record))
+    }
+
+    return undefined;
+  }
+
   async convertToResources(op: Operation, records: HasId[] | HasId, eagerLoadedData: EagerLoadedData) {
     if (Array.isArray(records)) {
       return Promise.all(
@@ -203,11 +212,18 @@ export default class OperationProcessor<ResourceT extends Resource> {
     const record = { ...records };
     const resourceClass = await this.resourceFor(op.ref.type);
 
-    const [attributes, computedAttributes, relationships, relationshipAttributes] = await Promise.all([
+    const [
+      attributes,
+      computedAttributes,
+      relationships,
+      relationshipAttributes,
+      computedMeta
+    ] = await Promise.all([
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
       this.getRelationships(op, record, eagerLoadedData),
-      this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData)
+      this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData),
+      this.getMeta(record),
     ]);
 
     const resource = new resourceClass({
@@ -217,7 +233,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
         ...attributes,
         ...relationshipAttributes,
         ...computedAttributes
-      }
+      },
+      meta: computedMeta
     });
 
     const passesFilters = await this.matchesComputedFilters(op, computedAttributes);

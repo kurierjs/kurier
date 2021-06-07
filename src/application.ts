@@ -229,7 +229,7 @@ export default class Application {
     };
   }
 
-  async serializeResources(data: Resource | Resource[] | void, appInstance: ApplicationInstance, params?: JsonApiParams,) {
+  async serializeResources(data: Resource | Resource[] | void, appInstance: ApplicationInstance, params?: JsonApiParams) {
     if (!data) {
       return {
         data: null
