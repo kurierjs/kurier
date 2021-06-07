@@ -202,7 +202,7 @@ export default class Application {
     }
 
     const allIncluded: Resource[] = !resourceType ? [] : flatten(
-      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []
+      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType), appInstance.baseUrl) || []
     );
 
     const included: Resource[] = [];
@@ -250,7 +250,7 @@ export default class Application {
         data: data.filter(
           record => !record.preventSerialization
         ).map(
-          record => this.serializer.serializeResource(record, resource)
+          record => this.serializer.serializeResource(record, resource, appInstance.baseUrl)
         ),
         links: getToManyLinks(resourceType, appInstance.baseUrl, params)
       };
@@ -259,7 +259,7 @@ export default class Application {
     const resource = await this.resourceFor(data.type);
 
     return {
-      data: this.serializer.serializeResource(data, resource),
+      data: this.serializer.serializeResource(data, resource, appInstance.baseUrl),
       links: getToOneLinks(data.type, data.id, appInstance.baseUrl, params),
     };
   }

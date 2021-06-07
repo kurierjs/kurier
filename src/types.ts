@@ -209,13 +209,17 @@ export interface IJsonApiSerializer {
   columnToRelationship(columnName: string, primaryKeyName?: string): string;
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
   deserializeResource(op: Operation, resourceClass: typeof Resource): Operation;
-  serializeResource(resource: Resource, resourceType: typeof Resource): Resource;
+  serializeResource(resource: Resource, resourceType: typeof Resource, baseUrl: URL): Resource;
   serializeRelationship(
     relationships: Resource | Resource[],
     resourceType: typeof Resource,
     primaryKeyName?: string
   ): ResourceRelationshipData[];
-  serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource): Resource[] | null;
+  serializeIncludedResources(
+    data: Resource | Resource[] | void,
+    resourceType: typeof Resource,
+    baseUrl: URL
+  ): Resource[] | null;
 }
 
 export interface IAddon {
