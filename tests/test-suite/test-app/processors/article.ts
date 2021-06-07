@@ -30,17 +30,4 @@ export default class ArticleProcessor<ResourceT extends Article> extends KnexPro
   //     return result;
   //   }
   // };
-
-  meta = {
-    async voteCount(this: ArticleProcessor<Article>, article: HasId) {
-      const processor = <KnexProcessor<Vote>>await this.processorFor("vote");
-
-      const [result] = await processor
-        .getQuery()
-        .where({ [this.appInstance.app.serializer.relationshipToColumn('article')]: article.id })
-        .count();
-
-      return result["count(*)"];
-    }
-  };
 }
