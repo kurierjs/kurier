@@ -82,7 +82,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         ...relationships,
         [relationship.name]: {
           id: data.attributes[relationship.key],
-          type: schemaRelationships[relationship.name].type().type
+          type: schemaRelationships[relationship.name].type().type,
         }
       }),
       Object.entries(data.relationships as EagerLoadedData).reduce(
@@ -114,13 +114,17 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
     Object.keys(data.relationships)
-      .filter(relName => data.relationships[relName])
+      .filter(relName => data.relationships?.[relName])
       .forEach(relName => {
         const fkName = schemaRelationships[relName].belongsTo
           ? DEFAULT_PRIMARY_KEY
           : schemaRelationships[relName].type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
         data.relationships[relName] = {
+          links: {
+            self: '',
+            related: '',
+          },
           data: this.serializeRelationship(
             (data.relationships[relName] as unknown) as Resource | Resource[],
             schemaRelationships[relName].type(),

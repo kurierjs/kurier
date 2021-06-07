@@ -217,7 +217,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
       computedAttributes,
       relationships,
       relationshipAttributes,
-      computedMeta
+      meta
     ] = await Promise.all([
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
@@ -234,7 +234,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
         ...relationshipAttributes,
         ...computedAttributes
       },
-      meta: computedMeta
+      meta
     });
 
     const passesFilters = await this.matchesComputedFilters(op, computedAttributes);
