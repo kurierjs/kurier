@@ -3,6 +3,7 @@ import { JsonApiSerializer, OperationProcessor } from ".";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import Password from "./attribute-types/password";
+import { LinkBuilder } from "./link-builder";
 import { Paginator } from "./paginatior";
 import Resource from "./resource";
 import User from "./resources/user";
@@ -203,7 +204,11 @@ export type ApplicationServices = {
   permissions?: (this: ApplicationInstance, user: User) => Promise<string[]>;
 } & { [key: string]: any };
 
+export interface IJsonApiSerializerConfig {
+  linkBuilder: LinkBuilder;
+}
 export interface IJsonApiSerializer {
+  linkBuilder: LinkBuilder;
   resourceTypeToTableName(resourceType: string): string;
   attributeToColumn(attributeName: string): string;
   columnToAttribute(columnName: string): string;

@@ -22,7 +22,6 @@ export default class Application {
   services: ApplicationServices;
   addons: ApplicationAddons;
   transportLayerOptions: TransportLayerOptions;
-  linkBuilder: LinkBuilder;
   paginator: typeof Paginator;
 
   constructor(settings: ApplicationSettings) {
@@ -32,15 +31,16 @@ export default class Application {
     this.services = settings.services || ({} as ApplicationServices);
     this.defaultProcessor = settings.defaultProcessor || KnexProcessor;
     this.addons = [];
-    this.serializer = new (settings.serializer || JsonApiSerializer)();
+    this.serializer = new (settings.serializer || JsonApiSerializer)({
+      linkBuilder: new LinkBuilder({
+        baseUrl: settings.baseUrl,
+        namespace: settings.namespace,
+      }),
+    });
     this.transportLayerOptions = settings.transportLayerOptions || {
       httpBodyPayload: '1mb'
     };
     this.paginator = settings.paginator || PagedPaginator;
-    this.linkBuilder = new LinkBuilder({
-      baseUrl: settings.baseUrl,
-      namespace: settings.namespace,
-    });
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
@@ -208,7 +208,7 @@ export default class Application {
     }
 
     const allIncluded: Resource[] = !resourceType ? [] : flatten(
-      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType), this.linkBuilder.baseUrl) || []
+      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []
     );
 
     const included: Resource[] = [];
@@ -255,14 +255,14 @@ export default class Application {
       const serializedData =  data.filter(
         record => !record.preventSerialization
       ).map(
-        record => this.serializer.serializeResource(record, resource, this.linkBuilder.baseUrl)
+        record => this.serializer.serializeResource(record, resource)
       );
       const Paginator = this.paginator;
       const paginator = new Paginator(params);
       const paginationParams = paginator.linksPageParams(serializedData.length);
 
       const paginationLinks = Object.keys(paginationParams).reduce((prev, current) => {
-        prev[current] = this.linkBuilder.queryLink(resourceType, { ...params, page: paginationParams[current] });
+        prev[current] = this.serializer.linkBuilder.queryLink(resourceType, { ...params, page: paginationParams[current] });
 
         return prev;
       }, {});
@@ -270,7 +270,7 @@ export default class Application {
       return {
         data: serializedData,
         links: {
-          self: this.linkBuilder.queryLink(resourceType, params),
+          self: this.serializer.linkBuilder.queryLink(resourceType, params),
           ...paginationLinks,
         }
       };
@@ -279,9 +279,9 @@ export default class Application {
     const resource = await this.resourceFor(data.type);
 
     return {
-      data: this.serializer.serializeResource(data, resource, this.linkBuilder.baseUrl),
+      data: this.serializer.serializeResource(data, resource),
       links: {
-        self: this.linkBuilder.selfLink(data.type, data.id, params),
+        self: this.serializer.linkBuilder.selfLink(data.type, data.id, params),
       }
     };
   }

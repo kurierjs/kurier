@@ -27,7 +27,7 @@ export class LinkBuilder {
     });
   }
 
-  public selfLink(resourceType: string, id?: string, params?: JsonApiParams) {
+  public selfLink(resourceType: string, id: string | undefined, params?: JsonApiParams) {
     if (!id) {
       throw new Error(`Self link for ${resourceType} could not be generated because resource "id" is undefined!`);
     }
@@ -40,12 +40,30 @@ export class LinkBuilder {
     });
   }
 
-  public relationshipsRelatedLink(source, relationship, params = {}) {
+  public relationshipsRelatedLink(resourceType: string, id: string | undefined, relationshipName: string, params?: JsonApiParams) {
+    if (!id) {
+      throw new Error(`Related link for ${resourceType} relationship ${relationshipName} could not be generated because resource "id" is undefined!`);
+    }
 
+    return format({
+      protocol: this.baseUrl?.protocol,
+      host: this.baseUrl?.host,
+      pathname: `${this.relativeResourcesUrl(resourceType)}/${id}/${relationshipName}`,
+      search: this.queryPramsToURlSearchParams(params),
+    })
   }
 
-  public relationshipsSelfLink(source, relationship) {
+  public relationshipsSelfLink(resourceType: string, id: string | undefined, relationshipName: string, params?: JsonApiParams) {
+    if (!id) {
+      throw new Error(`Self link for ${resourceType} relationship ${relationshipName} could not be generated because resource "id" is undefined!`);
+    }
 
+    return format({
+      protocol: this.baseUrl?.protocol,
+      host: this.baseUrl?.host,
+      pathname: `${this.relativeResourcesUrl(resourceType)}/${id}/relationships/${relationshipName}`,
+      search: this.queryPramsToURlSearchParams(params),
+    });
   }
 
   private queryPramsToURlSearchParams(params?: JsonApiParams) {

@@ -62,7 +62,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
         relationships: {}
       },
       userType,
-      this.appInstance.app.linkBuilder.baseUrl
+      this.appInstance.app.serializer.linkBuilder.baseUrl
     );
 
     const token = sign(secureData, process.env.SESSION_KEY as string, {

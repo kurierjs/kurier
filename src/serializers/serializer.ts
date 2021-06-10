@@ -1,4 +1,6 @@
+import { IJsonApiSerializerConfig } from "../types";
 import Password from "../attribute-types/password";
+import { LinkBuilder } from "../link-builder";
 import Resource from "../resource";
 import {
   DEFAULT_PRIMARY_KEY,
@@ -8,12 +10,17 @@ import {
   ResourceRelationshipData,
   ResourceRelationshipDescriptor
 } from "../types";
-import { getRelationshipLinks } from "../utils/links";
 import pick from "../utils/pick";
 import { camelize, classify, pluralize, underscore } from "../utils/string";
 import unpick from "../utils/unpick";
 
 export default class JsonApiSerializer implements IJsonApiSerializer {
+  linkBuilder: LinkBuilder;
+
+  constructor(config: IJsonApiSerializerConfig) {
+    this.linkBuilder = config.linkBuilder;
+  }
+
   resourceTypeToTableName(resourceType: string): string {
     return underscore(pluralize(resourceType));
   }
@@ -59,7 +66,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     return op;
   }
 
-  serializeResource(data: Resource, resourceType: typeof Resource, baseUrl: URL): Resource {
+  serializeResource(data: Resource, resourceType: typeof Resource): Resource {
     const resourceSchema = resourceType.schema;
     const schemaRelationships = resourceSchema.relationships;
     const relationshipsFound = Object.keys(schemaRelationships)
@@ -127,12 +134,10 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           fkName
         );
 
-        const links = getRelationshipLinks({
-          type: data.type,
-          id: data.id as string,
-          relName,
-          baseUrl,
-        });
+        const links = {
+          self: this.linkBuilder.relationshipsSelfLink(data.type, data.id, relName),
+          related: this.linkBuilder.relationshipsRelatedLink(data.type, data.id, relName)
+        };
 
         data.relationships[relName] = {
           links,
@@ -163,13 +168,13 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     return pick<Resource, ResourceRelationshipData[]>(relationships, ["id", "type"]);
   }
 
-  serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource, baseUrl: URL) {
+  serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource) {
     if (!data) {
       return null;
     }
 
     if (Array.isArray(data)) {
-      return data.map(record => this.serializeIncludedResources(record, resourceType, baseUrl));
+      return data.map(record => this.serializeIncludedResources(record, resourceType));
     }
 
     if (data.preventSerialization) { return [] }
@@ -200,7 +205,6 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                     ])
                   }),
                   relatedResourceClass,
-                  baseUrl,
                 ),
                 type: relatedResourceClass.type
               } as Resource;
@@ -229,7 +233,6 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                         relationships: {} // nestedResources.filter
                       }),
                       subResourceClass,
-                      baseUrl,
                     ),
                     type: subResourceClass.type
                   } as Resource;

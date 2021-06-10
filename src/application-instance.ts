@@ -13,8 +13,8 @@ export default class ApplicationInstance {
   public transaction: Knex.Transaction | NoOpTransaction;
 
   constructor(public app: Application, baseUrl?: URL) {
-    if (!app.linkBuilder.baseUrl && baseUrl) {
-      app.linkBuilder.baseUrl = baseUrl;
+    if (!app.serializer.linkBuilder.baseUrl && baseUrl) {
+      app.serializer.linkBuilder.baseUrl = baseUrl;
     }
   }
 
