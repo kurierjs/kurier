@@ -31,16 +31,16 @@ export default class Application {
     this.services = settings.services || ({} as ApplicationServices);
     this.defaultProcessor = settings.defaultProcessor || KnexProcessor;
     this.addons = [];
-    this.serializer = new (settings.serializer || JsonApiSerializer)({
-      linkBuilder: new LinkBuilder({
-        baseUrl: settings.baseUrl,
-        namespace: settings.namespace,
-      }),
-    });
+    this.serializer = new (settings.serializer || JsonApiSerializer)();
     this.transportLayerOptions = settings.transportLayerOptions || {
       httpBodyPayload: '1mb'
     };
     this.paginator = settings.paginator || PagedPaginator;
+
+    this.serializer.initLinkBuilder({
+      baseUrl: settings.baseUrl,
+      namespace: settings.namespace,
+    });
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {

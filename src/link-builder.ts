@@ -1,12 +1,8 @@
 import { join } from 'path';
 import { format } from 'url';
+import { ILinkBuilderConfig } from '.';
 import { JsonApiParams } from "./types";
 import { format as formatJasonApiParams } from './utils/json-api-params';
-
-export interface ILinkBuilderConfig {
-  namespace?: string;
-  baseUrl?: URL;
-}
 
 export class LinkBuilder {
   private namespace: string;

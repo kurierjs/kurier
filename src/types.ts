@@ -204,11 +204,9 @@ export type ApplicationServices = {
   permissions?: (this: ApplicationInstance, user: User) => Promise<string[]>;
 } & { [key: string]: any };
 
-export interface IJsonApiSerializerConfig {
-  linkBuilder: LinkBuilder;
-}
 export interface IJsonApiSerializer {
   linkBuilder: LinkBuilder;
+  initLinkBuilder(linkBuilderConfig: ILinkBuilderConfig): LinkBuilder;
   resourceTypeToTableName(resourceType: string): string;
   attributeToColumn(attributeName: string): string;
   columnToAttribute(columnName: string): string;
@@ -249,4 +247,9 @@ export type LinksPageParams<TPaginatorParams extends string = string> = {
   prev?: Record<TPaginatorParams, number>,
   next?: Record<TPaginatorParams, number>,
   last?: Record<TPaginatorParams, number>,
+}
+
+export interface ILinkBuilderConfig {
+  namespace?: string;
+  baseUrl?: URL;
 }

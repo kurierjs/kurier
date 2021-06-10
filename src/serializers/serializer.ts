@@ -1,6 +1,6 @@
-import { IJsonApiSerializerConfig } from "../types";
+import { ILinkBuilderConfig } from "../types";
 import Password from "../attribute-types/password";
-import { LinkBuilder } from "../link-builder";
+import {  LinkBuilder } from "../link-builder";
 import Resource from "../resource";
 import {
   DEFAULT_PRIMARY_KEY,
@@ -17,8 +17,10 @@ import unpick from "../utils/unpick";
 export default class JsonApiSerializer implements IJsonApiSerializer {
   linkBuilder: LinkBuilder;
 
-  constructor(config: IJsonApiSerializerConfig) {
-    this.linkBuilder = config.linkBuilder;
+  initLinkBuilder(linkBuilderConfig: ILinkBuilderConfig) {
+    this.linkBuilder = new LinkBuilder(linkBuilderConfig);
+
+    return this.linkBuilder;
   }
 
   resourceTypeToTableName(resourceType: string): string {
@@ -133,6 +135,10 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           schemaRelationships[relName].type(),
           fkName
         );
+
+        if (!this.linkBuilder) {
+          throw new Error('LinkBuilder is not initialized!')
+        }
 
         const links = {
           self: this.linkBuilder.relationshipsSelfLink(data.type, data.id, relName),
