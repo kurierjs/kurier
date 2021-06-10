@@ -10,7 +10,8 @@ import JsonApiSerializer from "./serializers/serializer";
 import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions, JsonApiParams } from "./types";
 import flatten from "./utils/flatten";
 import { ApplicationSettings } from ".";
-import { getToManyLinks, getToOneLinks } from "./utils/links";
+import { PagedPaginator, Paginator } from "./paginatior";
+import { LinkBuilder } from "./link-builder";
 
 export default class Application {
   namespace: string;
@@ -21,7 +22,8 @@ export default class Application {
   services: ApplicationServices;
   addons: ApplicationAddons;
   transportLayerOptions: TransportLayerOptions;
-  baseUrl?: URL;
+  linkBuilder: LinkBuilder;
+  paginator: typeof Paginator;
 
   constructor(settings: ApplicationSettings) {
     this.namespace = settings.namespace || "";
@@ -34,7 +36,11 @@ export default class Application {
     this.transportLayerOptions = settings.transportLayerOptions || {
       httpBodyPayload: '1mb'
     };
-    this.baseUrl = settings.baseUrl;
+    this.paginator = settings.paginator || PagedPaginator;
+    this.linkBuilder = new LinkBuilder({
+      baseUrl: settings.baseUrl,
+      namespace: settings.namespace,
+    });
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
@@ -202,7 +208,7 @@ export default class Application {
     }
 
     const allIncluded: Resource[] = !resourceType ? [] : flatten(
-      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType), appInstance.baseUrl) || []
+      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType), this.linkBuilder.baseUrl) || []
     );
 
     const included: Resource[] = [];
@@ -221,15 +227,16 @@ export default class Application {
       })
     );
 
-    const serializedResources = await this.serializeResources(data, appInstance, params);
+    const { data: serializedData, links } = await this.serializeResources(data, params);
 
     return {
-      ...serializedResources,
+      data: serializedData,
       ...(included.length ? { included } : {}),
-    };
+      links,
+    } as any;
   }
 
-  async serializeResources(data: Resource | Resource[] | void, appInstance: ApplicationInstance, params?: JsonApiParams) {
+  async serializeResources(data: Resource | Resource[] | void, params?: JsonApiParams) {
     if (!data) {
       return {
         data: null
@@ -245,22 +252,37 @@ export default class Application {
 
       const resourceType = data[0].type;
       const resource = await this.resourceFor(resourceType);
+      const serializedData =  data.filter(
+        record => !record.preventSerialization
+      ).map(
+        record => this.serializer.serializeResource(record, resource, this.linkBuilder.baseUrl)
+      );
+      const Paginator = this.paginator;
+      const paginator = new Paginator(params);
+      const paginationParams = paginator.linksPageParams(serializedData.length);
+
+      const paginationLinks = Object.keys(paginationParams).reduce((prev, current) => {
+        prev[current] = this.linkBuilder.queryLink(resourceType, { ...params, page: paginationParams[current] });
+
+        return prev;
+      }, {});
 
       return {
-        data: data.filter(
-          record => !record.preventSerialization
-        ).map(
-          record => this.serializer.serializeResource(record, resource, appInstance.baseUrl)
-        ),
-        links: getToManyLinks(resourceType, appInstance.baseUrl, params)
+        data: serializedData,
+        links: {
+          self: this.linkBuilder.queryLink(resourceType, params),
+          ...paginationLinks,
+        }
       };
     }
 
     const resource = await this.resourceFor(data.type);
 
     return {
-      data: this.serializer.serializeResource(data, resource, appInstance.baseUrl),
-      links: getToOneLinks(data.type, data.id, appInstance.baseUrl, params),
+      data: this.serializer.serializeResource(data, resource, this.linkBuilder.baseUrl),
+      links: {
+        self: this.linkBuilder.selfLink(data.type, data.id, params),
+      }
     };
   }
 }

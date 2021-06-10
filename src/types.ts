@@ -3,6 +3,7 @@ import { JsonApiSerializer, OperationProcessor } from ".";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import Password from "./attribute-types/password";
+import { Paginator } from "./paginatior";
 import Resource from "./resource";
 import User from "./resources/user";
 
@@ -193,6 +194,7 @@ export type ApplicationSettings = {
   services?: {};
   transportLayerOptions?: TransportLayerOptions;
   baseUrl?: URL;
+  paginator?: typeof Paginator;
 }
 
 export type ApplicationServices = {
@@ -209,7 +211,7 @@ export interface IJsonApiSerializer {
   columnToRelationship(columnName: string, primaryKeyName?: string): string;
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
   deserializeResource(op: Operation, resourceClass: typeof Resource): Operation;
-  serializeResource(resource: Resource, resourceType: typeof Resource, baseUrl: URL): Resource;
+  serializeResource(resource: Resource, resourceType: typeof Resource, baseUrl?: URL): Resource;
   serializeRelationship(
     relationships: Resource | Resource[],
     resourceType: typeof Resource,
@@ -218,7 +220,7 @@ export interface IJsonApiSerializer {
   serializeIncludedResources(
     data: Resource | Resource[] | void,
     resourceType: typeof Resource,
-    baseUrl: URL
+    baseUrl?: URL
   ): Resource[] | null;
 }
 
@@ -235,4 +237,11 @@ export type NoOpTransaction = {
 
 export type TransportLayerOptions = {
   httpBodyPayload?: string;
+}
+
+export type LinksPageParams<TPaginatorParams extends string = string> = {
+  first?: Record<TPaginatorParams, number>,
+  prev?: Record<TPaginatorParams, number>,
+  next?: Record<TPaginatorParams, number>,
+  last?: Record<TPaginatorParams, number>,
 }

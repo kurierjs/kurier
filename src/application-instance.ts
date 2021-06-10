@@ -11,10 +11,11 @@ import User from "./resources/user";
 export default class ApplicationInstance {
   public user: User | undefined;
   public transaction: Knex.Transaction | NoOpTransaction;
-  public baseUrl: URL;
 
   constructor(public app: Application, baseUrl?: URL) {
-    this.baseUrl = app.baseUrl || baseUrl || new URL('/');
+    if (!app.linkBuilder.baseUrl && baseUrl) {
+      app.linkBuilder.baseUrl = baseUrl;
+    }
   }
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
