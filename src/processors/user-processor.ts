@@ -1,14 +1,15 @@
 import Authorize from "../decorators/authorize";
-import { Operation, HasId, DEFAULT_PRIMARY_KEY } from "../types";
+import { Operation, HasId } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
 import Password from "../attribute-types/password";
 import Resource from "../resource";
+import { ResourcesOperationResult } from "../operation-result";
 
 export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   public static resourceClass = User;
 
-  async identify(op: Operation): Promise<HasId[] | HasId> {
+  async identify(op: Operation): Promise<ResourcesOperationResult | HasId> {
     return super.get({ ...op, params: {} });
   }
 
@@ -41,7 +42,7 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   }
 
   @Authorize()
-  async get(op: Operation): Promise<HasId[] | HasId> {
+  async get(op: Operation): Promise<ResourcesOperationResult | HasId> {
     return super.get(op);
   }
 }

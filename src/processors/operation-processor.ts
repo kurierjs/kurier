@@ -5,6 +5,7 @@ import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
 import { JsonApiErrors } from "..";
 import { FunctionalOperators as operators, OperatorName } from "../utils/operators";
+import { ResourcesOperationResult } from "../operation-result";
 
 export default class OperationProcessor<ResourceT extends Resource> {
   static resourceClass: typeof Resource;
@@ -200,16 +201,16 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return undefined;
   }
 
-  async convertToResources(op: Operation, records: HasId[] | HasId, eagerLoadedData: EagerLoadedData) {
-    if (Array.isArray(records)) {
+  async convertToResources(op: Operation, operationResult: ResourcesOperationResult | HasId, eagerLoadedData: EagerLoadedData) {
+    if (operationResult instanceof ResourcesOperationResult) {
       return Promise.all(
-        records.map(record => {
+        operationResult.resources.map(record => {
           return this.convertToResources(op, record, eagerLoadedData);
         })
       );
     }
 
-    const record = { ...records };
+    const record = { ...operationResult };
     const resourceClass = await this.resourceFor(op.ref.type);
 
     const [
@@ -254,8 +255,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return this.appInstance.processorFor(resourceType) as Promise<OperationProcessor<Resource>>;
   }
 
-  async get(op: Operation): Promise<HasId[] | HasId> {
-    return [];
+  async get(op: Operation): Promise<ResourcesOperationResult | HasId> {
+    return Promise.reject();
   }
 
   async remove(op: Operation): Promise<void> {

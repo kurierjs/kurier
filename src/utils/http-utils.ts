@@ -17,6 +17,14 @@ const STATUS_MAPPING = {
   DELETE: 204
 };
 
+const OP_MAPPING = {
+  GET: "get",
+  POST: "add",
+  PATCH: "update",
+  PUT: "update",
+  DELETE: "remove"
+}
+
 async function authenticate(appInstance: ApplicationInstance, request: ExpressRequest | KoaRequest) {
   const authHeader = request.headers.authorization;
   let currentUser: User | undefined;
@@ -62,6 +70,7 @@ async function handleJsonApiEndpoint(
 
   try {
     const [result]: OperationResponse[] = await appInstance.app.executeOperations([op], appInstance);
+
     return {
       body: convertOperationResponseToHttpResponse(request, result),
       status: STATUS_MAPPING[request.method]
@@ -75,19 +84,11 @@ async function handleJsonApiEndpoint(
 }
 
 function convertHttpRequestToOperation(req: ExpressRequest | KoaRequest): Operation {
-  const { id, resource, relationship } = req["urlData"];
+  const { id, resource, relationship, isRelationships } = req["urlData"];
   const type = camelize(singularize(resource));
 
-  const opMap = {
-    GET: "get",
-    POST: "add",
-    PATCH: "update",
-    PUT: "update",
-    DELETE: "remove"
-  };
-
   return {
-    op: opMap[req.method],
+    op: OP_MAPPING[req.method],
     params: parse(req["href"]),
     ref: { id, type, relationship },
     data: (req.body || {}).data

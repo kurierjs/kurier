@@ -1,6 +1,6 @@
 import Random from "../resources/random";
 import { OperationProcessor, HasId, Operation } from "../kurier";
-import { JsonApiErrors } from "../kurier";
+import { JsonApiErrors, ResourcesOperationResult } from "../kurier";
 
 const randomDataGenerator = {
   number: () => ({ randomNumber: Math.random() }),
@@ -11,7 +11,7 @@ const randomDataGenerator = {
 export default class RandomProcessor<ResourceT extends Random> extends OperationProcessor<ResourceT> {
   static resourceClass = Random;
 
-  async get(op: Operation): Promise<HasId | HasId[]> {
+  async get(op: Operation): Promise<HasId | ResourcesOperationResult> {
     if (op.ref.id in randomDataGenerator) {
       return {
         id: op.ref.id,

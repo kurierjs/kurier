@@ -11,7 +11,6 @@ import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerialize
 import flatten from "./utils/flatten";
 import { ApplicationSettings } from ".";
 import { PagedPaginator, Paginator } from "./paginatior";
-import { LinkBuilder } from "./link-builder";
 
 export default class Application {
   namespace: string;
@@ -23,6 +22,8 @@ export default class Application {
   addons: ApplicationAddons;
   transportLayerOptions: TransportLayerOptions;
   paginator: typeof Paginator;
+  defaultPageSize: number;
+  maximumPageSize: number;
 
   constructor(settings: ApplicationSettings) {
     this.namespace = settings.namespace || "";
@@ -36,6 +37,8 @@ export default class Application {
       httpBodyPayload: '1mb'
     };
     this.paginator = settings.paginator || PagedPaginator;
+    this.defaultPageSize = settings.defaultPageSize || 100;
+    this.maximumPageSize = settings.maximumPageSize || 500;
 
     this.serializer.initLinkBuilder({
       baseUrl: settings.baseUrl,
@@ -257,8 +260,15 @@ export default class Application {
       ).map(
         record => this.serializer.serializeResource(record, resource)
       );
+
       const Paginator = this.paginator;
-      const paginator = new Paginator(params);
+      const paginator = new Paginator(
+        params,
+        {
+          defaultPageSize: this.defaultPageSize,
+          maximumPageSize: this.maximumPageSize,
+        }
+      );
       const paginationParams = paginator.linksPageParams(serializedData.length);
 
       const paginationLinks = Object.keys(paginationParams).reduce((prev, current) => {

@@ -18,6 +18,8 @@ import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import OperationProcessor from "./operation-processor";
 import { KnexOperators as operators } from "../utils/operators";
+import { ResourcesOperationResult } from "../operation-result";
+import { HttpStatusCode } from "../types";
 
 const getWhereMethod = (value: string, operator: string) => {
   if (value !== "null") {
@@ -146,7 +148,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     ];
   }
 
-  async get(op: Operation): Promise<HasId[] | HasId> {
+  async get(op: Operation): Promise<ResourcesOperationResult| HasId> {
     const { params, ref } = op;
     const { id } = ref;
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
@@ -164,7 +166,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     if (id) {
       return records[0];
     }
-    return records;
+
+    return new ResourcesOperationResult(HttpStatusCode.OK, records, {});
   }
 
   async remove(op: Operation): Promise<void> {
@@ -313,9 +316,17 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       });
     }
 
+    let offset = 0;
+    let limit = this.appInstance.app.defaultPageSize;
+
     if (page) {
-      queryBuilder.offset(page.offset || page.number * page.size).limit(page.limit || page.size);
+      offset = page.offset || (page.number - 1) * page.size;
+      limit = page.limit || page.size;
     }
+
+    // TODO use paginator.apply(queryBuilder) instead!!
+
+    queryBuilder.offset(offset).limit(limit);
   }
 
   async eagerFetchRelationship(

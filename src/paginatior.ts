@@ -1,26 +1,18 @@
+import { IPaginatorSettings, JsonApiSerializer } from '.';
 import { LinksPageParams, JsonApiParams } from './types';
+import JsonApiErrors from "./errors/json-api-errors";
+import Knex from 'knex';
 
 export class Paginator {
   public static readonly requiresRecordCount: boolean = false;
 
-  constructor(params?: JsonApiParams) {}
+  constructor(params: JsonApiParams | undefined, settings: IPaginatorSettings) {}
 
-  public apply(relation) {}
+  public apply(queryBuilder: Knex.QueryBuilder) {}
 
   public linksPageParams(recordCount: number): LinksPageParams {
     return {};
   };
-}
-
-export type OffsetPaginatorParams = 'limit' | 'offset';
-
-export class OffsetPaginator extends Paginator {
-
-  public static readonly requiresRecordCount: boolean = true;
-
-  constructor(params) {
-    super(params);
-  }
 }
 
 export type PagedPaginatorParams = 'size' | 'number';
@@ -28,20 +20,23 @@ export type PagedPaginatorParams = 'size' | 'number';
 export class PagedPaginator extends Paginator {
   private number: number;
   private size: number;
+  private settings: IPaginatorSettings;
 
   public static readonly requiresRecordCount: boolean = true;
 
-  constructor(params?: JsonApiParams) {
-    super(params);
+  constructor(params: JsonApiParams | undefined, settings: IPaginatorSettings) {
+    super(params, settings);
+
+    this.settings = settings;
 
     this.parsePaginationParams(params);
     this.verifyPaginationParams();
   }
 
-  public apply(relation) {
+  public apply(queryBuilder: Knex.QueryBuilder) {
     const offset = (this.number - 1) * this.size;
 
-    relation.offset(offset).limit(this.size);
+    queryBuilder.offset(offset).limit(this.size);
   }
 
   public linksPageParams(recordCount: number): LinksPageParams<PagedPaginatorParams> {
@@ -83,10 +78,32 @@ export class PagedPaginator extends Paginator {
   }
 
   private parsePaginationParams(params?: JsonApiParams) {
-
+    this.number = params?.page?.number || 1;
+    this.size = params?.page?.size || this.settings.defaultPageSize;
   }
 
   private verifyPaginationParams() {
+    if (this.size < 1) {
+      throw JsonApiErrors.BadRequest(`Invalid page size value.`);
+    }
 
+    if (this.size > this.settings.maximumPageSize) {
+      throw JsonApiErrors.BadRequest(`Size exceeds maximum page size of ${this.settings.maximumPageSize}.`)
+    }
+
+    if (this.number < 1) {
+      throw JsonApiErrors.BadRequest(`Invalid page number value. Page number starts from 1.`);
+    }
   }
 }
+
+// export type OffsetPaginatorParams = 'limit' | 'offset';
+
+// export class OffsetPaginator extends Paginator {
+
+//   public static readonly requiresRecordCount: boolean = true;
+
+//   constructor(params, settings) {
+//     super(params, settings);
+//   }
+// }

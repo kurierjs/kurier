@@ -58,6 +58,10 @@ export type Link = string | {
   meta?: Meta;
 };
 
+export type Links = {
+  [key: string]: Link;
+}
+
 export type DefaultLinks = {
   self?: Link;
   related?: Link;
@@ -74,7 +78,7 @@ export type ErrorLinks = {
   about?: string;
 }
 
-export type DocumentLinks = DefaultLinks & PaginationLinks;
+export type DocumentLinks = DefaultLinks & PaginationLinks & Links;
 
 export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> = {
   data: ResourceT | ResourceT[];
@@ -196,6 +200,8 @@ export type ApplicationSettings = {
   transportLayerOptions?: TransportLayerOptions;
   baseUrl?: URL;
   paginator?: typeof Paginator;
+  defaultPageSize?: number;
+  maximumPageSize?: number;
 }
 
 export type ApplicationServices = {
@@ -252,4 +258,9 @@ export type LinksPageParams<TPaginatorParams extends string = string> = {
 export interface ILinkBuilderConfig {
   namespace?: string;
   baseUrl?: URL;
+}
+
+export interface IPaginatorSettings {
+  defaultPageSize: number;
+  maximumPageSize: number;
 }
