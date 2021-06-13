@@ -211,7 +211,7 @@ export default class Application {
 
     await Promise.all(
       allIncluded.map((resource: Resource) => {
-        return new Promise(async resolve => {
+        return new Promise<void>(async resolve => {
           const result = await canAccessResource(resource, "get", appInstance);
 
           if (result) {
