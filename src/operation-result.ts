@@ -1,4 +1,5 @@
 import { IJsonApiSerializer, KnexRecord } from ".";
+import Resource from "./resource";
 import { HttpStatusCode, Links, Meta } from "./types";
 
 export interface IOperationResultOptions {
@@ -10,11 +11,9 @@ export abstract class OperationResult {
   code: HttpStatusCode;
   meta: Meta;
   links: Links;
-  options: any;
 
   constructor(code: HttpStatusCode, options: IOperationResultOptions = {}) {
     this.code = code;
-    this.options = options;
     this.meta = options.meta || {};
     this.links = options.links || {};
   }
@@ -25,23 +24,18 @@ export abstract class OperationResult {
 }
 
 export interface IResourcesOperationResultOptions extends IOperationResultOptions {
-  paginationParams?: any;
   recordCount?: number;
-  pageCount?: number;
 }
 
-export class ResourcesOperationResult extends OperationResult {
-  resources: Array<KnexRecord>;
-  paginationParams: any;
+export class ResourcesOperationResult<TResource extends Resource = Resource> extends OperationResult {
+  records: Array<KnexRecord>;
   recordCount?: number;
-  pageCount?: number;
+  resources?: Array<TResource>;
 
-  constructor(code: HttpStatusCode, resources: Array<KnexRecord>, options: IResourcesOperationResultOptions = {}) {
+  constructor(code: HttpStatusCode, records: Array<KnexRecord>, options: IResourcesOperationResultOptions = {}) {
     super(code, options);
 
-    this.resources = resources;
-    this.paginationParams = options.paginationParams || {};
+    this.records = records;
     this.recordCount = options.recordCount;
-    this.pageCount = options.pageCount;
   }
 }

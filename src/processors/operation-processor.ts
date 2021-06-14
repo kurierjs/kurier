@@ -7,7 +7,7 @@ import { JsonApiErrors } from "..";
 import { FunctionalOperators as operators, OperatorName } from "../utils/operators";
 import { ResourcesOperationResult } from "../operation-result";
 
-export default class OperationProcessor<ResourceT extends Resource> {
+export default class OperationProcessor<TResource extends Resource> {
   static resourceClass: typeof Resource;
 
   static async shouldHandle(resourceType: string): Promise<boolean> {
@@ -26,7 +26,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
 
   constructor(public appInstance: ApplicationInstance) { }
 
-  async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
+  async execute(op: Operation): Promise<TResource | ResourcesOperationResult<TResource> | void> {
     const action: string = op.op;
 
     if (["update", "remove"].includes(action) && !op.ref.id) {
@@ -41,7 +41,19 @@ export default class OperationProcessor<ResourceT extends Resource> {
       eagerLoadedData = await this.computeRelationshipProperties(op, eagerLoadedData);
     }
 
-    return this.convertToResources(op, result, eagerLoadedData);
+    if (result instanceof ResourcesOperationResult) {
+      const resources = await Promise.all(
+        result.records.map(record => {
+          return this.convertToResource(op, record, eagerLoadedData);
+        })
+      );
+
+      result.resources = resources;
+
+      return result;
+    }
+
+    return this.convertToResource(op, result, eagerLoadedData);
   }
 
   async computeRelationshipProperties(op, eagerLoadedData) {
@@ -113,7 +125,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return nestedRelations;
   }
 
-  async eagerLoad(op: Operation, result: ResourceT | ResourceT[]) {
+  async eagerLoad(op: Operation, result: TResource | TResource[]) {
     return {};
   }
 
@@ -201,16 +213,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return undefined;
   }
 
-  async convertToResources(op: Operation, operationResult: ResourcesOperationResult | HasId, eagerLoadedData: EagerLoadedData) {
-    if (operationResult instanceof ResourcesOperationResult) {
-      return Promise.all(
-        operationResult.resources.map(record => {
-          return this.convertToResources(op, record, eagerLoadedData);
-        })
-      );
-    }
-
-    const record = { ...operationResult };
+  async convertToResource(op: Operation, record: HasId, eagerLoadedData: EagerLoadedData) {
     const resourceClass = await this.resourceFor(op.ref.type);
 
     const [
@@ -244,7 +247,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
       resource.preventSerialization = true;
     }
 
-    return resource;
+    return resource as TResource;
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {

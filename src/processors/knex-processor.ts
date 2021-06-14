@@ -154,8 +154,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
-    const records: KnexRecord[] = await this.getQuery()
-      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
+    const recordsQuery = this.getQuery()
+      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters));
+
+    // TODO: skip this query if not needed
+    const { recordCount } = await this.getQuery()
+      .count('* as recordCount')
+      .from(recordsQuery.clone().offset(0).clearOrder())
+      .first() as { recordCount: number };
+
+    const records: KnexRecord[] = await recordsQuery
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, params || {}))
       .select(this.getColumns(this.appInstance.app.serializer, (params || {}).fields));
 
@@ -167,7 +175,13 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       return records[0];
     }
 
-    return new ResourcesOperationResult(HttpStatusCode.OK, records, {});
+    return new ResourcesOperationResult(
+      HttpStatusCode.OK,
+      records,
+      {
+        recordCount,
+      }
+    );
   }
 
   async remove(op: Operation): Promise<void> {

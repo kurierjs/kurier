@@ -9,7 +9,7 @@ import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
 import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions, JsonApiParams } from "./types";
 import flatten from "./utils/flatten";
-import { ApplicationSettings } from ".";
+import { ApplicationSettings, ResourcesOperationResult } from ".";
 import { PagedPaginator, Paginator } from "./paginatior";
 
 export default class Application {
@@ -196,23 +196,26 @@ export default class Application {
   }
 
   async buildOperationResponse(
-    data: Resource | Resource[] | void,
+    result: Resource | ResourcesOperationResult | void,
     appInstance: ApplicationInstance,
     params?: JsonApiParams,
   ): Promise<OperationResponse> {
-    let resourceType: string | null;
+    let resourceType: string | undefined;
+    let allIncluded: Resource[] = [];
 
-    if (Array.isArray(data)) {
-      resourceType = data[0] ? data[0].type : null;
-    } else if (data) {
-      resourceType = data.type;
+    if (result instanceof ResourcesOperationResult) {
+      resourceType = result.resources?.[0]?.type;
+      allIncluded = !resourceType ? [] : flatten(
+        this.serializer.serializeIncludedResources(result.resources, await this.resourceFor(resourceType)) || []
+      )
+    } else if (result) {
+      resourceType = result.type;
+      allIncluded = !resourceType ? [] : flatten(
+        this.serializer.serializeIncludedResources(result, await this.resourceFor(resourceType)) || []
+      )
     } else {
-      resourceType = null;
+      resourceType = undefined;
     }
-
-    const allIncluded: Resource[] = !resourceType ? [] : flatten(
-      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []
-    );
 
     const included: Resource[] = [];
 
@@ -230,7 +233,7 @@ export default class Application {
       })
     );
 
-    const { data: serializedData, links } = await this.serializeResources(data, params);
+    const { data: serializedData, links } = await this.serializeResources(result, params);
 
     return {
       data: serializedData,
@@ -239,27 +242,31 @@ export default class Application {
     } as any;
   }
 
-  async serializeResources(data: Resource | Resource[] | void, params?: JsonApiParams) {
-    if (!data) {
+  async serializeResources(result: Resource | ResourcesOperationResult | void, params?: JsonApiParams) {
+    if (!result) {
       return {
         data: null
       };
     }
 
-    if (Array.isArray(data)) {
-      if (!data.length) {
+    if (result instanceof ResourcesOperationResult) {
+      if (!result.resources) {
         return {
           data: []
         };
       }
 
-      const resourceType = data[0].type;
+      const resourceType = result.resources?.[0]?.type;
       const resource = await this.resourceFor(resourceType);
-      const serializedData =  data.filter(
+      const serializedData = result.resources.filter(
         record => !record.preventSerialization
       ).map(
         record => this.serializer.serializeResource(record, resource)
       );
+
+      if (this.paginator.requiresRecordCount && result.recordCount) {
+
+      }
 
       const Paginator = this.paginator;
       const paginator = new Paginator(
@@ -269,7 +276,7 @@ export default class Application {
           maximumPageSize: this.maximumPageSize,
         }
       );
-      const paginationParams = paginator.linksPageParams(serializedData.length);
+      const paginationParams = paginator.linksPageParams(result.recordCount as number);
 
       const paginationLinks = Object.keys(paginationParams).reduce((prev, current) => {
         prev[current] = this.serializer.linkBuilder.queryLink(resourceType, { ...params, page: paginationParams[current] });
@@ -286,12 +293,12 @@ export default class Application {
       };
     }
 
-    const resource = await this.resourceFor(data.type);
+    const resource = await this.resourceFor(result.type);
 
     return {
-      data: this.serializer.serializeResource(data, resource),
+      data: this.serializer.serializeResource(result, resource),
       links: {
-        self: this.serializer.linkBuilder.selfLink(data.type, data.id, params),
+        self: this.serializer.linkBuilder.selfLink(result.type, result.id, params),
       }
     };
   }
