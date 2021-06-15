@@ -117,6 +117,7 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
     }
     jsonApiError.detail = firstLineErrorStack;
   }
+
   return { errors: [jsonApiError] };
 }
 

@@ -1,4 +1,4 @@
-import * as Knex from "knex";
+import {Knex} from "knex";
 import ApplicationInstance from "../application-instance";
 import JsonApiErrors from "../errors/json-api-errors";
 import Resource from "../resource";

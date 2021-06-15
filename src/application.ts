@@ -1,4 +1,4 @@
-import * as Knex from "knex";
+import {Knex} from "knex";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import { canAccessResource } from "./decorators/authorize";
