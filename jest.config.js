@@ -9,7 +9,7 @@ const baseUnitTest = {
       tsconfig: "tsconfig.test.json"
     }
   },
-  testMatch: ["<rootDir>/tests/test-suite/unit/**/?(*.)+(spec|test).ts"]
+  testMatch: ["<rootDir>/tests/test-suite/unit/**/?(*.)+(spec|test).ts"],
 };
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
         }
       },
       testMatch: ["<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"],
-      setupFilesAfterEnv: ["<rootDir>/tests/test-suite/setup.ts"]
+      setupFilesAfterEnv: ["trace-unhandled/register", "<rootDir>/tests/test-suite/setup.ts"]
     },
     {
       ...baseUnitTest,
@@ -40,7 +40,7 @@ module.exports = {
         }
       },
       testMatch: ["<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"],
-      setupFilesAfterEnv: ["<rootDir>/tests/test-suite/setup.ts"]
+      setupFilesAfterEnv: ["trace-unhandled/register", "<rootDir>/tests/test-suite/setup.ts"]
     }
   ]
 };
