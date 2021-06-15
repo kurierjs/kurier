@@ -154,11 +154,7 @@ export default class Application {
       }
     }
 
-    return new Promise(resolve =>
-      knex.transaction((trx: Knex.Transaction) => {
-        resolve(trx);
-      })
-    );
+    return knex.transaction();
   }
 
   async processorFor(
