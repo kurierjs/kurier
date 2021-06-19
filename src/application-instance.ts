@@ -1,5 +1,5 @@
 import { decode } from "jsonwebtoken";
-import * as Knex from "knex";
+import { Knex } from "knex";
 
 import Application from "./application";
 import Resource from "./resource";

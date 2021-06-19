@@ -1,9 +1,9 @@
-import * as Knex from "knex";
+import {Knex, knex} from "knex";
 import app from "./test-app/app";
 import context from "./transaction";
 import knexfile from "./test-data/knexfile";
 import Serializer from "./test-app/serializers/serializer";
-let knexInstance = Knex(knexfile[global["TEST_SUITE"]]);
+let knexInstance = knex(knexfile[global["TEST_SUITE"]]);
 const createTransaction = (connection, callback): Promise<Knex.Transaction> => {
   return new Promise(resolve => {
     connection

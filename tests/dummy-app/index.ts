@@ -1,3 +1,6 @@
+require('trace-unhandled/register');
+console.log('trace-unhandled is online: this will allow you, brave developer, to hunt down those devilish unhandled promises');
+
 import { Server } from "ws";
 import { jsonApiWebSocket } from "./kurier";
 import app from "./app";

@@ -30,10 +30,16 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
       return next();
     }
 
-    const { body, status } = await handleJsonApiEndpoint(appInstance, ctx.request);
-    ctx.body = body;
-    ctx.status = status;
-    return next();
+    try {
+      const { body, status } = await handleJsonApiEndpoint(appInstance, ctx.request);
+      ctx.body = body;
+      ctx.status = status;
+    } catch (error) {
+      ctx.body = convertErrorToHttpResponse(error);
+      ctx.status = error.status;
+    } finally {
+      return next();
+    }
   };
 
   const koaBodySettings = {
