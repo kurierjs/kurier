@@ -1,4 +1,7 @@
+import { IncomingMessage, ServerResponse } from "http";
 import { Knex } from "knex";
+import { Request as ExpressRequest } from "express";
+import { Request as KoaRequest } from "koa";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import Password from "./attribute-types/password";
@@ -206,3 +209,20 @@ export type NoOpTransaction = {
 export type TransportLayerOptions = {
   httpBodyPayload?: string;
 }
+
+export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
+  query: Record<string, string>;
+  cookies: Record<string, string>;
+  body: BodyType;
+}
+
+export type VercelResponse = ServerResponse & {
+  status: (code: HttpStatusCode) => void;
+  send: (body: string | JsonApiDocument | JsonApiErrorsDocument | JsonApiBulkResponse | Buffer) => void;
+  json: (body: JsonApiDocument | JsonApiErrorsDocument | JsonApiBulkResponse) => void;
+  redirect: (urlOrStatusCode: HttpStatusCode | string, url?: string) => void;
+}
+
+export type JsonApiBulkResponse = { operations: OperationResponse[] };
+
+export type VendorRequest = ExpressRequest | KoaRequest | VercelRequest;
