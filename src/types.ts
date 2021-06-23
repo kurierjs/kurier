@@ -211,7 +211,7 @@ export type TransportLayerOptions = {
 }
 
 export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
-  query: Record<string, string>;
+  query: Record<string, string | string[]>;
   cookies: Record<string, string>;
   body: BodyType;
 }
