@@ -30,9 +30,8 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
      static schema = {
        attributes: {
          firstName: String,
-         lastName: String
+         lastName: String,
        },
-       relationships: {}
      };
    }
    ```

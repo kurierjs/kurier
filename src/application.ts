@@ -182,7 +182,13 @@ export default class Application {
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {
-    return this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
+    const resource = this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
+
+    if (!resource.schema.relationships) {
+      resource.schema.relationships = {};
+    }
+
+    return resource;
   }
 
   async buildOperationResponse(

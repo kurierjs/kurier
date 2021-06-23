@@ -73,9 +73,8 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
      static schema = {
        attributes: {
          firstName: String,
-         lastName: String
+         lastName: String,
        },
-       relationships: {}
      };
    }
 ```
@@ -725,7 +724,6 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
       type: op.ref.type,
       id: basename(file),
       attributes: JSON.parse(readFileSync(file).toString()),
-      relationships: {}
     }));
   }
 }
@@ -750,7 +748,6 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
           type: op.ref.type,
           id: basename(file),
           attributes,
-          relationships: {}
         };
       } catch {
         throw JsonApiErrors.UnhandledError("Error while reading file");
@@ -797,9 +794,8 @@ export default class Moment extends Resource {
   static schema = {
     attributes: {
       date: String,
-      time: String
+      time: String,
     },
-    relationships: {}
   };
 }
 ```
@@ -833,7 +829,6 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
           date,
           time
         },
-        relationships: {}
       }
     ];
   }
@@ -928,7 +923,6 @@ export default class BookProcessor extends KnexProcessor<Book> {
       attributes: {
         count: (await super.get(op)).length
       },
-      relationships: {}
     };
   }
 }
@@ -1025,7 +1019,6 @@ export default class User extends JsonApiUser {
       emailAddress: String,
       passphrase: Password
     },
-    relationships: {}
   };
 }
 ```
