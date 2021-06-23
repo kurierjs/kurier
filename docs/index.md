@@ -663,10 +663,10 @@ In case you don't want all of your endpoints to go through Kurier, you can names
 pages/
 |__ api/
     |__ kurier/
-        |__ [...kurier.js]
+        |__ [...kurier].js
 ```
 
-In the `[...kurier.js]` file, you can import the `jsonApiVercel` middleware to handle the resource endpoints automatically, just like `jsonApiKoa` and `jsonApiExpress` do:
+In the `[...kurier].js` file, you can import the `jsonApiVercel` middleware to handle the resource endpoints automatically, just like `jsonApiKoa` and `jsonApiExpress` do:
 
 ```js
 import { Application, jsonApiVercel } from 'kurier';
@@ -687,7 +687,7 @@ export default jsonApiVercel(app);
 
 #### Using Vercel Functions
 
-For Vercel Functions, the procedure is the same as above. Instead of creating `/pages/api/[...kurier.js]`, create `/api/[...kurier.js]`.
+For Vercel Functions, the procedure is the same as above. Instead of creating `/pages/api/[...kurier].js`, create `/api/[...kurier].js`.
 
 ### WebSocket Protocol
 
