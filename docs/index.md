@@ -28,7 +28,6 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
         - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
         - [Executing operations over sockets](#executing-operations-over-sockets)
     - [Serverless Functions](#serverless-functions)
-        - [Using Vercel + Next.js](#using-vercel-nextjs)
         - [Using Vercel Functions](#using-vercel-functions)
 - [Processors](#processors)
     - [What is a processor?](#what-is-a-processor)
@@ -647,12 +646,12 @@ Both `jsonApiKoa` and `jsonApiExpress` expose a `/bulk` endpoint which can be us
 
 Since version `1.2.0`, Kurier can be used inside serverless functions.
 
-#### Using Vercel + Next.js
+#### Using Vercel Functions
 
-If you want your Next.js API to work with Kurier in a Vercel-hosted environment, you'll need to create a _generic route_ in your `pages/api` directory, like this:
+If you want your API to work with Kurier in a Vercel-hosted environment, you'll need to create a _generic route_ in your `api` directory, like this:
 
 ```
-pages/
+/
 |__ api/
     |__ [...kurier].js
 ```
@@ -660,7 +659,7 @@ pages/
 In case you don't want all of your endpoints to go through Kurier, you can namespace them:
 
 ```
-pages/
+/
 |__ api/
     |__ kurier/
         |__ [...kurier].js
@@ -684,10 +683,6 @@ app.services.knex = knex({ /* Your DB configuration */ });
 // Export the middleware result so Next.js can handle Kurier endpoints.
 export default jsonApiVercel(app);
 ```
-
-#### Using Vercel Functions
-
-For Vercel Functions, the procedure is the same as above. Instead of creating `/pages/api/[...kurier].js`, create `/api/[...kurier].js`.
 
 ### WebSocket Protocol
 
