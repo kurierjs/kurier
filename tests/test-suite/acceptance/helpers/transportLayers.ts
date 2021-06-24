@@ -24,10 +24,13 @@ const transportLayerContext = {
 export const transportLayers = Object.keys(transportLayerContext).map(layer => [layer]);
 
 export default function testTransportLayer(transportLayer?: string) {
-  const { app, agent }= transportLayerContext[transportLayer];
+  const { app, agent } = transportLayerContext[transportLayer];
   const request = superagentDefaults(agent(app));
 
   request.use(supertestPrefix(`/${kurierApp.namespace}`));
+  request.use((req: supertest.Request) => {
+    req.set("Content-Type", "application/vnd.api+json");
+  });
 
   return request;
 }
