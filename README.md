@@ -83,6 +83,14 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
    }
    ```
 
+## Addons
+
+Extend Kurier's features with these addons:
+
+- [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many): Creates intermediate resource types for many-to-many relationships.
+- [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include): Alters GET operations to automatically include relationships.
+- [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0): Integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+
 ## Documentation
 
 Check out our [updated docs at ReadTheDocs](https://kurier.readthedocs.io/en/latest/). There you will find more info and examples.
