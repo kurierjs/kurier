@@ -1,3 +1,5 @@
+import {URL} from "url";
+
 import { Operation, VercelRequest, VercelResponse } from "../types";
 
 import Application from "../application";
@@ -34,18 +36,14 @@ export default function jsonApiVercel(app: Application) {
       req["href"] = `http://${req.headers.host}${req.url!}`;
     }
 
-    req["urlData"] = {
-      id: req.query.kurier[1],
-      resource: req.query.kurier[0],
-    }
+    const urlObject = new URL(req["href"]);
+    req["urlData"] = urlData(appInstance, urlObject.pathname);
 
     if (req.method === "PATCH" && req["urlData"].resource === "bulk") {
       const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[]);
       res.json(bulkResponse);
       return;
     }
-
-    console.log(req.query);
 
     const { body, status } = await handleJsonApiEndpoint(appInstance, req);
     res.status(status)
