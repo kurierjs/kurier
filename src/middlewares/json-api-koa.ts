@@ -14,7 +14,7 @@ import jsonApiErrors from "../errors/json-api-errors";
 
 export default function jsonApiKoa(app: Application, ...middlewares: Middleware[]) {
   const checkStrictMode = async (ctx: Context, next: () => Promise<any>) => {
-    if (!app.transportLayerOptions.strictMode) {
+    if (!app.transportLayerOptions.httpStrictMode) {
       return next();
     }
 

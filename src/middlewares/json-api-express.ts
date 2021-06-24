@@ -14,7 +14,7 @@ import jsonApiErrors from "../errors/json-api-errors";
 
 export default function jsonApiExpress(app: Application, ...middlewares: express.RequestHandler[]) {
   const checkStrictMode = async (req: express.Request, res: express.Response, next: () => any) => {
-    if (!app.transportLayerOptions.strictMode) {
+    if (!app.transportLayerOptions.httpStrictMode) {
       return next();
     }
 
@@ -51,7 +51,7 @@ export default function jsonApiExpress(app: Application, ...middlewares: express
   return compose([
     checkStrictMode,
     express.json({
-      type: app.transportLayerOptions?.strictMode
+      type: app.transportLayerOptions?.httpStrictMode
         ? 'application/vnd.api+json'
         : 'application/json',
       strict: false,

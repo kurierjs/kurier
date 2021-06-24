@@ -37,7 +37,7 @@ export default class Application {
     this.serializer = new (settings.serializer || JsonApiSerializer)();
     this.transportLayerOptions = settings.transportLayerOptions || {
       httpBodyPayload: '1mb',
-      strictMode: false
+      httpStrictMode: false
     };
   }
 

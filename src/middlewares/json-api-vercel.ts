@@ -16,7 +16,7 @@ import {
 import jsonApiErrors from "../errors/json-api-errors";
 
 const checkStrictMode = async (app: Application, req: VercelRequest, res: VercelResponse) => {
-  if (!app.transportLayerOptions.strictMode) {
+  if (!app.transportLayerOptions.httpStrictMode) {
     return;
   }
 

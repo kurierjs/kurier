@@ -28,7 +28,7 @@ const app = new Application({
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor,
   transportLayerOptions: {
-    strictMode: true,
+    httpStrictMode: true,
   }
 });
 
