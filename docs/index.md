@@ -4,7 +4,6 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 ## Table of contents
 
-- [Features](#features)
 - [Getting started](#getting-started)
 - [Data flow](#data-flow)
 - [Resources](#resources)
@@ -28,6 +27,8 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
     - [WebSocket Protocol](#websocket-protocol)
         - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
         - [Executing operations over sockets](#executing-operations-over-sockets)
+    - [Serverless Functions](#serverless-functions)
+        - [Using Vercel Functions](#using-vercel-functions)
 - [Processors](#processors)
     - [What is a processor?](#what-is-a-processor)
     - [The `OperationProcessor` class](#the-operationprocessor-class)
@@ -639,6 +640,48 @@ The middleware, if successful, will respond with a `204 No Content` HTTP status 
 #### Bulk operations in HTTP
 
 Both `jsonApiKoa` and `jsonApiExpress` expose a `/bulk` endpoint which can be used to execute multiple operations. The request must use the `PATCH` method, using the JSON payload [shown earlier](#running-multiple-operations).
+
+### Serverless Functions
+
+Since version `1.2.0`, Kurier can be used inside serverless functions.
+
+#### Using Vercel Functions
+
+If you want your API to work with Kurier in a Vercel-hosted environment, you'll need to create a _generic route_ in your `api` directory, like this:
+
+```
+/
+|__ api/
+    |__ [...kurier].js
+```
+
+In case you don't want all of your endpoints to go through Kurier, you can namespace them:
+
+```
+/
+|__ api/
+    |__ kurier/
+        |__ [...kurier].js
+```
+
+In the `[...kurier].js` file, you can import the `jsonApiVercel` middleware to handle the resource endpoints automatically, just like `jsonApiKoa` and `jsonApiExpress` do:
+
+```js
+import { Application, jsonApiVercel } from 'kurier';
+import { knex } from 'knex';
+
+const app = new Application({
+  // The `namespace` property must match your directory structure under `pages/api`.
+  namespace: 'api/kurier',
+  // ...the rest of the Application properties (types, processors, etc.).
+});
+
+// You can also add a database connection with Knex.
+app.services.knex = knex({ /* Your DB configuration */ });
+
+// Export the middleware result so Next.js can handle Kurier endpoints.
+export default jsonApiVercel(app);
+```
 
 ### WebSocket Protocol
 
