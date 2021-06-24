@@ -28,13 +28,9 @@ export default function jsonApiVercel(app: Application) {
       res.json(convertErrorToHttpResponse(error));
     }
 
-    if (process.env.AWS_REGION) {
-      // This means we're not in localhost.
-      req["href"] = `https://${req.headers.host}${req.url!}`;
-    } else {
-      // This means we're in development. We won't use HTTPS here.
-      req["href"] = `http://${req.headers.host}${req.url!}`;
-    }
+    // This `href` property is used later in the parsing process to extract query parameters.
+    // Protocol is there just to make a valid URL. It has no behavioural signifance.
+    req["href"] = `https://${req.headers.host}${req.url!}`;
 
     const urlObject = new URL(req["href"]);
     req["urlData"] = urlData(appInstance, urlObject.pathname);
