@@ -208,6 +208,7 @@ export type NoOpTransaction = {
 
 export type TransportLayerOptions = {
   httpBodyPayload?: string;
+  httpStrictMode?: boolean;
 }
 
 export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {

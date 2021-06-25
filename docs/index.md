@@ -1291,7 +1291,11 @@ import Author from "./resources/author";
 const app = new Application({
   namespace: "api",
   types: [Author],
-  defaultProcessor: new KnexProcessor(/* knex options */)
+  defaultProcessor: new KnexProcessor(/* knex options */),
+  transportLayerOptions: {
+    httpBodyPayload: '1mb',
+    httpStrictMode: true
+  },
 });
 
 const api = new Koa();
@@ -1307,6 +1311,9 @@ The `Application` object is instantiated with the following settings:
 - `types`: A list of all resource types declared and handled by this app.
 - `processors`: If you define custom processors, they have to be registered here as instances.
 - `defaultProcessor`: All non-bound-to-processor resources will be handled by this processor.
+- `transportLayerOptions`: Allows to customize some aspects of the transport layer used by the application.
+  - `httpBodyPayload`: Describes how big the request's `body` can be, expressed in a string i.e. `10mb`. Defaults to `1mb`.
+  - `httpStrictMode`: If enabled, requires all HTTP incoming requests to use `Content-Type: application/vnd.api+json`. Defaults to `false`.
 
 ### Referencing types and processors
 
