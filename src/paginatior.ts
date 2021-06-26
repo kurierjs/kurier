@@ -1,7 +1,7 @@
 import { IPaginatorSettings, JsonApiSerializer } from '.';
 import { LinksPageParams, JsonApiParams } from './types';
 import JsonApiErrors from "./errors/json-api-errors";
-import Knex from 'knex';
+import { Knex } from 'knex';
 
 export class Paginator {
   public static readonly requiresRecordCount: boolean = false;

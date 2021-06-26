@@ -1,7 +1,8 @@
 import app from "./app";
 import * as Koa from "koa";
 import * as express from "express";
-import { jsonApiKoa, jsonApiExpress } from "./kurier";
+import { createServer } from "vercel-node-server";
+import { jsonApiKoa, jsonApiExpress, jsonApiVercel } from "./kurier";
 
 const faviconMiddleware = async (req, res, next) => {
   if (req.url === '/favicon.ico') {
@@ -20,5 +21,7 @@ const expressApp = express();
 expressApp.use(faviconMiddleware);
 expressApp.use(jsonApiExpress(app));
 
-export { expressApp, koaApp };
+const vercelApp = createServer(jsonApiVercel(app));
+
+export { expressApp, koaApp, vercelApp };
 export default koaApp;

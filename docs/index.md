@@ -4,7 +4,6 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 ## Table of contents
 
-- [Features](#features)
 - [Getting started](#getting-started)
 - [Data flow](#data-flow)
 - [Resources](#resources)
@@ -28,6 +27,8 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
     - [WebSocket Protocol](#websocket-protocol)
         - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
         - [Executing operations over sockets](#executing-operations-over-sockets)
+    - [Serverless Functions](#serverless-functions)
+        - [Using Vercel Functions](#using-vercel-functions)
 - [Processors](#processors)
     - [What is a processor?](#what-is-a-processor)
     - [The `OperationProcessor` class](#the-operationprocessor-class)
@@ -73,9 +74,8 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
      static schema = {
        attributes: {
          firstName: String,
-         lastName: String
+         lastName: String,
        },
-       relationships: {}
      };
    }
 ```
@@ -641,6 +641,48 @@ The middleware, if successful, will respond with a `204 No Content` HTTP status 
 
 Both `jsonApiKoa` and `jsonApiExpress` expose a `/bulk` endpoint which can be used to execute multiple operations. The request must use the `PATCH` method, using the JSON payload [shown earlier](#running-multiple-operations).
 
+### Serverless Functions
+
+Since version `1.2.0`, Kurier can be used inside serverless functions.
+
+#### Using Vercel Functions
+
+If you want your API to work with Kurier in a Vercel-hosted environment, you'll need to create a _generic route_ in your `api` directory, like this:
+
+```
+/
+|__ api/
+    |__ [...kurier].js
+```
+
+In case you don't want all of your endpoints to go through Kurier, you can namespace them:
+
+```
+/
+|__ api/
+    |__ kurier/
+        |__ [...kurier].js
+```
+
+In the `[...kurier].js` file, you can import the `jsonApiVercel` middleware to handle the resource endpoints automatically, just like `jsonApiKoa` and `jsonApiExpress` do:
+
+```js
+import { Application, jsonApiVercel } from 'kurier';
+import { knex } from 'knex';
+
+const app = new Application({
+  // The `namespace` property must match your directory structure under `pages/api`.
+  namespace: 'api/kurier',
+  // ...the rest of the Application properties (types, processors, etc.).
+});
+
+// You can also add a database connection with Knex.
+app.services.knex = knex({ /* Your DB configuration */ });
+
+// Export the middleware result so Next.js can handle Kurier endpoints.
+export default jsonApiVercel(app);
+```
+
 ### WebSocket Protocol
 
 The framework supports JSONAPI operations via WebSockets, using the [`ws`](http://npmjs.org/package/ws) package.
@@ -725,7 +767,6 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
       type: op.ref.type,
       id: basename(file),
       attributes: JSON.parse(readFileSync(file).toString()),
-      relationships: {}
     }));
   }
 }
@@ -750,7 +791,6 @@ export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
           type: op.ref.type,
           id: basename(file),
           attributes,
-          relationships: {}
         };
       } catch {
         throw JsonApiErrors.UnhandledError("Error while reading file");
@@ -797,9 +837,8 @@ export default class Moment extends Resource {
   static schema = {
     attributes: {
       date: String,
-      time: String
+      time: String,
     },
-    relationships: {}
   };
 }
 ```
@@ -833,7 +872,6 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
           date,
           time
         },
-        relationships: {}
       }
     ];
   }
@@ -928,7 +966,6 @@ export default class BookProcessor extends KnexProcessor<Book> {
       attributes: {
         count: (await super.get(op)).length
       },
-      relationships: {}
     };
   }
 }
@@ -1025,7 +1062,6 @@ export default class User extends JsonApiUser {
       emailAddress: String,
       passphrase: Password
     },
-    relationships: {}
   };
 }
 ```
@@ -1255,7 +1291,11 @@ import Author from "./resources/author";
 const app = new Application({
   namespace: "api",
   types: [Author],
-  defaultProcessor: new KnexProcessor(/* knex options */)
+  defaultProcessor: new KnexProcessor(/* knex options */),
+  transportLayerOptions: {
+    httpBodyPayload: '1mb',
+    httpStrictMode: true
+  },
 });
 
 const api = new Koa();
@@ -1271,6 +1311,9 @@ The `Application` object is instantiated with the following settings:
 - `types`: A list of all resource types declared and handled by this app.
 - `processors`: If you define custom processors, they have to be registered here as instances.
 - `defaultProcessor`: All non-bound-to-processor resources will be handled by this processor.
+- `transportLayerOptions`: Allows to customize some aspects of the transport layer used by the application.
+  - `httpBodyPayload`: Describes how big the request's `body` can be, expressed in a string i.e. `10mb`. Defaults to `1mb`.
+  - `httpStrictMode`: If enabled, requires all HTTP incoming requests to use `Content-Type: application/vnd.api+json`. Defaults to `false`.
 
 ### Referencing types and processors
 

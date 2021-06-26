@@ -1,4 +1,4 @@
-import * as Knex from "knex";
+import {knex} from "knex";
 import {
   Application,
   ApplicationInstance,
@@ -39,6 +39,6 @@ app.use(UserManagementAddon, {
   // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);
 
-app.services.knex = Knex(knexfile["development"]);
+app.services.knex = knex(knexfile["development"]);
 
 export default app;

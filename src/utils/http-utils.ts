@@ -1,6 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { Request as ExpressRequest } from "express";
-import { Request as KoaRequest } from "koa";
+import { JsonApiBulkResponse, VendorRequest } from '../types';
 import ApplicationInstance from "../application-instance";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
@@ -25,7 +24,7 @@ const OP_MAPPING = {
   DELETE: "remove"
 }
 
-async function authenticate(appInstance: ApplicationInstance, request: ExpressRequest | KoaRequest) {
+async function authenticate(appInstance: ApplicationInstance, request: VendorRequest) {
   const authHeader = request.headers.authorization;
   let currentUser: User | undefined;
 
@@ -58,13 +57,13 @@ function urlData(appInstance: ApplicationInstance, path: string) {
 async function handleBulkEndpoint(
   appInstance: ApplicationInstance,
   operations: Operation[]
-): Promise<{ operations: OperationResponse[] }> {
+): Promise<JsonApiBulkResponse> {
   return { operations: await appInstance.app.executeOperations(operations || []) };
 }
 
 async function handleJsonApiEndpoint(
   appInstance: ApplicationInstance,
-  request: ExpressRequest | KoaRequest
+  request: VendorRequest
 ): Promise<{ body: JsonApiDocument | JsonApiErrorsDocument; status: number }> {
   const op: Operation = convertHttpRequestToOperation(request);
 
@@ -73,7 +72,7 @@ async function handleJsonApiEndpoint(
 
     return {
       body: convertOperationResponseToHttpResponse(request, result),
-      status: STATUS_MAPPING[request.method]
+      status: STATUS_MAPPING[request.method as string]
     } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   } catch (error) {
     return {
@@ -83,12 +82,12 @@ async function handleJsonApiEndpoint(
   }
 }
 
-function convertHttpRequestToOperation(req: ExpressRequest | KoaRequest): Operation {
+function convertHttpRequestToOperation(req: VendorRequest): Operation {
   const { id, resource, relationship, isRelationships } = req["urlData"];
   const type = camelize(singularize(resource));
 
   return {
-    op: OP_MAPPING[req.method],
+    op: OP_MAPPING[req.method as string],
     params: parse(req["href"]),
     ref: { id, type, relationship },
     data: (req.body || {}).data
@@ -96,12 +95,12 @@ function convertHttpRequestToOperation(req: ExpressRequest | KoaRequest): Operat
 }
 
 function convertOperationResponseToHttpResponse(
-  req: ExpressRequest | KoaRequest,
+  req: VendorRequest,
   operation: OperationResponse
 ): JsonApiDocument | undefined {
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
-  if (responseMethods.includes(req.method)) {
+  if (responseMethods.includes(req.method as string)) {
     return { data: operation.data, included: operation.included, links: operation.links, meta: operation.meta } as JsonApiDocument;
   }
 }
@@ -118,6 +117,7 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
     }
     jsonApiError.detail = firstLineErrorStack;
   }
+
   return { errors: [jsonApiError] };
 }
 

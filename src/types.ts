@@ -1,4 +1,7 @@
-import * as Knex from "knex";
+import { IncomingMessage, ServerResponse } from "http";
+import { Knex } from "knex";
+import { Request as ExpressRequest } from "express";
+import { Request as KoaRequest } from "koa";
 import { JsonApiSerializer, OperationProcessor } from ".";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
@@ -246,6 +249,7 @@ export type NoOpTransaction = {
 
 export type TransportLayerOptions = {
   httpBodyPayload?: string;
+  httpStrictMode?: boolean;
 }
 
 export type LinksPageParams<TPaginatorParams extends string = string> = {
@@ -264,3 +268,20 @@ export interface IPaginatorSettings {
   defaultPageSize: number;
   maximumPageSize: number;
 }
+
+export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
+  query: Record<string, string | string[]>;
+  cookies: Record<string, string>;
+  body: BodyType;
+}
+
+export type VercelResponse = ServerResponse & {
+  status: (code: HttpStatusCode) => void;
+  send: (body: string | JsonApiDocument | JsonApiErrorsDocument | JsonApiBulkResponse | Buffer) => void;
+  json: (body: JsonApiDocument | JsonApiErrorsDocument | JsonApiBulkResponse) => void;
+  redirect: (urlOrStatusCode: HttpStatusCode | string, url?: string) => void;
+}
+
+export type JsonApiBulkResponse = { operations: OperationResponse[] };
+
+export type VendorRequest = ExpressRequest | KoaRequest | VercelRequest;

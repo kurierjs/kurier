@@ -1,5 +1,4 @@
-import * as Knex from "knex";
-
+import { Knex } from "knex";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import { canAccessResource } from "./decorators/authorize";
@@ -34,7 +33,8 @@ export default class Application {
     this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
     this.transportLayerOptions = settings.transportLayerOptions || {
-      httpBodyPayload: '1mb'
+      httpBodyPayload: '1mb',
+      httpStrictMode: false
     };
     this.paginator = settings.paginator || PagedPaginator;
     this.defaultPageSize = settings.defaultPageSize || 100;
@@ -160,11 +160,7 @@ export default class Application {
       }
     }
 
-    return new Promise(resolve =>
-      knex.transaction((trx: Knex.Transaction) => {
-        resolve(trx);
-      })
-    );
+    return knex.transaction();
   }
 
   async processorFor(
@@ -192,7 +188,13 @@ export default class Application {
   }
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {
-    return this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
+    const resource = this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
+
+    if (!resource.schema.relationships) {
+      resource.schema.relationships = {};
+    }
+
+    return resource;
   }
 
   async buildOperationResponse(

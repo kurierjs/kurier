@@ -10,8 +10,22 @@ import {
   handleJsonApiEndpoint,
   urlData
 } from "../utils/http-utils";
+import jsonApiErrors from "../errors/json-api-errors";
 
 export default function jsonApiKoa(app: Application, ...middlewares: Middleware[]) {
+  const checkStrictMode = async (ctx: Context, next: () => Promise<any>) => {
+    if (!app.transportLayerOptions.httpStrictMode) {
+      return next();
+    }
+
+    if (ctx.headers["content-type"] !== 'application/vnd.api+json') {
+      ctx.status = 400;
+      ctx.body = convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json"));
+    }
+
+    return next();
+  };
+
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
     const baseUrl = new URL(`${ctx.request.protocol}://${ctx.request.get("host")}`);
     const appInstance = new ApplicationInstance(app, baseUrl);
@@ -31,10 +45,16 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
       return next();
     }
 
-    const { body, status } = await handleJsonApiEndpoint(appInstance, ctx.request);
-    ctx.body = body;
-    ctx.status = status;
-    return next();
+    try {
+      const { body, status } = await handleJsonApiEndpoint(appInstance, ctx.request);
+      ctx.body = body;
+      ctx.status = status;
+    } catch (error) {
+      ctx.body = convertErrorToHttpResponse(error);
+      ctx.status = error.status;
+    } finally {
+      return next();
+    }
   };
 
   const koaBodySettings = {
@@ -42,5 +62,5 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
     jsonLimit: app.transportLayerOptions?.httpBodyPayload
   };
 
-  return compose([koaBody(koaBodySettings), ...middlewares, jsonApiKoa]);
+  return compose([checkStrictMode, koaBody(koaBodySettings), ...middlewares, jsonApiKoa]);
 }
