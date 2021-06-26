@@ -46,36 +46,16 @@ exports.seed = (knex) => {
         { id: 7, url: "http://example.com/7" },
       ]
     },
-    {
-      tableName: 'books',
-      values: [...Array(100)].map(() => ({
-        id: faker.datatype.uuid(),
-        title: faker.lorem.lines(1),
-        date_published: faker.date.past().toISOString(),
-        isbn: faker.datatype.number({ min: 1000000, max: 9999999 }),
-        author: faker.datatype.number({ min: 1, max: 3 })
-      }))
-    },
-    {
-      tableName: 'books',
-      values: [...Array(100)].map(() => ({
-        id: faker.datatype.uuid(),
-        title: faker.lorem.lines(1),
-        date_published: faker.date.past().toISOString(),
-        isbn: faker.datatype.number({ min: 1000000, max: 9999999 }),
-        author: faker.datatype.number({ min: 1, max: 3 })
-      }))
-    },
-    {
-      tableName: 'books',
-      values: [...Array(100)].map(() => ({
-        id: faker.datatype.uuid(),
-        title: faker.lorem.lines(1),
-        date_published: faker.date.past().toISOString(),
-        isbn: faker.datatype.number({ min: 1000000, max: 9999999 }),
-        author: faker.datatype.number({ min: 1, max: 3 })
-      }))
-    }
+    ...new Array(10).fill(0).map(_ => ({
+        tableName: 'books',
+        values: [...Array(100)].map(() => ({
+          id: faker.datatype.uuid(),
+          title: faker.lorem.lines(1),
+          date_published: faker.date.past().toISOString(),
+          isbn: faker.datatype.number({ min: 1000000, max: 9999999 }),
+          author: faker.datatype.number({ min: 1, max: 3 })
+        }))
+    })),
   ];
   return Promise.all(initialData.map(({ tableName, values }) => knex(tableName).insert(values))).then(() => { });
 };
