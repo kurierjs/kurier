@@ -235,10 +235,10 @@ export default class Application {
       })
     );
 
-    const { data: serializedData, links } = await this.serializeResources(result, params);
+    const { data, links } = await this.serializeResources(result, params);
 
     return {
-      data: serializedData,
+      data,
       ...(included.length ? { included } : {}),
       links,
     } as any;
@@ -299,9 +299,6 @@ export default class Application {
 
     return {
       data: this.serializer.serializeResource(result, resource),
-      links: {
-        self: this.serializer.linkBuilder.selfLink(result.type, result.id, params),
-      }
     };
   }
 }

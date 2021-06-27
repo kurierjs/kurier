@@ -24,6 +24,7 @@ export default class Resource {
   attributes: ResourceAttributes;
   relationships?: ResourceRelationships;
   meta?: Meta;
+  links?: DefaultLinks;
 
   preventSerialization?: boolean;
 
