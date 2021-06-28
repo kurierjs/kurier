@@ -10,6 +10,7 @@ import { LinkBuilder } from "./link-builder";
 import { Paginator } from "./paginatior";
 import Resource from "./resource";
 import User from "./resources/user";
+import { ResourceListOperationResult, ResourceOperationResult } from "./operation-result";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -268,6 +269,17 @@ export interface IPaginatorSettings {
   defaultPageSize: number;
   maximumPageSize: number;
 }
+
+export interface IOperationResultOptions {
+  meta?: Meta;
+  links?: Links;
+}
+
+export interface IResourceListOperationResultOptions extends IOperationResultOptions {
+  recordCount?: number;
+}
+
+export type OperationResult = ResourceOperationResult | ResourceListOperationResult;
 
 export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
   query: Record<string, string | string[]>;

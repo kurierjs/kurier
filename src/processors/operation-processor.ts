@@ -3,9 +3,9 @@ import { HasId, Operation, EagerLoadedData, ComputedMeta } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
-import { JsonApiErrors } from "..";
+import { JsonApiErrors, OperationResult } from "..";
 import { FunctionalOperators as operators, OperatorName } from "../utils/operators";
-import { ResourcesOperationResult } from "../operation-result";
+import { ResourceOperationResult, ResourceListOperationResult } from "../operation-result";
 
 export default class OperationProcessor<TResource extends Resource> {
   static resourceClass: typeof Resource;
@@ -26,7 +26,7 @@ export default class OperationProcessor<TResource extends Resource> {
 
   constructor(public appInstance: ApplicationInstance) { }
 
-  async execute(op: Operation): Promise<TResource | ResourcesOperationResult<TResource> | void> {
+  async execute(op: Operation): Promise<OperationResult> {
     const action: string = op.op;
 
     if (["update", "remove"].includes(action) && !op.ref.id) {
@@ -41,7 +41,7 @@ export default class OperationProcessor<TResource extends Resource> {
       eagerLoadedData = await this.computeRelationshipProperties(op, eagerLoadedData);
     }
 
-    if (result instanceof ResourcesOperationResult) {
+    if (result instanceof ResourceListOperationResult) {
       const resources = await Promise.all(
         result.records.map(record => {
           return this.convertToResource(op, record, eagerLoadedData);
@@ -53,7 +53,9 @@ export default class OperationProcessor<TResource extends Resource> {
       return result;
     }
 
-    return this.convertToResource(op, result, eagerLoadedData);
+    result.resource = await this.convertToResource(op, result.record, eagerLoadedData)
+
+    return result;
   }
 
   async computeRelationshipProperties(op, eagerLoadedData) {
@@ -258,7 +260,7 @@ export default class OperationProcessor<TResource extends Resource> {
     return this.appInstance.processorFor(resourceType) as Promise<OperationProcessor<Resource>>;
   }
 
-  async get(op: Operation): Promise<ResourcesOperationResult | HasId> {
+  async get(op: Operation): Promise<OperationResult> {
     return Promise.reject();
   }
 
@@ -266,11 +268,11 @@ export default class OperationProcessor<TResource extends Resource> {
     return Promise.reject();
   }
 
-  async update(op: Operation): Promise<HasId> {
+  async update(op: Operation): Promise<ResourceOperationResult> {
     return Promise.reject();
   }
 
-  async add(op: Operation): Promise<HasId> {
+  async add(op: Operation): Promise<ResourceOperationResult> {
     return Promise.reject();
   }
 }

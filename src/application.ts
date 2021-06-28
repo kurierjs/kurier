@@ -8,8 +8,9 @@ import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
 import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions, JsonApiParams } from "./types";
 import flatten from "./utils/flatten";
-import { ApplicationSettings, ResourcesOperationResult } from ".";
+import { ApplicationSettings, OperationResult } from ".";
 import { PagedPaginator, Paginator } from "./paginatior";
+import { ResourceListOperationResult, ResourceOperationResult } from "./operation-result";
 
 export default class Application {
   namespace: string;
@@ -122,13 +123,13 @@ export default class Application {
             { ...op, op: "get" },
             resourceClass
           );
-          const result = (await processor.execute(deserializedOriginalOperation)) as Resource;
+          const result = (await processor.execute(deserializedOriginalOperation)) as ResourceOperationResult;
 
           relatedOp = {
             ...op,
             ref: {
               type: relatedResourceClass.type,
-              id: result.attributes[
+              id: result.resource?.attributes[
                 resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
                 this.serializer.relationshipToColumn(op.ref.relationship)
               ] as string
@@ -198,22 +199,22 @@ export default class Application {
   }
 
   async buildOperationResponse(
-    result: Resource | ResourcesOperationResult | void,
+    result: OperationResult,
     appInstance: ApplicationInstance,
     params?: JsonApiParams,
   ): Promise<OperationResponse> {
     let resourceType: string | undefined;
     let allIncluded: Resource[] = [];
 
-    if (result instanceof ResourcesOperationResult) {
+    if (result instanceof ResourceListOperationResult) {
       resourceType = result.resources?.[0]?.type;
       allIncluded = !resourceType ? [] : flatten(
         this.serializer.serializeIncludedResources(result.resources, await this.resourceFor(resourceType)) || []
       )
-    } else if (result) {
-      resourceType = result.type;
+    } else if (result instanceof ResourceOperationResult) {
+      resourceType = result.resource?.type;
       allIncluded = !resourceType ? [] : flatten(
-        this.serializer.serializeIncludedResources(result, await this.resourceFor(resourceType)) || []
+        this.serializer.serializeIncludedResources(result.resource, await this.resourceFor(resourceType)) || []
       )
     } else {
       resourceType = undefined;
@@ -244,14 +245,8 @@ export default class Application {
     } as any;
   }
 
-  async serializeResources(result: Resource | ResourcesOperationResult | void, params?: JsonApiParams) {
-    if (!result) {
-      return {
-        data: null
-      };
-    }
-
-    if (result instanceof ResourcesOperationResult) {
+  async serializeResources(result: OperationResult, params?: JsonApiParams) {
+    if (result instanceof ResourceListOperationResult) {
       if (!result.resources) {
         return {
           data: []
@@ -295,10 +290,16 @@ export default class Application {
       };
     }
 
-    const resource = await this.resourceFor(result.type);
+    if (!result.resource) {
+      return {
+        data: null
+      };
+    }
+
+    const resource = await this.resourceFor(result.resource.type);
 
     return {
-      data: this.serializer.serializeResource(result, resource),
+      data: this.serializer.serializeResource(result.resource, resource),
     };
   }
 }

@@ -1,19 +1,11 @@
-import { IJsonApiSerializer, KnexRecord } from ".";
+import { IJsonApiSerializer, IOperationResultOptions, IResourceListOperationResultOptions, KnexRecord } from ".";
 import Resource from "./resource";
-import { HttpStatusCode, Links, Meta } from "./types";
-
-export interface IOperationResultOptions {
-  meta?: Meta;
-  links?: Links;
-}
-
-export abstract class OperationResult {
-  code: HttpStatusCode;
+import { Links, Meta } from "./types";
+abstract class OperationResult {
   meta: Meta;
   links: Links;
 
-  constructor(code: HttpStatusCode, options: IOperationResultOptions = {}) {
-    this.code = code;
+  constructor(options: IOperationResultOptions = {}) {
     this.meta = options.meta || {};
     this.links = options.links || {};
   }
@@ -23,17 +15,24 @@ export abstract class OperationResult {
   }
 }
 
-export interface IResourcesOperationResultOptions extends IOperationResultOptions {
-  recordCount?: number;
+export class ResourceOperationResult<TResource extends Resource = Resource> extends OperationResult {
+  record: KnexRecord;
+  resource?: TResource;
+
+  constructor(record: KnexRecord, options: IOperationResultOptions = {}) {
+    super(options);
+
+    this.record = record;
+  }
 }
 
-export class ResourcesOperationResult<TResource extends Resource = Resource> extends OperationResult {
+export class ResourceListOperationResult<TResource extends Resource = Resource> extends OperationResult {
   records: Array<KnexRecord>;
   recordCount?: number;
   resources?: Array<TResource>;
 
-  constructor(code: HttpStatusCode, records: Array<KnexRecord>, options: IResourcesOperationResultOptions = {}) {
-    super(code, options);
+  constructor(records: Array<KnexRecord>, options: IResourceListOperationResultOptions = {}) {
+    super(options);
 
     this.records = records;
     this.recordCount = options.recordCount;
