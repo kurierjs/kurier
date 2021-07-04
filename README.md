@@ -15,7 +15,11 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 ## Getting started
 
-### The quickest possible way
+### One-click way
+
+▶ [Click right here](https://github.com/kurierjs/kurier-starter-pack-typescript/generate) to get started with TypeScript, a dockerized database, basic user management support, HTTP logs and more.
+
+### The second quickest possible way
 
 Create your project using the [GitHub CLI](https://cli.github.com/) and with one of our starter packs:
 
