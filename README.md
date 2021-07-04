@@ -17,13 +17,19 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 ### The quickest possible way
 
-Create your project using the [GitHub CLI](https://cli.github.com/) and our TypeScript starter pack:
+Create your project using the [GitHub CLI](https://cli.github.com/) and with one of our starter packs:
 
 ```bash
+# Create a TypeScript + Kurier API.
 gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-typescript
+
+# Create a JavaScript + Kurier API.
+gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-javascript
 ```
 
 ### The DIY way
+
+_Note: This example assumes a TypeScript environment with several dependencies preinstalled._
 
 1. Install the package with `npm` or `yarn`:
 
