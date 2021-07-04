@@ -103,9 +103,16 @@ _Note: This example assumes a TypeScript environment with several dependencies p
 
 Extend Kurier's features with these addons:
 
-- [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many): Creates intermediate resource types for many-to-many relationships.
-- [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include): Alters GET operations to automatically include relationships.
-- [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0): Integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+- [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many) creates intermediate resource types for many-to-many relationships.
+- [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include) alters GET operations to automatically include relationships.
+- [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0) integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+
+## Starter packs
+
+Jump-start your project with these preconfigured, opinionated starter packs. They all include a dockerized database, HTTP logs, linting and basic user management.
+
+- [`kurier-starter-pack-javascript`](https://github.com/kurierjs/kurier-starter-pack-javascript)
+- [`kurier-starter-pack-typescript`](https://github.com/kurierjs/kurier-starter-pack-typescript)
 
 ## Documentation
 
