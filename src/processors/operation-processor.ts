@@ -3,7 +3,7 @@ import { HasId, Operation, EagerLoadedData } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
-import { JsonApiErrors } from "..";
+import JsonApiErrors from "../errors/json-api-errors";
 import { FunctionalOperators as operators, OperatorName } from "../utils/operators";
 
 export default class OperationProcessor<ResourceT extends Resource> {
@@ -145,6 +145,9 @@ export default class OperationProcessor<ResourceT extends Resource> {
         let expected = filter;
         if (filter.includes(":")) {
           [operator, expected] = filter.split(":") as [OperatorName, string];
+        }
+        if (!(operator in operators)) {
+          throw JsonApiErrors.BadRequest(`Operator ${operator} is not part of the filter's valid operators`);
         }
         const filterResult = operators[operator](computedAttributes[filterAttribute], expected);
         if (!filterResult) {
