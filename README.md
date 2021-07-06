@@ -15,6 +15,26 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 ## Getting started
 
+### One-click way
+
+▶ [Click right here](https://github.com/kurierjs/kurier-starter-pack-typescript/generate) to get started with TypeScript, a dockerized database, basic user management support, HTTP logs and more.
+
+### The second quickest possible way
+
+Create your project using the [GitHub CLI](https://cli.github.com/) and with one of our starter packs:
+
+```bash
+# Create a TypeScript + Kurier API.
+gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-typescript
+
+# Create a JavaScript + Kurier API.
+gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-javascript
+```
+
+### The DIY way
+
+_Note: This example assumes a TypeScript environment with several dependencies preinstalled._
+
 1. Install the package with `npm` or `yarn`:
 
    ```bash
@@ -87,9 +107,16 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 
 Extend Kurier's features with these addons:
 
-- [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many): Creates intermediate resource types for many-to-many relationships.
-- [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include): Alters GET operations to automatically include relationships.
-- [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0): Integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+- [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many) creates intermediate resource types for many-to-many relationships.
+- [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include) alters GET operations to automatically include relationships.
+- [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0) integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+
+## Starter packs
+
+Jump-start your project with these preconfigured, opinionated starter packs. They all include a dockerized database, HTTP logs, linting and basic user management.
+
+- [`kurier-starter-pack-javascript`](https://github.com/kurierjs/kurier-starter-pack-javascript)
+- [`kurier-starter-pack-typescript`](https://github.com/kurierjs/kurier-starter-pack-typescript)
 
 ## Documentation
 
