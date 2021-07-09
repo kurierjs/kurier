@@ -151,12 +151,16 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         };
       });
 
-    data.links = {
+    const links = unpick({
       /* TODO find a way to access req params!
        * Maybe we should pass down the whole OperationResult object to the serializer.
        **/
       self: this.linkBuilder.selfLink(data.type, data.id),
-    };
+    }, resourceType.excludeLinks);
+
+    if (Object.keys(links).length > 0) {
+      data.links = links;
+    }
 
     return data;
   }

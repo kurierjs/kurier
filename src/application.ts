@@ -255,6 +255,7 @@ export default class Application {
 
       const resourceType = result.resources?.[0]?.type;
       const resource = await this.resourceFor(resourceType);
+      console.log(resourceType, resource)
       const serializedData = result.resources.filter(
         record => !record.preventSerialization
       ).map(

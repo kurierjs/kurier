@@ -20,4 +20,6 @@ export default class Article extends Resource {
       }
     }
   };
+
+  static excludeLinks = ['self']
 }

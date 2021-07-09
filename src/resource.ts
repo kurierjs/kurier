@@ -19,6 +19,13 @@ export default class Resource {
     relationships: {}
   };
 
+  /**
+   * By default resources are serialized with a `self` link.
+   * Use this option if you don't want clients accessing the resource through the self link.
+   * This may be expanded to custom links in the future.
+   */
+   static excludeLinks?: Array<string>;
+
   id?: string;
   type: string;
   attributes: ResourceAttributes;
