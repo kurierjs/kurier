@@ -140,13 +140,13 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           throw new Error('LinkBuilder is not initialized!')
         }
 
-        const links = {
+        const links = unpick({
           self: this.linkBuilder.relationshipsSelfLink(data.type, data.id, relName),
           related: this.linkBuilder.relationshipsRelatedLink(data.type, data.id, relName)
-        };
+        }, schemaRelationships[relName].excludeLinks);
 
         data.relationships[relName] = {
-          links,
+          ...(Object.keys(links).length > 0 && { links }),
           data: serializedData,
         };
       });

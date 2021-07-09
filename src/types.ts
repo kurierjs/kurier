@@ -178,6 +178,11 @@ export interface ResourceSchemaRelationship {
   hasMany?: boolean;
   belongsTo?: boolean;
   foreignKeyName?: string;
+  /**
+   * By default resources are serialized with a self and related link.
+   * Use this option if you don't want clients accessing the resource through the self or related link.
+   */
+  excludeLinks?: Array<string>;
 };
 
 export interface HasId {

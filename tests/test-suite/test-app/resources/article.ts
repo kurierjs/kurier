@@ -12,11 +12,13 @@ export default class Article extends Resource {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "author"
+        foreignKeyName: "author",
+        excludeLinks: ['self', 'related']
       },
       votes: {
         type: () => Vote,
-        hasMany: true
+        hasMany: true,
+        excludeLinks: ['self', 'related']
       }
     }
   };
