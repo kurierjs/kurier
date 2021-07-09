@@ -132,7 +132,9 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const { type, schema } = this.resourceClass;
     const { attributes, relationships, primaryKeyName } = schema;
     const relationshipsKeys = Object.entries(relationships)
-      .filter(([, value]) => value.belongsTo)
+      .filter(([, value]) => {
+        return value.belongsTo && value.alwaysIncludeLinkageData;
+      })
       .map(
         ([key, value]) =>
           value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)

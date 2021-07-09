@@ -183,6 +183,11 @@ export interface ResourceSchemaRelationship {
    * Use this option if you don't want clients accessing the resource through the self or related link.
    */
   excludeLinks?: Array<string>;
+  /**
+   *  If set to true, the serialized relationship will always include the type and id of the related record under a data key.
+   *  Defaults to true if not set to avoid breaking change.
+   */
+  alwaysIncludeLinkageData?: boolean;
 };
 
 export interface HasId {
