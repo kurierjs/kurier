@@ -21,7 +21,7 @@ export default class Application {
   services: ApplicationServices;
   addons: ApplicationAddons;
   transportLayerOptions: TransportLayerOptions;
-  paginator: typeof Paginator;
+  defaultPaginator: typeof Paginator;
   defaultPageSize: number;
   maximumPageSize: number;
 
@@ -37,7 +37,7 @@ export default class Application {
       httpBodyPayload: '1mb',
       httpStrictMode: false
     };
-    this.paginator = settings.paginator || PagedPaginator;
+    this.defaultPaginator = settings.defaultPaginator || PagedPaginator;
     this.defaultPageSize = settings.defaultPageSize || 100;
     this.maximumPageSize = settings.maximumPageSize || 500;
 
@@ -261,12 +261,7 @@ export default class Application {
         record => this.serializer.serializeResource(record, resource)
       );
 
-      if (this.paginator.requiresRecordCount && result.recordCount) {
-
-      }
-
-      const Paginator = this.paginator;
-      const paginator = new Paginator(
+      const paginator = new (this.defaultPaginator)(
         params,
         {
           defaultPageSize: this.defaultPageSize,

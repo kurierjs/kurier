@@ -203,7 +203,7 @@ export type ApplicationSettings = {
   services?: {};
   transportLayerOptions?: TransportLayerOptions;
   baseUrl?: URL;
-  paginator?: typeof Paginator;
+  defaultPaginator?: typeof Paginator;
   defaultPageSize?: number;
   maximumPageSize?: number;
 }
