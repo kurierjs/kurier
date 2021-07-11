@@ -235,6 +235,8 @@ export interface IJsonApiSerializer {
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
   deserializeResource(op: Operation, resourceClass: typeof Resource): Operation;
   serializeResource(resource: Resource, resourceType: typeof Resource, baseUrl?: URL): Resource;
+  serializeResourceLinks(data:Resource, excludeLinks?: Array<string>): Record<string, Link>;
+  serializeRelationshipLinks(primaryData: Resource, relName: string, excludeLinks?: Array<string>): Record<string, Link>;
   serializeRelationship(
     relationships: Resource | Resource[],
     resourceType: typeof Resource,

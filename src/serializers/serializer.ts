@@ -13,6 +13,7 @@ import {
 import pick from "../utils/pick";
 import { camelize, classify, pluralize, underscore } from "../utils/string";
 import unpick from "../utils/unpick";
+import { Link } from "../types";
 
 export default class JsonApiSerializer implements IJsonApiSerializer {
   linkBuilder: LinkBuilder;
@@ -136,33 +137,49 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           fkName
         );
 
-        if (!this.linkBuilder) {
-          throw new Error('LinkBuilder is not initialized!')
-        }
-
-        const links = unpick({
-          self: this.linkBuilder.relationshipsSelfLink(data.type, data.id, relName),
-          related: this.linkBuilder.relationshipsRelatedLink(data.type, data.id, relName)
-        }, schemaRelationships[relName].excludeLinks);
+        const serializedLinks = this.serializeRelationshipLinks(data, relName, schemaRelationships[relName].excludeLinks);
 
         data.relationships[relName] = {
-          ...(Object.keys(links).length > 0 && { links }),
+          ...(Object.keys(serializedLinks).length > 0 && { links: serializedLinks }),
           data: serializedData,
         };
       });
 
-    const links = unpick({
-      /* TODO find a way to access req params!
-       * Maybe we should pass down the whole OperationResult object to the serializer.
-       **/
-      self: this.linkBuilder.selfLink(data.type, data.id),
-    }, resourceType.excludeLinks);
+    const links = this.serializeResourceLinks(data, resourceType.excludeLinks);
 
     if (Object.keys(links).length > 0) {
       data.links = links;
     }
 
     return data;
+  }
+
+  serializeResourceLinks(data:Resource, excludeLinks?: Array<string>) {
+    if (!this.linkBuilder) {
+      throw new Error('LinkBuilder is not initialized!')
+    }
+
+    const links = unpick({
+      /* TODO find a way to access req params!
+       * Maybe we should pass down the whole OperationResult object to the serializer.
+       **/
+      self: this.linkBuilder.selfLink(data.type, data.id),
+    }, excludeLinks) as Record<string, Link>;
+
+    return links;
+  }
+
+  serializeRelationshipLinks(primaryData: Resource, relName: string, excludeLinks?: Array<string>) {
+    if (!this.linkBuilder) {
+      throw new Error('LinkBuilder is not initialized!')
+    }
+
+    const links = unpick({
+      self: this.linkBuilder.relationshipsSelfLink(primaryData.type, primaryData.id, relName),
+      related: this.linkBuilder.relationshipsRelatedLink(primaryData.type, primaryData.id, relName)
+    }, excludeLinks) as Record<string, Link>;
+
+    return links;
   }
 
   serializeRelationship(
