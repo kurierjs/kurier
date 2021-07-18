@@ -128,12 +128,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     return eagerlyLoadedData;
   }
 
-  protected getColumns(serializer: IJsonApiSerializer, fields = {}): string[] {
+  protected getColumns(serializer: IJsonApiSerializer, params: JsonApiParams = {}): string[] {
+    const { fields = {}, include = [] } = params;
     const { type, schema } = this.resourceClass;
     const { attributes, relationships, primaryKeyName } = schema;
     const relationshipsKeys = Object.entries(relationships)
-      .filter(([, value]) => {
-        return value.belongsTo && value.alwaysIncludeLinkageData;
+      .filter(([relName, value]) => {
+        const isIncluded = include.includes(relName);
+        const isInSparseFieldsets = fields[type]?.includes(relName);
+
+        return isIncluded || isInSparseFieldsets|| value.belongsTo && value.alwaysIncludeLinkageData;
       })
       .map(
         ([key, value]) =>
@@ -167,7 +171,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
     const records: KnexRecord[] = await recordsQuery
       .modify(queryBuilder => this.optionsBuilder(queryBuilder, params || {}))
-      .select(this.getColumns(this.appInstance.app.serializer, (params || {}).fields));
+      .select(this.getColumns(this.appInstance.app.serializer, params));
 
     if (!records.length && id) {
       throw JsonApiErrors.RecordNotExists();
