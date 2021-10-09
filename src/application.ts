@@ -1,4 +1,4 @@
-import {Knex} from "knex";
+import { Knex } from "knex";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import { canAccessResource } from "./decorators/authorize";
@@ -6,7 +6,17 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions } from "./types";
+import {
+  AddonOptions,
+  ApplicationAddons,
+  ApplicationServices,
+  IJsonApiSerializer,
+  Operation,
+  OperationResponse,
+  ResourceSchemaRelationship,
+  NoOpTransaction,
+  TransportLayerOptions,
+} from "./types";
 import flatten from "./utils/flatten";
 
 export default class Application {
@@ -36,13 +46,13 @@ export default class Application {
     this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
     this.transportLayerOptions = settings.transportLayerOptions || {
-      httpBodyPayload: '1mb',
-      httpStrictMode: false
+      httpBodyPayload: "1mb",
+      httpStrictMode: false,
     };
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
-    if (this.addons.find(installedAddon => installedAddon.addon === addon)) {
+    if (this.addons.find((installedAddon) => installedAddon.addon === addon)) {
       return;
     }
 
@@ -53,22 +63,22 @@ export default class Application {
 
   async executeOperations(
     ops: Operation[],
-    applicationInstance = new ApplicationInstance(this)
+    applicationInstance = new ApplicationInstance(this),
   ): Promise<OperationResponse[]> {
     applicationInstance.transaction = await this.createTransaction();
 
     try {
-      const result: OperationResponse[] = await Promise.all(
+      const result: OperationResponse[] = (await Promise.all(
         ops
-          .map(async op => {
+          .map(async (op) => {
             const processor = await applicationInstance.processorFor(op.ref.type);
 
             if (processor) {
               return this.executeOperation(op, processor);
             }
           })
-          .filter(Boolean)
-      ) as OperationResponse[];
+          .filter(Boolean),
+      )) as OperationResponse[];
 
       await applicationInstance.transaction.commit();
 
@@ -93,29 +103,33 @@ export default class Application {
 
         if (relationship.hasMany) {
           const relatedResourceClassRelationships = Object.entries(relatedResourceClass.schema.relationships);
-          let [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
-            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type) as [string, ResourceSchemaRelationship];
+          const [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
+            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type) as [
+              string,
+              ResourceSchemaRelationship,
+            ];
 
           relatedOp = {
             ...op,
             ref: {
-              type: relatedResourceClass.type
+              type: relatedResourceClass.type,
             },
             params: {
               ...op.params,
               filter: {
                 ...(op.params || {}).filter,
-                [
-                  relatedRelationship.foreignKeyName ||
-                  this.serializer.relationshipToColumn(relatedRelationshipName, relatedResourceClass.schema.primaryKeyName)
-                ]: op.ref.id
-              }
-            }
+                [relatedRelationship.foreignKeyName ||
+                this.serializer.relationshipToColumn(
+                  relatedRelationshipName,
+                  relatedResourceClass.schema.primaryKeyName,
+                )]: op.ref.id,
+              },
+            },
           } as Operation;
         } else if (relationship.belongsTo) {
           const deserializedOriginalOperation = await this.serializer.deserializeResource(
             { ...op, op: "get" },
-            resourceClass
+            resourceClass,
           );
           const result = (await processor.execute(deserializedOriginalOperation)) as Resource;
 
@@ -125,14 +139,17 @@ export default class Application {
               type: relatedResourceClass.type,
               id: result.attributes[
                 resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
-                this.serializer.relationshipToColumn(op.ref.relationship)
-              ] as string
-            }
+                  this.serializer.relationshipToColumn(op.ref.relationship)
+              ] as string,
+            },
           };
         }
 
         const deserializedOperation = this.serializer.deserializeResource(relatedOp, relatedResourceClass);
-        const relatedProcessor = await this.processorFor(relatedResourceClass.type, processor.appInstance) as OperationProcessor<Resource>;
+        const relatedProcessor = (await this.processorFor(
+          relatedResourceClass.type,
+          processor.appInstance,
+        )) as OperationProcessor<Resource>;
         const result = await relatedProcessor.execute(deserializedOperation);
 
         return this.buildOperationResponse(result, processor.appInstance);
@@ -150,9 +167,9 @@ export default class Application {
 
     if (!knex) {
       return {
-        commit: () => { },
-        rollback: () => { }
-      }
+        commit: () => {},
+        rollback: () => {},
+      };
     }
 
     return knex.transaction();
@@ -161,15 +178,15 @@ export default class Application {
   async processorFor(
     resourceType: string,
     applicationInstance: ApplicationInstance,
-    processorType = this.defaultProcessor
+    processorType = this.defaultProcessor,
   ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
 
     const processors = await Promise.all(
-      this.processors.map(async processor => ((await processor.shouldHandle(resourceType)) ? processor : false))
+      this.processors.map(async (processor) => ((await processor.shouldHandle(resourceType)) ? processor : false)),
     );
 
-    const ProcessorClass = processors.find(p => p !== false);
+    const ProcessorClass = processors.find((p) => p !== false);
 
     if (ProcessorClass) {
       return new ProcessorClass(applicationInstance);
@@ -194,7 +211,7 @@ export default class Application {
 
   async buildOperationResponse(
     data: Resource | Resource[] | void,
-    appInstance: ApplicationInstance
+    appInstance: ApplicationInstance,
   ): Promise<OperationResponse> {
     let resourceType: string | null;
 
@@ -206,15 +223,16 @@ export default class Application {
       resourceType = null;
     }
 
-    const allIncluded: Resource[] = !resourceType ? [] : flatten(
-      this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []
-    );
+    const allIncluded: Resource[] = !resourceType
+      ? []
+      : flatten(this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []);
 
     const included: Resource[] = [];
 
     await Promise.all(
       allIncluded.map((resource: Resource) => {
-        return new Promise<void>(async resolve => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<void>(async (resolve) => {
           const result = await canAccessResource(resource, "get", appInstance);
 
           if (result) {
@@ -223,7 +241,7 @@ export default class Application {
 
           resolve();
         });
-      })
+      }),
     );
 
     const serializedResources = await this.serializeResources(data);
@@ -243,11 +261,9 @@ export default class Application {
 
       const resource = await this.resourceFor(data[0].type);
 
-      return data.filter(
-        record => !record.preventSerialization
-      ).map(
-        record => this.serializer.serializeResource(record, resource)
-      );
+      return data
+        .filter((record) => !record.preventSerialization)
+        .map((record) => this.serializer.serializeResource(record, resource));
     }
 
     const resource = await this.resourceFor(data.type);

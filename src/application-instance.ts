@@ -12,7 +12,7 @@ export default class ApplicationInstance {
   public user: User | undefined;
   public transaction: Knex.Transaction | NoOpTransaction;
 
-  constructor(public app: Application) { }
+  constructor(public app: Application) {}
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
     return this.app.processorFor(resourceType, this);
@@ -29,9 +29,9 @@ export default class ApplicationInstance {
       op: "identify",
       ref: {
         type: "user",
-        id: tokenPayload["id"]
+        id: tokenPayload["id"],
       },
-      params: {}
+      params: {},
     } as Operation;
 
     let user: OperationResponse;
