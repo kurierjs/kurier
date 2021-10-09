@@ -10,7 +10,7 @@ export const KnexOperators = {
   like: "like",
   nlike: "not like",
   in: "in",
-  nin: "not in"
+  nin: "not in",
 };
 
 export const FunctionalOperators: { [T in OperatorName]: (actual: any, expected: any) => boolean } = {
@@ -51,5 +51,5 @@ export const FunctionalOperators: { [T in OperatorName]: (actual: any, expected:
     return false;
   },
   in: <T = any>(actual: T, expected: T[]) => expected.includes(actual),
-  nin: <T = any>(actual: T, expected: T[]) => !expected.includes(actual)
-}
+  nin: <T = any>(actual: T, expected: T[]) => !expected.includes(actual),
+};

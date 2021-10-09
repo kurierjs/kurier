@@ -6,14 +6,14 @@ export function ifUser(attribute: string, value: string | number | boolean | str
 
 export function ifUserDoesNotMatches(
   attribute: string,
-  value: string | number | boolean | string[] | number[]
+  value: string | number | boolean | string[] | number[],
 ): AttributeValueMatch {
   return { attribute, value, operator: "not" };
 }
 
 export function ifUserMatchesEvery(
   attribute: string,
-  value: string | number | boolean | string[] | number[]
+  value: string | number | boolean | string[] | number[],
 ): AttributeValueMatch {
   return { attribute, value, operator: "every" };
 }

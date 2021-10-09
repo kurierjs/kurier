@@ -22,7 +22,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(public appInstance: ApplicationInstance) { }
+  constructor(public appInstance: ApplicationInstance) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;
@@ -60,13 +60,13 @@ export default class OperationProcessor<ResourceT extends Resource> {
       eagerLoadedData[relationship].direct = await this.computeDirectRelationsProps(
         op,
         eagerLoadedData[relationship].direct,
-        relationResourceClass
+        relationResourceClass,
       );
 
       eagerLoadedData[relationship].nested = await this.computeNestedRelationsProps(
         op,
         eagerLoadedData[relationship].nested,
-        relationResourceClass
+        relationResourceClass,
       );
     }
     return eagerLoadedData;
@@ -103,7 +103,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
           op,
           nestedRelationResourceClass,
           includedRelationElements,
-          {}
+          {},
         );
         nestedRelations[includedNestedRelation][index] = { ...value, ...computed };
       });
@@ -119,12 +119,12 @@ export default class OperationProcessor<ResourceT extends Resource> {
     op: Operation,
     resourceClass: typeof Resource,
     record: HasId,
-    eagerLoadedData: EagerLoadedData
+    eagerLoadedData: EagerLoadedData,
   ) {
     const typeFields = op.params && op.params.fields && op.params.fields[resourceClass.type];
     const attributes: { [key: string]: Function } = typeFields ? pick(this.attributes, typeFields) : this.attributes;
 
-    return promiseHashMap(attributes, key => attributes[key].call(this, record));
+    return promiseHashMap(attributes, (key) => attributes[key].call(this, record));
   }
 
   async matchesComputedFilters(op: Operation, computedAttributes) {
@@ -179,17 +179,17 @@ export default class OperationProcessor<ResourceT extends Resource> {
     op: Operation,
     resourceClass: typeof Resource,
     record: HasId,
-    eagerLoadedData: EagerLoadedData
+    eagerLoadedData: EagerLoadedData,
   ) {
     const relationshipKeys = Object.keys(resourceClass.schema.relationships)
-      .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
+      .filter((relName) => resourceClass.schema.relationships[relName].belongsTo)
       .map(
-        relName =>
+        (relName) =>
           resourceClass.schema.relationships[relName].foreignKeyName ||
           this.appInstance.app.serializer.relationshipToColumn(
             relName,
-            resourceClass.schema.relationships[relName].type().schema.primaryKeyName
-          )
+            resourceClass.schema.relationships[relName].type().schema.primaryKeyName,
+          ),
       );
     return pick(record, relationshipKeys);
   }
@@ -197,9 +197,9 @@ export default class OperationProcessor<ResourceT extends Resource> {
   async convertToResources(op: Operation, records: HasId[] | HasId, eagerLoadedData: EagerLoadedData) {
     if (Array.isArray(records)) {
       return Promise.all(
-        records.map(record => {
+        records.map((record) => {
           return this.convertToResources(op, record, eagerLoadedData);
-        })
+        }),
       );
     }
 
@@ -210,7 +210,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
       this.getRelationships(op, record, eagerLoadedData),
-      this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData)
+      this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData),
     ]);
 
     const resource = new resourceClass({
@@ -219,8 +219,8 @@ export default class OperationProcessor<ResourceT extends Resource> {
       attributes: {
         ...attributes,
         ...relationshipAttributes,
-        ...computedAttributes
-      }
+        ...computedAttributes,
+      },
     });
 
     const passesFilters = await this.matchesComputedFilters(op, computedAttributes);

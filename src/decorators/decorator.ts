@@ -7,14 +7,14 @@ function isOperation(name: string) {
 }
 
 export function getArgument<T>(argsList: any[], match: (arg: any) => boolean) {
-  return argsList.find(arg => arg && match(arg)) as T;
+  return argsList.find((arg) => arg && match(arg)) as T;
 }
 
 export default function decorateWith(decorator: OperationDecorator, ...decoratorArgs: any[]) {
   return (
     target: OperationProcessor<any> | Function,
     propertyKey?: string,
-    descriptor?: TypedPropertyDescriptor<any>
+    descriptor?: TypedPropertyDescriptor<any>,
   ): any => {
     if (propertyKey && descriptor) {
       // Behave as a method decorator. Only apply where requested.
@@ -26,17 +26,17 @@ export default function decorateWith(decorator: OperationDecorator, ...decorator
       const controller = target as Function;
       const controllerMethods = Object.getOwnPropertyNames(controller.prototype)
         .filter(isOperation)
-        .map(member => ({
+        .map((member) => ({
           methodName: member,
-          descriptor: Object.getOwnPropertyDescriptor(controller.prototype, member) as PropertyDescriptor
+          descriptor: Object.getOwnPropertyDescriptor(controller.prototype, member) as PropertyDescriptor,
         }));
 
-      controllerMethods.forEach(controllerMethod => {
+      controllerMethods.forEach((controllerMethod) => {
         const originalFunction = controllerMethod.descriptor.value;
 
         Object.defineProperty(controller.prototype, controllerMethod.methodName, {
           ...controllerMethod.descriptor,
-          value: decorator(originalFunction, ...decoratorArgs)
+          value: decorator(originalFunction, ...decoratorArgs),
         });
       });
     }

@@ -11,13 +11,13 @@ export default class Session extends Resource {
     attributes: {
       token: String,
       username: String,
-      password: Password
+      password: Password,
     },
     relationships: {
       user: {
         type: () => User,
-        belongsTo: true
-      }
-    }
+        belongsTo: true,
+      },
+    },
   };
 }
