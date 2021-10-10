@@ -13,15 +13,15 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
   protected async login(op: Operation, userDataSource: ResourceAttributes) {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
-      "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration.",
     );
     return true;
   }
 
   public async add(op: Operation): Promise<HasId> {
     const fields = Object.keys(op.data?.attributes as { [key: string]: Function })
-      .filter(attribute => this.resourceClass.schema.attributes[attribute] !== Password)
-      .map(attribute => ({ [attribute]: op.data?.attributes[attribute] }))
+      .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
+      .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] }))
       .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
 
     if (Object.keys(fields).length === 0) {
@@ -48,8 +48,8 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     const userAttributes = pick(
       user,
       Object.keys(userType.schema.attributes)
-        .filter(attribute => userType.schema.attributes[attribute] !== Password)
-        .map(attribute => this.appInstance.app.serializer.attributeToColumn(attribute))
+        .filter((attribute) => userType.schema.attributes[attribute] !== Password)
+        .map((attribute) => this.appInstance.app.serializer.attributeToColumn(attribute)),
     );
 
     const secureData = this.appInstance.app.serializer.serializeResource(
@@ -57,24 +57,22 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
         type: userType.type,
         id: userId,
         attributes: {
-          ...userAttributes
+          ...userAttributes,
         } as { [key: string]: Function },
-        relationships: {}
+        relationships: {},
       },
-      userType
+      userType,
     );
 
     const token = sign(secureData, process.env.SESSION_KEY as string, {
       subject: String(userId),
-      expiresIn: "1d"
+      expiresIn: "1d",
     });
 
     const session = {
       token,
-      [this.appInstance.app.serializer.relationshipToColumn(
-        userType.type, userType.schema.primaryKeyName
-      )]: userId,
-      id: randomBytes(16).toString("hex")
+      [this.appInstance.app.serializer.relationshipToColumn(userType.type, userType.schema.primaryKeyName)]: userId,
+      id: randomBytes(16).toString("hex"),
     };
 
     return session;

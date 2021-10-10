@@ -1,10 +1,10 @@
-import {knex} from "knex";
+import { knex } from "knex";
 import {
   Application,
   ApplicationInstance,
   KnexProcessor,
   UserManagementAddon,
-  UserManagementAddonOptions
+  UserManagementAddonOptions,
 } from "./kurier";
 
 import Article from "./resources/article";
@@ -25,7 +25,7 @@ const app = new Application({
   namespace: "api",
   types: [Article, Comment, Vote, Random],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
-  defaultProcessor: KnexProcessor
+  defaultProcessor: KnexProcessor,
 });
 
 app.use(UserManagementAddon, {
@@ -34,7 +34,7 @@ app.use(UserManagementAddon, {
   userLoginCallback: login,
   async userRolesProvider(this: ApplicationInstance, user: User) {
     return ["Admin"];
-  }
+  },
   // userGenerateIdCallback: async () => (-Date.now()).toString(),
   // userEncryptPasswordCallback: encryptPassword
 } as UserManagementAddonOptions);

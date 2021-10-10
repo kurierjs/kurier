@@ -16,7 +16,7 @@ export enum HttpStatusCode {
   Forbidden = 403,
   NotFound = 404,
   UnprocessableEntity = 422,
-  InternalServerError = 500
+  InternalServerError = 500,
 }
 
 export const DEFAULT_PRIMARY_KEY = "id";
@@ -133,7 +133,7 @@ export interface ResourceSchema {
   primaryKeyName?: string;
   attributes: ResourceSchemaAttributes;
   relationships: ResourceSchemaRelationships;
-};
+}
 
 export type PasswordConstructor = typeof Password;
 
@@ -145,7 +145,7 @@ export interface ResourceSchemaAttributes {
     | ArrayConstructor
     | ObjectConstructor
     | PasswordConstructor;
-};
+}
 
 export type ResourceSchemaRelationships = {
   [key: string]: ResourceSchemaRelationship;
@@ -156,7 +156,7 @@ export interface ResourceSchemaRelationship {
   hasMany?: boolean;
   belongsTo?: boolean;
   foreignKeyName?: string;
-};
+}
 
 export interface HasId {
   id: any;
@@ -190,7 +190,7 @@ export interface IJsonApiSerializer {
   serializeRelationship(
     relationships: Resource | Resource[],
     resourceType: typeof Resource,
-    primaryKeyName?: string
+    primaryKeyName?: string,
   ): ResourceRelationshipData[];
   serializeIncludedResources(data: Resource | Resource[] | void, resourceType: typeof Resource): Resource[] | null;
 }
@@ -204,25 +204,25 @@ export type ApplicationAddons = { addon: typeof Addon; options: AddonOptions }[]
 export type NoOpTransaction = {
   commit(): void;
   rollback(): void;
-}
+};
 
 export type TransportLayerOptions = {
   httpBodyPayload?: string;
   httpStrictMode?: boolean;
-}
+};
 
 export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
   query: Record<string, string | string[]>;
   cookies: Record<string, string>;
   body: BodyType;
-}
+};
 
 export type VercelResponse = ServerResponse & {
   status: (code: HttpStatusCode) => void;
   send: (body: string | JsonApiDocument | JsonApiErrorsDocument | JsonApiBulkResponse | Buffer) => void;
   json: (body: JsonApiDocument | JsonApiErrorsDocument | JsonApiBulkResponse) => void;
   redirect: (urlOrStatusCode: HttpStatusCode | string, url?: string) => void;
-}
+};
 
 export type JsonApiBulkResponse = { operations: OperationResponse[] };
 

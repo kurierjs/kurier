@@ -1,5 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { JsonApiBulkResponse, VendorRequest } from '../types';
+import { JsonApiBulkResponse, VendorRequest } from "../types";
 import ApplicationInstance from "../application-instance";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
@@ -13,7 +13,7 @@ const STATUS_MAPPING = {
   POST: 201,
   PATCH: 200,
   PUT: 200,
-  DELETE: 204
+  DELETE: 204,
 };
 
 async function authenticate(appInstance: ApplicationInstance, request: VendorRequest) {
@@ -31,9 +31,9 @@ async function authenticate(appInstance: ApplicationInstance, request: VendorReq
 function urlData(appInstance: ApplicationInstance, path: string) {
   const urlRegexp = new RegExp(
     `^(\/+)?((?<namespace>${escapeStringRegexp(
-      appInstance.app.namespace
+      appInstance.app.namespace,
     )})(\/+|$))?(?<resource>[^\\s\/?]+)?(\/+)?((?<id>[^\\s\/?]+)?(\/+)?(?<relationships>relationships)?(\/+)?)?` +
-    "(?<relationship>[^\\s/?]+)?(/+)?$"
+      "(?<relationship>[^\\s/?]+)?(/+)?$",
   );
 
   const { resource, id, relationships, relationship } = (path.match(urlRegexp) || {})["groups"] || ({} as any);
@@ -42,20 +42,20 @@ function urlData(appInstance: ApplicationInstance, path: string) {
     id,
     resource,
     relationship,
-    isRelationships: !!relationships
+    isRelationships: !!relationships,
   };
 }
 
 async function handleBulkEndpoint(
   appInstance: ApplicationInstance,
-  operations: Operation[]
+  operations: Operation[],
 ): Promise<JsonApiBulkResponse> {
   return { operations: await appInstance.app.executeOperations(operations || []) };
 }
 
 async function handleJsonApiEndpoint(
   appInstance: ApplicationInstance,
-  request: VendorRequest
+  request: VendorRequest,
 ): Promise<{ body: JsonApiDocument | JsonApiErrorsDocument; status: number }> {
   const op: Operation = convertHttpRequestToOperation(request);
 
@@ -63,12 +63,12 @@ async function handleJsonApiEndpoint(
     const [result]: OperationResponse[] = await appInstance.app.executeOperations([op], appInstance);
     return {
       body: convertOperationResponseToHttpResponse(request, result),
-      status: STATUS_MAPPING[request.method as string]
+      status: STATUS_MAPPING[request.method as string],
     } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   } catch (error) {
     return {
       body: convertErrorToHttpResponse(error),
-      status: error.status || 500
+      status: error.status || 500,
     } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   }
 }
@@ -82,20 +82,20 @@ function convertHttpRequestToOperation(req: VendorRequest): Operation {
     POST: "add",
     PATCH: "update",
     PUT: "update",
-    DELETE: "remove"
+    DELETE: "remove",
   };
 
   return {
     op: opMap[req.method as string],
     params: parse(req["href"]),
     ref: { id, type, relationship },
-    data: (req.body || {}).data
+    data: (req.body || {}).data,
   } as Operation;
 }
 
 function convertOperationResponseToHttpResponse(
   req: VendorRequest,
-  operation: OperationResponse
+  operation: OperationResponse,
 ): JsonApiDocument | undefined {
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
@@ -128,5 +128,5 @@ export {
   handleJsonApiEndpoint,
   convertHttpRequestToOperation,
   convertOperationResponseToHttpResponse,
-  convertErrorToHttpResponse
+  convertErrorToHttpResponse,
 };

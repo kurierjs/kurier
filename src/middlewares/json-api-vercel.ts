@@ -1,4 +1,4 @@
-import {URL} from "url";
+import { URL } from "url";
 
 import { Operation, VercelRequest, VercelResponse } from "../types";
 
@@ -10,7 +10,7 @@ import {
   urlData,
   handleBulkEndpoint,
   handleJsonApiEndpoint,
-  convertErrorToHttpResponse
+  convertErrorToHttpResponse,
 } from "../utils/http-utils";
 
 import jsonApiErrors from "../errors/json-api-errors";
@@ -20,14 +20,14 @@ const checkStrictMode = async (app: Application, req: VercelRequest, res: Vercel
     return;
   }
 
-  if (req.headers["content-type"] !== 'application/vnd.api+json') {
+  if (req.headers["content-type"] !== "application/vnd.api+json") {
     res.status(400);
     res.send(convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json")));
   } else {
     // Vercel's magic body parser is limited to certain MIME types. The JSONAPI MIME type isn't one of them.
     // As a result, `req.body` becomes undefined. So, we trick Vercel into thinking this is an `application/json`
     // request, and keep parsing the data as JSON.
-    req.headers["content-type"] = 'application/json';
+    req.headers["content-type"] = "application/json";
   }
 };
 
@@ -57,7 +57,7 @@ export default function jsonApiVercel(app: Application) {
     }
 
     const { body, status } = await handleJsonApiEndpoint(appInstance, req);
-    res.status(status)
+    res.status(status);
     res.json(body);
-  }
+  };
 }

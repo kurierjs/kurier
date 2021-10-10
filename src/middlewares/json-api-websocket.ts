@@ -5,7 +5,7 @@ import { JsonApiDocument, Operation } from "../types";
 import ApplicationInstance from "../application-instance";
 
 export default function jsonApiWebSocket(websocketServer: Server, app: Application) {
-  websocketServer.on("connection", connection => {
+  websocketServer.on("connection", (connection) => {
     connection.on("message", async (message: Buffer) => {
       try {
         const appInstance = new ApplicationInstance(app);
@@ -26,14 +26,14 @@ export default function jsonApiWebSocket(websocketServer: Server, app: Applicati
 
         connection.send(
           JSON.stringify({
-            operations: response
-          })
+            operations: response,
+          }),
         );
       } catch (e) {
         connection.send(
           JSON.stringify({
-            errors: [e]
-          })
+            errors: [e],
+          }),
         );
       }
     });

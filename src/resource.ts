@@ -9,7 +9,7 @@ export default class Resource {
   static schema: ResourceSchema = {
     primaryKeyName: "",
     attributes: {},
-    relationships: {}
+    relationships: {},
   };
   id?: string;
   type: string;
@@ -21,7 +21,7 @@ export default class Resource {
   constructor({
     id,
     attributes,
-    relationships
+    relationships,
   }: {
     id?: string;
     attributes?: ResourceAttributes;

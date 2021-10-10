@@ -19,16 +19,16 @@ export default class RelationshipProcessor<ResourceT extends Resource> extends K
       ? super.get({
           op: "get",
           ref: {
-            type: op.ref.type
+            type: op.ref.type,
           },
           params: {
             fields: {
               [this.resourceClass.type]: [
                 this.resourceClass.schema.relationships[`${op.ref.relationship}`].foreignKeyName ||
-                  this.appInstance.app.serializer.relationshipToColumn(`${op.ref.relationship}`)
-              ]
-            }
-          }
+                  this.appInstance.app.serializer.relationshipToColumn(`${op.ref.relationship}`),
+              ],
+            },
+          },
         })
       : super.get(op);
   }

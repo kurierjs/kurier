@@ -1,5 +1,7 @@
-require('trace-unhandled/register');
-console.log('trace-unhandled is online: this will allow you, brave developer, to hunt down those devilish unhandled promises');
+require("trace-unhandled/register");
+console.log(
+  "trace-unhandled is online: this will allow you, brave developer, to hunt down those devilish unhandled promises",
+);
 
 import { Server } from "ws";
 import { jsonApiWebSocket } from "./kurier";
@@ -11,7 +13,7 @@ const expressServer = expressApp.listen(3001);
 const vercelServer = vercelApp.listen(3002);
 
 const ws = new Server({
-  server: koaServer
+  server: koaServer,
 });
 
 jsonApiWebSocket(ws, app);
