@@ -11,10 +11,20 @@ import {
   convertErrorToHttpResponse,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
+import { TransportLayerOptions } from "../types";
 
-export default function jsonApiExpress(app: Application, ...middlewares: express.RequestHandler[]) {
+export default function jsonApiExpress(
+  app: Application, 
+  transportLayerOptions: TransportLayerOptions = {
+    httpBodyPayload: '1mb',
+    httpStrictMode: false,
+  }, 
+  ...middlewares: express.RequestHandler[]
+) {
+  const { httpBodyPayload, httpStrictMode } = transportLayerOptions;
+
   const checkStrictMode = async (req: express.Request, res: express.Response, next: () => any) => {
-    if (!app.transportLayerOptions.httpStrictMode) {
+    if (!httpStrictMode) {
       return next();
     }
 
@@ -53,9 +63,9 @@ export default function jsonApiExpress(app: Application, ...middlewares: express
   return compose([
     checkStrictMode,
     express.json({
-      type: app.transportLayerOptions?.httpStrictMode ? "application/vnd.api+json" : "application/json",
+      type: httpStrictMode ? "application/vnd.api+json" : "application/json",
       strict: false,
-      limit: app.transportLayerOptions?.httpBodyPayload,
+      limit: httpBodyPayload,
     }),
     ...middlewares,
     jsonApiExpress,
