@@ -27,9 +27,6 @@ const app = new Application({
   types: [Article, Comment, Vote, Random],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor,
-  transportLayerOptions: {
-    httpStrictMode: true,
-  }
 });
 
 app.use(UserManagementAddon, {
