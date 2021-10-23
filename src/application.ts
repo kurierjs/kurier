@@ -197,7 +197,7 @@ export default class Application {
     const resource = this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
 
     if (!resource) {
-      throw JsonApiErrors.BadRequest(`Resource ${resourceType} is not registered in the API Application`);
+      throw JsonApiErrors.ResourceNotFound(`Resource ${resourceType} is not registered in the API Application`);
     }
 
     if (!resource.schema.relationships) {
