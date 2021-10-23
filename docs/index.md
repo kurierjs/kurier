@@ -61,7 +61,7 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 1. Install using either `npm` or `yarn`:
 
 ```bash
-  yarn add kurier
+  npm run add kurier
 ```
 
 2. Create a Resource:
