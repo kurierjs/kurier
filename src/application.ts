@@ -1,4 +1,5 @@
 import { Knex } from "knex";
+import JsonApiErrors from "./errors/json-api-errors";
 import Addon from "./addon";
 import ApplicationInstance from "./application-instance";
 import { canAccessResource } from "./decorators/authorize";
@@ -194,6 +195,10 @@ export default class Application {
 
   async resourceFor(resourceType: string): Promise<typeof Resource> {
     const resource = this.types.find(({ type }) => type && type === resourceType) as typeof Resource;
+
+    if (!resource) {
+      throw JsonApiErrors.BadRequest(`Resource ${resourceType} is not registered in the API Application`);
+    }
 
     if (!resource.schema.relationships) {
       resource.schema.relationships = {};
