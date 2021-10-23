@@ -11,7 +11,6 @@ export default {
         ...getFactoryObject(articles)(1),
         relationships: {
           ...getExtraRelationships(users, "author")([1], "Object"),
-          ...getExtraRelationships(votes, "votes")([1, 2]),
         },
       },
       included: [getFactoryObject(users)(1), ...getFactoryObjects(votes)([1, 2])],
@@ -21,7 +20,6 @@ export default {
         ...getFactoryObject(users)(2),
         relationships: {
           ...getExtraRelationships(articles, "articles")([2, 3]),
-          ...getExtraRelationships(votes, "votes")([3]),
         },
       },
       included: [...getFactoryObjects(articles)([2, 3]), getFactoryObject(votes)(3)],

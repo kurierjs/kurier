@@ -91,8 +91,13 @@ export default function authorize(...conditions: AttributeValueMatch[]) {
   return decorateWith(authorizeMiddleware, conditions);
 }
 
-export async function canAccessResource(resource: Resource, operationName: string, appInstance: ApplicationInstance) {
-  const processor = (await appInstance.processorFor(resource.type)) as OperationProcessor<Resource>;
+export async function canAccessResource(
+  resource: Resource | Resource[],
+  operationName: string,
+  appInstance: ApplicationInstance,
+) {
+  const type = Array.isArray(resource) && resource.length ? resource[0].type : (resource as Resource).type;
+  const processor = (await appInstance.processorFor(type)) as OperationProcessor<Resource>;
   const accessRules = processor[operationName][ACCESS_RULES] || [];
 
   if (!accessRules.length) {
