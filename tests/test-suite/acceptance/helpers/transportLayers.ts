@@ -21,7 +21,7 @@ const transportLayerContext = {
   },
 };
 
-export const transportLayers = Object.keys(transportLayerContext).map(layer => [layer]);
+export const transportLayers = Object.keys(transportLayerContext).map((layer) => [layer]);
 
 export default function testTransportLayer(transportLayer?: string) {
   const { app, agent } = transportLayerContext[transportLayer];

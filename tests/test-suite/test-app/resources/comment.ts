@@ -6,18 +6,18 @@ export default class Comment extends Resource {
     primaryKeyName: "_id",
     attributes: {
       body: String,
-      type: String
+      type: String,
     },
     relationships: {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "author_id"
+        foreignKeyName: "author_id",
       },
       parentComment: {
         type: () => Comment,
         belongsTo: true,
-      }
-    }
+      },
+    },
   };
 }

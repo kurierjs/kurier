@@ -7,42 +7,32 @@ import { comments } from "./comment";
 export default {
   get: {
     authorAndAuthorVotesOf1stArticle: {
-      "data": {...getFactoryObject(articles)(1),
-        "relationships":{
-          ...getExtraRelationships(users,'author')([1],"Object"),
-          ...getExtraRelationships(votes,'votes')([1,2])
-        }
+      data: {
+        ...getFactoryObject(articles)(1),
+        relationships: {
+          ...getExtraRelationships(users, "author")([1], "Object"),
+          ...getExtraRelationships(votes, "votes")([1, 2]),
         },
-      "included": [
-        getFactoryObject(users)(1),
-        ...getFactoryObjects(votes)([1, 2])
-      ]
+      },
+      included: [getFactoryObject(users)(1), ...getFactoryObjects(votes)([1, 2])],
     },
     articlesAndArticlesVotsOf2ndUser: {
-      "data":  {...getFactoryObject(users)(2),
-      "relationships":{
-        ...getExtraRelationships(articles,'articles')([2,3]),
-        ...getExtraRelationships(votes,'votes')([3])
-      }
+      data: {
+        ...getFactoryObject(users)(2),
+        relationships: {
+          ...getExtraRelationships(articles, "articles")([2, 3]),
+          ...getExtraRelationships(votes, "votes")([3]),
+        },
       },
-      "included": [
-        ...getFactoryObjects(articles)([2, 3]),
-        getFactoryObject(votes)(3)
-      ]
+      included: [...getFactoryObjects(articles)([2, 3]), getFactoryObject(votes)(3)],
     },
     parentCommentAndParentCommentsAuthorOf1stComment: {
-      "data": getFactoryObject(comments)(1),
-      "included": [
-        getFactoryObject(comments)(2),
-        getFactoryObject(users)(2)
-      ]
+      data: getFactoryObject(comments)(1),
+      included: [getFactoryObject(comments)(2), getFactoryObject(users)(2)],
     },
-    parentCommentAndParentCommentsParentCommentOf1stComment:{
-      "data": getFactoryObject(comments)(1),
-      "included": [
-        getFactoryObject(comments)(2),
-        getFactoryObject(comments)(3)
-      ]
+    parentCommentAndParentCommentsParentCommentOf1stComment: {
+      data: getFactoryObject(comments)(1),
+      included: [getFactoryObject(comments)(2), getFactoryObject(comments)(3)],
     },
-  }
+  },
 };

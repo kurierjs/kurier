@@ -1,72 +1,62 @@
-export const users = [{
-  "id": 1,
-  "type": "user",
-  "attributes": {
-    "username": "me",
-    "email": "me@me.com",
-    "friends": [
-      {
-        "name": "Joel"
-      },
-      {
-        "name": "Ryan"
-      }
-    ],
-    "coolFactor": 3,
-    "roles": [
-      "user",
-      "author",
-      "voter"
-    ]
+export const users = [
+  {
+    id: 1,
+    type: "user",
+    attributes: {
+      username: "me",
+      email: "me@me.com",
+      friends: [
+        {
+          name: "Joel",
+        },
+        {
+          name: "Ryan",
+        },
+      ],
+      coolFactor: 3,
+      roles: ["user", "author", "voter"],
+    },
+    relationships: {},
   },
-  "relationships": {}
-},
-{
-  "id": 2,
-  "type": "user",
-  "attributes": {
-    "username": "username2",
-    "email": "me2@me.com",
-    "friends": [
-      {
-        "name": "Joel"
-      },
-      {
-        "name": "Ryan"
-      }
-    ],
-    "coolFactor": 3,
-    "roles": [
-      "user",
-      "author",
-      "voter"
-    ]
+  {
+    id: 2,
+    type: "user",
+    attributes: {
+      username: "username2",
+      email: "me2@me.com",
+      friends: [
+        {
+          name: "Joel",
+        },
+        {
+          name: "Ryan",
+        },
+      ],
+      coolFactor: 3,
+      roles: ["user", "author", "voter"],
+    },
+    relationships: {},
   },
-  "relationships": {}
-},
-{
-  "id": 3,
-  "type": "user",
-  "attributes": {
-    "username": "username3",
-    "email": "me3@me.com",
-    "friends": [
-      {
-        "name": "Joel"
-      },
-      {
-        "name": "Ryan"
-      }
-    ],
-    "coolFactor": 3,
-    "roles": [
-      "user",
-      "author",
-      "voter"
-    ]
+  {
+    id: 3,
+    type: "user",
+    attributes: {
+      username: "username3",
+      email: "me3@me.com",
+      friends: [
+        {
+          name: "Joel",
+        },
+        {
+          name: "Ryan",
+        },
+      ],
+      coolFactor: 3,
+      roles: ["user", "author", "voter"],
+    },
+    relationships: {},
   },
-  "relationships": {}
-}];
+];
 
 export default {
   forCreation: {
@@ -75,11 +65,11 @@ export default {
         attributes: {
           email: "creationtest@test.com",
           password: "test",
-          username: "creationtest"
+          username: "creationtest",
         },
         type: "user",
-        relationships: {}
-      }
+        relationships: {},
+      },
     },
     response: {
       data: {
@@ -90,20 +80,20 @@ export default {
           email: "creationtest@test.com",
           friends: [{ name: "Joel" }, { name: "Ryan" }],
           coolFactor: 3,
-          roles: ["user", "author", "voter"]
+          roles: ["user", "author", "voter"],
         },
-        relationships: {}
-      }
-    }
+        relationships: {},
+      },
+    },
   },
   toUpdate: {
     dataToUpdate: {
       data: {
         type: "user",
         attributes: {
-          email: "updatetest@test.com"
-        }
-      }
+          email: "updatetest@test.com",
+        },
+      },
     },
     response: {
       data: {
@@ -114,40 +104,40 @@ export default {
           email: "updatetest@test.com",
           friends: [{ name: "Joel" }, { name: "Ryan" }],
           coolFactor: 3,
-          roles: ["user", "author", "voter"]
+          roles: ["user", "author", "voter"],
         },
-        relationships: {}
-      }
-    }
+        relationships: {},
+      },
+    },
   },
   toAuthenticate: {
     request: {
       data: {
         attributes: {
           email: "me@me.com",
-          password: "test"
+          password: "test",
         },
         type: "session",
-        relationships: {}
-      }
+        relationships: {},
+      },
     },
     response: {
       data: {
         id: "STRING",
         type: "session",
         attributes: {
-          token: "STRING"
+          token: "STRING",
         },
         relationships: {
           user: {
             data: {
               id: 1,
-              type: "user"
-            }
-          }
-        }
-      }
-    }
+              type: "user",
+            },
+          },
+        },
+      },
+    },
   },
   toGet: [
     // the first element here is the authenticated user
@@ -159,9 +149,9 @@ export default {
         username: "me",
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
-        roles: ["user", "author", "voter"]
+        roles: ["user", "author", "voter"],
       },
-      relationships: {}
+      relationships: {},
     },
     {
       id: 2,
@@ -171,9 +161,9 @@ export default {
         username: "username2",
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
-        roles: ["user", "author", "voter"]
+        roles: ["user", "author", "voter"],
       },
-      relationships: {}
+      relationships: {},
     },
     {
       id: 3,
@@ -183,10 +173,10 @@ export default {
         username: "username3",
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
-        roles: ["user", "author", "voter"]
+        roles: ["user", "author", "voter"],
       },
-      relationships: {}
-    }
+      relationships: {},
+    },
   ],
   multipleIncludeGetSingleUser: {
     data: {
@@ -197,49 +187,49 @@ export default {
         email: "me@me.com",
         friends: [
           {
-            name: "Joel"
+            name: "Joel",
           },
           {
-            name: "Ryan"
-          }
+            name: "Ryan",
+          },
         ],
         coolFactor: 3,
-        roles: ["user", "author", "voter"]
+        roles: ["user", "author", "voter"],
       },
       relationships: {
         comments: {
           data: [
             {
               id: 1,
-              type: "comment"
+              type: "comment",
             },
             {
               id: 3,
-              type: "comment"
-            }
-          ]
+              type: "comment",
+            },
+          ],
         },
         articles: {
           data: [
             {
               id: 1,
-              type: "article"
-            }
-          ]
+              type: "article",
+            },
+          ],
         },
         votes: {
           data: [
             {
               id: 1,
-              type: "vote"
+              type: "vote",
             },
             {
               id: 2,
-              type: "vote"
-            }
-          ]
-        }
-      }
+              type: "vote",
+            },
+          ],
+        },
+      },
     },
     included: [
       {
@@ -247,57 +237,57 @@ export default {
         type: "comment",
         attributes: {
           body: "hello",
-          type: "not_spam"
+          type: "not_spam",
         },
         relationships: {
           author: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           parentComment: {
             data: {
               id: 2,
-              type: "comment"
-            }
-          }
-        }
+              type: "comment",
+            },
+          },
+        },
       },
       {
         id: 3,
         type: "comment",
         attributes: {
           body: "hello3",
-          type: "spam"
+          type: "spam",
         },
         relationships: {
           author: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           parentComment: {
-            data: null
-          }
-        }
+            data: null,
+          },
+        },
       },
       {
         id: 1,
         type: "article",
         attributes: {
           body: "this is test 1",
-          voteCount: 2
+          voteCount: 2,
         },
         relationships: {
           author: {
             data: {
               id: 1,
-              type: "user"
-            }
-          }
-        }
+              type: "user",
+            },
+          },
+        },
       },
       {
         id: 1,
@@ -307,22 +297,22 @@ export default {
           createdOn: null,
           updatedOn: null,
           updatedBy: null,
-          createdBy: null
+          createdBy: null,
         },
         relationships: {
           user: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           article: {
             data: {
               id: 1,
-              type: "article"
-            }
-          }
-        }
+              type: "article",
+            },
+          },
+        },
       },
       {
         id: 2,
@@ -332,31 +322,31 @@ export default {
           createdOn: null,
           updatedOn: null,
           updatedBy: null,
-          createdBy: null
+          createdBy: null,
         },
         relationships: {
           user: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           article: {
             data: {
               id: 1,
-              type: "article"
-            }
-          }
-        }
-      }
-    ]
+              type: "article",
+            },
+          },
+        },
+      },
+    ],
   },
   deletedUserError: {
     errors: [
       {
         code: "not_found",
-        status: 404
-      }
-    ]
-  }
+        status: 404,
+      },
+    ],
+  },
 };

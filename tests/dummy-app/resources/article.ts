@@ -5,20 +5,20 @@ import Vote from "./vote";
 export default class Article extends Resource {
   static schema = {
     attributes: {
-      body: String
+      body: String,
     },
 
     relationships: {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "author"
+        foreignKeyName: "author",
       },
       votes: {
         type: () => Vote,
         hasMany: true,
-        foreignKeyName: "article_id"
-      }
-    }
+        foreignKeyName: "article_id",
+      },
+    },
   };
 }

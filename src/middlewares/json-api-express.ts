@@ -14,11 +14,11 @@ import jsonApiErrors from "../errors/json-api-errors";
 import { TransportLayerOptions } from "../types";
 
 export default function jsonApiExpress(
-  app: Application, 
+  app: Application,
   transportLayerOptions: TransportLayerOptions = {
-    httpBodyPayload: '1mb',
+    httpBodyPayload: "1mb",
     httpStrictMode: false,
-  }, 
+  },
   ...middlewares: express.RequestHandler[]
 ) {
   const { httpBodyPayload, httpStrictMode } = transportLayerOptions;
