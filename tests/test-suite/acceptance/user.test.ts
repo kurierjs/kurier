@@ -1,7 +1,7 @@
 import users from "./factories/user";
 import getAuthenticationData from "./helpers/authenticateUser";
 
-import testTransportLayer, {transportLayers} from "./helpers/transportLayers";
+import testTransportLayer, { transportLayers } from "./helpers/transportLayers";
 
 describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
   const request = testTransportLayer(transportLayer);
@@ -16,7 +16,9 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
 
       it("Authenticated - Get all users with their votes and comments - Multiple types include", async () => {
         const authData = await getAuthenticationData();
-        const result = await request.get("/users/1?include=comments,articles,votes").set("Authorization", authData.token);
+        const result = await request
+          .get("/users/1?include=comments,articles,votes")
+          .set("Authorization", authData.token);
         expect(result.status).toEqual(200);
         expect(result.body).toEqual(users.multipleIncludeGetSingleUser);
       });

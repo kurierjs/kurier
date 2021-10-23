@@ -8,7 +8,7 @@ const expressServer = expressApp.listen(3001);
 const vercelServer = vercelApp.listen(3002);
 
 const ws = new Server({
-  server: koaServer
+  server: koaServer,
 });
 
 jsonApiWebSocket(ws, app);

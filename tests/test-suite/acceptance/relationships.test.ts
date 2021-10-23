@@ -1,11 +1,10 @@
 import relationships from "./factories/relationships";
 
-import testTransportLayer, {transportLayers} from "./helpers/transportLayers";
+import testTransportLayer, { transportLayers } from "./helpers/transportLayers";
 
 describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
   const request = testTransportLayer(transportLayer);
   describe("Relationships", () => {
-
     describe("GET", () => {
       it("Get 1st article votes (hasMany)(Multiple Results)", async () => {
         const result = await request.get(`/articles/1/votes`);
@@ -45,6 +44,5 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
         expect(result.status).toEqual(200);
       });
     });
-
   });
 });

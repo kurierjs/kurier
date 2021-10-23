@@ -8,24 +8,24 @@ export default class User extends JsonApiUser {
     attributes: {
       username: String,
       email: String,
-      password: Password
+      password: Password,
     },
 
     relationships: {
       articles: {
         type: () => Article,
         hasMany: true,
-        foreignKeyName: "author"
+        foreignKeyName: "author",
       },
       comments: {
         type: () => Comment,
         hasMany: true,
-        foreignKeyName: "author_id"
+        foreignKeyName: "author_id",
       },
       votes: {
         type: () => Vote,
-        hasMany: true
-      }
-    }
+        hasMany: true,
+      },
+    },
   };
 }

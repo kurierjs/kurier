@@ -22,7 +22,7 @@ export default class MyVeryOwnUserProcessor<T extends User> extends UserProcesso
 
     async roles() {
       return ["user", "author", "voter"];
-    }
+    },
   };
 
   @Authorize(IfUserDoesNotHaveRole("foo"))

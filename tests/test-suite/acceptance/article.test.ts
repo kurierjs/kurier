@@ -1,6 +1,6 @@
 import articles from "./factories/article";
 import getAuthenticationData from "./helpers/authenticateUser";
-import testTransportLayer, {transportLayers} from "./helpers/transportLayers";
+import testTransportLayer, { transportLayers } from "./helpers/transportLayers";
 
 describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
   const request = testTransportLayer(transportLayer);
@@ -56,4 +56,3 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
     });
   });
 });
-

@@ -16,7 +16,11 @@ import {
 import jsonApiErrors from "../errors/json-api-errors";
 import { TransportLayerOptions } from "../types";
 
-const checkStrictMode = async (transportLayerOptions: TransportLayerOptions, req: VercelRequest, res: VercelResponse) => {
+const checkStrictMode = async (
+  transportLayerOptions: TransportLayerOptions,
+  req: VercelRequest,
+  res: VercelResponse,
+) => {
   if (!transportLayerOptions.httpStrictMode) {
     return;
   }
@@ -32,9 +36,12 @@ const checkStrictMode = async (transportLayerOptions: TransportLayerOptions, req
   }
 };
 
-export default function jsonApiVercel(app: Application, transportLayerOptions: TransportLayerOptions = {
-  httpStrictMode: false,
-}) {
+export default function jsonApiVercel(
+  app: Application,
+  transportLayerOptions: TransportLayerOptions = {
+    httpStrictMode: false,
+  },
+) {
   return async (req: VercelRequest, res: VercelResponse) => {
     await checkStrictMode(transportLayerOptions, req, res);
     const appInstance = new ApplicationInstance(app);

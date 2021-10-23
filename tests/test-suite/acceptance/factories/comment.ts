@@ -1,68 +1,68 @@
 export const comments = [
   {
-      "id": 1,
-      "type": "comment",
-      "attributes": {
-          "body": "hello",
-          "type": "not_spam"
+    id: 1,
+    type: "comment",
+    attributes: {
+      body: "hello",
+      type: "not_spam",
+    },
+    relationships: {
+      author: {
+        data: {
+          id: 1,
+          type: "user",
+        },
       },
-      "relationships": {
-          "author": {
-              "data": {
-                  "id": 1,
-                  "type": "user"
-              }
-          },
-          "parentComment": {
-              "data": {
-                  "id": 2,
-                  "type": "comment"
-              }
-          }
-      }
+      parentComment: {
+        data: {
+          id: 2,
+          type: "comment",
+        },
+      },
+    },
   },
   {
-      "id": 2,
-      "type": "comment",
-      "attributes": {
-          "body": "hello2",
-          "type": "not_spam"
+    id: 2,
+    type: "comment",
+    attributes: {
+      body: "hello2",
+      type: "not_spam",
+    },
+    relationships: {
+      author: {
+        data: {
+          id: 2,
+          type: "user",
+        },
       },
-      "relationships": {
-          "author": {
-              "data": {
-                  "id": 2,
-                  "type": "user"
-              }
-          },
-          "parentComment": {
-              "data": {
-                  "id": 3,
-                  "type": "comment"
-              }
-          }
-      }
+      parentComment: {
+        data: {
+          id: 3,
+          type: "comment",
+        },
+      },
+    },
   },
   {
-      "id": 3,
-      "type": "comment",
-      "attributes": {
-          "body": "hello3",
-          "type": "spam"
+    id: 3,
+    type: "comment",
+    attributes: {
+      body: "hello3",
+      type: "spam",
+    },
+    relationships: {
+      author: {
+        data: {
+          id: 1,
+          type: "user",
+        },
       },
-      "relationships": {
-          "author": {
-              "data": {
-                  "id": 1,
-                  "type": "user"
-              }
-          },
-          "parentComment": {
-              "data": null
-          }
-      }
-  }
-]
+      parentComment: {
+        data: null,
+      },
+    },
+  },
+];
 
 export default {
   forCreation: {
@@ -72,23 +72,23 @@ export default {
           type: "comment",
           attributes: {
             body: "new commentttt",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             parentComment: {
               data: {
                 id: 1,
-                type: "comment"
-              }
+                type: "comment",
+              },
             },
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
-            }
-          }
-        }
+                type: "user",
+              },
+            },
+          },
+        },
       },
       rawRequestSnakeCase: {
         data: {
@@ -96,9 +96,9 @@ export default {
             body: "new commentttt",
             type: "spam",
             author_id: 2,
-            parent_comment_id: 1
-          }
-        }
+            parent_comment_id: 1,
+          },
+        },
       },
       rawRequestCamelCase: {
         data: {
@@ -106,10 +106,10 @@ export default {
             body: "new commentttt",
             type: "spam",
             author_id: 2,
-            parentCommentId: 1
-          }
-        }
-      }
+            parentCommentId: 1,
+          },
+        },
+      },
     },
     responses: {
       complete: {
@@ -118,23 +118,23 @@ export default {
           type: "comment",
           attributes: {
             body: "new commentttt",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
+                type: "user",
+              },
             },
             parentComment: {
               data: {
                 id: 1,
-                type: "comment"
-              }
-            }
-          }
-        }
+                type: "comment",
+              },
+            },
+          },
+        },
       },
       responseNoBody: {
         data: {
@@ -142,23 +142,23 @@ export default {
           type: "comment",
           attributes: {
             body: null,
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
+                type: "user",
+              },
             },
             parentComment: {
               data: {
                 id: 1,
-                type: "comment"
-              }
-            }
-          }
-        }
+                type: "comment",
+              },
+            },
+          },
+        },
       },
       responseNoParentComment: {
         data: {
@@ -166,22 +166,22 @@ export default {
           type: "comment",
           attributes: {
             body: "new commentttt",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
+                type: "user",
+              },
             },
             parentComment: {
-              data: null
-            }
-          }
-        }
-      }
-    }
+              data: null,
+            },
+          },
+        },
+      },
+    },
   },
   toUpdate: {
     attributeAndRelationship: {
@@ -190,23 +190,23 @@ export default {
           type: "comment",
           attributes: {
             body: "updated body",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             parentComment: {
               data: {
                 id: 2,
-                type: "comment"
-              }
+                type: "comment",
+              },
             },
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
-            }
-          }
-        }
+                type: "user",
+              },
+            },
+          },
+        },
       },
       response: {
         data: {
@@ -214,24 +214,24 @@ export default {
           type: "comment",
           attributes: {
             body: "updated body",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
+                type: "user",
+              },
             },
             parentComment: {
               data: {
                 id: 2,
-                type: "comment"
-              }
-            }
-          }
-        }
-      }
+                type: "comment",
+              },
+            },
+          },
+        },
+      },
     },
     removeRelationship: {
       request: {
@@ -239,46 +239,46 @@ export default {
           type: "comment",
           attributes: {
             body: "updated body",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             parentComment: {
               data: {
                 id: null,
-                type: "comment"
-              }
+                type: "comment",
+              },
             },
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
-            }
-          }
-        }
+                type: "user",
+              },
+            },
+          },
+        },
       },
       requestForError: {
         data: {
           type: "comment",
           attributes: {
             body: "updated body",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             parentComment: {
               data: {
                 id: 1,
-                type: "comment"
-              }
+                type: "comment",
+              },
             },
             author: {
               data: {
                 id: null,
-                type: "user"
-              }
-            }
-          }
-        }
+                type: "user",
+              },
+            },
+          },
+        },
       },
       response: {
         data: {
@@ -286,22 +286,22 @@ export default {
           type: "comment",
           attributes: {
             body: "updated body",
-            type: "spam"
+            type: "spam",
           },
           relationships: {
             author: {
               data: {
                 id: 2,
-                type: "user"
-              }
+                type: "user",
+              },
             },
             parentComment: {
-              data: null
-            }
-          }
-        }
-      }
-    }
+              data: null,
+            },
+          },
+        },
+      },
+    },
   },
   toGetReverseSorted: {
     data: [
@@ -310,88 +310,88 @@ export default {
         type: "comment",
         attributes: {
           body: "hello3",
-          type: "spam"
+          type: "spam",
         },
         relationships: {
           author: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           parentComment: {
-            data: null
-          }
-        }
+            data: null,
+          },
+        },
       },
       {
         id: 2,
         type: "comment",
         attributes: {
           body: "hello2",
-          type: "not_spam"
+          type: "not_spam",
         },
         relationships: {
           author: {
             data: {
               id: 2,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           parentComment: {
             data: {
               id: 3,
-              type: "comment"
-            }
-          }
-        }
+              type: "comment",
+            },
+          },
+        },
       },
       {
         id: 1,
         type: "comment",
         attributes: {
           body: "hello",
-          type: "not_spam"
+          type: "not_spam",
         },
         relationships: {
           author: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           parentComment: {
             data: {
               id: 2,
-              type: "comment"
-            }
-          }
-        }
-      }
-    ]
+              type: "comment",
+            },
+          },
+        },
+      },
+    ],
   },
   singleCommentNoType: {
     data: {
       id: 1,
       type: "comment",
       attributes: {
-        body: "hello"
+        body: "hello",
       },
       relationships: {
         author: {
           data: {
             id: 1,
-            type: "user"
-          }
+            type: "user",
+          },
         },
         parentComment: {
           data: {
             id: 2,
-            type: "comment"
-          }
-        }
-      }
-    }
+            type: "comment",
+          },
+        },
+      },
+    },
   },
   singleCommentWithReflexiveInclude: {
     data: {
@@ -400,8 +400,8 @@ export default {
       attributes: { body: "hello", type: "not_spam" },
       relationships: {
         parentComment: { data: { id: 2, type: "comment" } },
-        author: { data: { id: 1, type: "user" } }
-      }
+        author: { data: { id: 1, type: "user" } },
+      },
     },
     included: [
       {
@@ -410,9 +410,9 @@ export default {
         attributes: { body: "hello2", type: "not_spam" },
         relationships: {
           author: { data: { id: 2, type: "user" } },
-          parentComment: { data: { id: 3, type: "comment" } }
-        }
-      }
-    ]
-  }
+          parentComment: { data: { id: 3, type: "comment" } },
+        },
+      },
+    ],
+  },
 };
