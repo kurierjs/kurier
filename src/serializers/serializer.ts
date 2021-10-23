@@ -89,11 +89,26 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         (includedDirectRelationships, [relName, relData]: [string, ResourceRelationshipDescriptor]) => ({
           ...includedDirectRelationships,
           [relName]: relData.direct,
-          ...relData.nested,
         }),
         {},
       ),
     );
+
+    Object.keys(data.relationships)
+      .filter((relName) => data.relationships[relName] && schemaRelationships[relName])
+      .forEach((relName) => {
+        const fkName = schemaRelationships[relName].belongsTo
+          ? DEFAULT_PRIMARY_KEY
+          : schemaRelationships[relName].type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
+
+        data.relationships[relName] = {
+          data: this.serializeRelationship(
+            data.relationships[relName] as unknown as Resource | Resource[],
+            schemaRelationships[relName].type(),
+            fkName,
+          ),
+        };
+      });
 
     data.attributes = unpick(
       data.attributes,
@@ -112,22 +127,6 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         [this.columnToAttribute(attribute)]: data.attributes[attribute],
       }))
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
-
-    Object.keys(data.relationships)
-      .filter((relName) => data.relationships[relName])
-      .forEach((relName) => {
-        const fkName = schemaRelationships[relName].belongsTo
-          ? DEFAULT_PRIMARY_KEY
-          : schemaRelationships[relName].type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-
-        data.relationships[relName] = {
-          data: this.serializeRelationship(
-            data.relationships[relName] as unknown as Resource | Resource[],
-            schemaRelationships[relName].type(),
-            fkName,
-          ),
-        };
-      });
 
     return data;
   }
@@ -195,6 +194,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                           (attribute) => relatedResourceClass.schema.attributes[attribute] === Password,
                         ),
                       ]),
+                      relationships: {}, //TODO: this is not responding with the nested relationship relations
                     }),
                     relatedResourceClass,
                   ),
@@ -221,7 +221,6 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                               (attribute) => subResourceClass.schema.attributes[attribute] === Password,
                             ),
                           ]),
-                          // A drunk Santiago walks in the bar...
                           relationships: {}, // nestedResources.filter
                         }),
                         subResourceClass,

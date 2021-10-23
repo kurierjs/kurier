@@ -221,20 +221,20 @@ export default class Application {
       resourceType = null;
     }
 
-    const allIncluded: Resource[] = !resourceType
+    const allIncluded: (Resource | Resource[])[] = !resourceType
       ? []
       : flatten(this.serializer.serializeIncludedResources(data, await this.resourceFor(resourceType)) || []);
 
-    const included: Resource[] = [];
+    let included: Resource[] = [];
 
     await Promise.all(
-      allIncluded.map((resource: Resource) => {
+      allIncluded.map((resource) => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve) => {
           const result = await canAccessResource(resource, "get", appInstance);
 
           if (result) {
-            included.push(resource);
+            included = included.concat(resource);
           }
 
           resolve();
