@@ -1,7 +1,6 @@
 import { Resource } from "../kurier";
 import User from "./user";
 import Vote from "./vote";
-import Comment from "./comment";
 
 export default class Article extends Resource {
   static schema = {
@@ -17,9 +16,6 @@ export default class Article extends Resource {
         excludeLinks: ['self', 'related'],
         alwaysIncludeLinkageData: true,
       },
-      // comments: {
-      //   type: () => Comment,
-      // },
       votes: {
         type: () => Vote,
         hasMany: true,

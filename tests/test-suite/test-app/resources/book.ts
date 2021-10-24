@@ -1,4 +1,5 @@
 import { User } from "../../../../src";
+import Tag from "./Tag";
 import { Resource } from "../kurier";
 
 export default class Book extends Resource {
@@ -15,6 +16,11 @@ export default class Book extends Resource {
         belongsTo: true,
         foreignKeyName: "author"
       },
+      tags: {
+        type: () => Tag,
+        hasMany: true,
+        alwaysIncludeLinkageData: true,
+      }
     }
   };
 }

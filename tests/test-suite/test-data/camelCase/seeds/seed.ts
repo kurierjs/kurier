@@ -46,16 +46,35 @@ exports.seed = (knex) => {
         { id: 7, url: "http://example.com/7" },
       ]
     },
-    ...new Array(10).fill(0).map(_ => ({
+    ...new Array(10).fill(0).map(_ => {
+      const tags = {
+        tableName: 'tags',
+        values: []
+      };
+
+      const books = {
         tableName: 'books',
-        values: [...Array(100)].map(() => ({
-          id: faker.datatype.uuid(),
-          title: faker.lorem.lines(1),
-          datePublished: faker.date.past().toISOString(),
-          isbn: faker.datatype.number({ min: 1000000, max: 9999999 }),
-          author: faker.datatype.number({ min: 1, max: 3 })
-        }))
-    })),
+        values: [...Array(100)].map(() => {
+          const book = {
+            id: faker.datatype.uuid(),
+            title: faker.lorem.lines(1),
+            datePublished: faker.date.past().toISOString(),
+            isbn: faker.datatype.number({ min: 1000000, max: 9999999 }),
+            author: faker.datatype.number({ min: 1, max: 3 })
+          };
+
+          tags.values.push({
+            id: faker.datatype.uuid(),
+            name: faker.lorem.lines(1),
+            bookId: book.id,
+          })
+
+          return book;
+        })
+      };
+
+      return [tags, books];
+    }).flat(),
   ];
   return Promise.all(initialData.map(({ tableName, values }) => knex(tableName).insert(values))).then(() => { });
 };

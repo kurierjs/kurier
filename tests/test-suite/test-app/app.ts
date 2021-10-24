@@ -24,10 +24,11 @@ import VoteProcessor from "./processors/vote";
 import RandomProcessor from "./processors/random";
 import LinkProcessor from "./processors/link";
 import Book from "./resources/book";
+import Tag from "./resources/tag";
 
 const app = new Application({
   namespace: "api",
-  types: [Article, Comment, Vote, Random, Link, Book],
+  types: [Article, Comment, Vote, Random, Link, Book, Tag],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor, LinkProcessor],
   defaultProcessor: KnexProcessor,
   baseUrl: process.env.NODE_ENV === 'test' ? new URL('http://localhost:3000') : undefined,
