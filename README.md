@@ -124,7 +124,7 @@ Check out our [updated docs at ReadTheDocs](https://kurier.readthedocs.io/en/lat
 
 ## Contributing
 
-We have a little contributors guide now! Take a look at it [in here](https://github.com/kurierjs/kurier/tree/main/docs/contributing.md).
+We have a little contributors guide now! Take a look at it [in here](https://github.com/kurierjs/kurier/blob/main/CONTRIBUTING.md).
 
 ## License
 
