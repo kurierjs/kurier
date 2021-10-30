@@ -34,8 +34,8 @@ export default class Application {
     this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
     this.transportLayerOptions = settings.transportLayerOptions || {
-      httpBodyPayload: '1mb',
-      httpStrictMode: false
+      httpBodyPayload: "1mb",
+      httpStrictMode: false,
     };
     this.defaultPaginator = settings.defaultPaginator || PagedPaginator;
     this.defaultPageSize = settings.defaultPageSize || 100;
@@ -48,7 +48,7 @@ export default class Application {
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
-    if (this.addons.find(installedAddon => installedAddon.addon === addon)) {
+    if (this.addons.find((installedAddon) => installedAddon.addon === addon)) {
       return;
     }
 
@@ -64,17 +64,17 @@ export default class Application {
     applicationInstance.transaction = await this.createTransaction();
 
     try {
-      const result: OperationResponse[] = await Promise.all(
+      const result: OperationResponse[] = (await Promise.all(
         ops
-          .map(async op => {
+          .map(async (op) => {
             const processor = await applicationInstance.processorFor(op.ref.type);
 
             if (processor) {
               return this.executeOperation(op, processor);
             }
           })
-          .filter(Boolean)
-      ) as OperationResponse[];
+          .filter(Boolean),
+      )) as OperationResponse[];
 
       await applicationInstance.transaction.commit();
 
@@ -99,29 +99,33 @@ export default class Application {
 
         if (relationship.hasMany) {
           const relatedResourceClassRelationships = Object.entries(relatedResourceClass.schema.relationships);
-          let [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
-            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type) as [string, ResourceSchemaRelationship];
+          const [relatedRelationshipName, relatedRelationship]: [string, ResourceSchemaRelationship] =
+            relatedResourceClassRelationships.find(([_relName, relData]) => relData.type().type === op.ref.type) as [
+              string,
+              ResourceSchemaRelationship,
+            ];
 
           relatedOp = {
             ...op,
             ref: {
-              type: relatedResourceClass.type
+              type: relatedResourceClass.type,
             },
             params: {
               ...op.params,
               filter: {
                 ...(op.params || {}).filter,
-                [
-                  relatedRelationship.foreignKeyName ||
-                  this.serializer.relationshipToColumn(relatedRelationshipName, relatedResourceClass.schema.primaryKeyName)
-                ]: op.ref.id
-              }
-            }
+                [relatedRelationship.foreignKeyName ||
+                this.serializer.relationshipToColumn(
+                  relatedRelationshipName,
+                  relatedResourceClass.schema.primaryKeyName,
+                )]: op.ref.id,
+              },
+            },
           } as Operation;
         } else if (relationship.belongsTo) {
           const deserializedOriginalOperation = await this.serializer.deserializeResource(
             { ...op, op: "get" },
-            resourceClass
+            resourceClass,
           );
           const result = (await processor.execute(deserializedOriginalOperation)) as ResourceOperationResult;
 
@@ -131,14 +135,17 @@ export default class Application {
               type: relatedResourceClass.type,
               id: result.resource?.attributes[
                 resourceClass.schema.relationships[op.ref.relationship].foreignKeyName ||
-                this.serializer.relationshipToColumn(op.ref.relationship)
-              ] as string
-            }
+                  this.serializer.relationshipToColumn(op.ref.relationship)
+              ] as string,
+            },
           };
         }
 
         const deserializedOperation = this.serializer.deserializeResource(relatedOp, relatedResourceClass);
-        const relatedProcessor = await this.processorFor(relatedResourceClass.type, processor.appInstance) as OperationProcessor<Resource>;
+        const relatedProcessor = (await this.processorFor(
+          relatedResourceClass.type,
+          processor.appInstance,
+        )) as OperationProcessor<Resource>;
         const result = await relatedProcessor.execute(deserializedOperation);
 
         return this.buildOperationResponse(result, processor.appInstance, op.params);
@@ -156,9 +163,9 @@ export default class Application {
 
     if (!knex) {
       return {
-        commit: () => { },
-        rollback: () => { }
-      }
+        commit: () => {},
+        rollback: () => {},
+      };
     }
 
     return knex.transaction();
@@ -167,15 +174,15 @@ export default class Application {
   async processorFor(
     resourceType: string,
     applicationInstance: ApplicationInstance,
-    processorType = this.defaultProcessor
+    processorType = this.defaultProcessor,
   ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
 
     const processors = await Promise.all(
-      this.processors.map(async processor => ((await processor.shouldHandle(resourceType)) ? processor : false))
+      this.processors.map(async (processor) => ((await processor.shouldHandle(resourceType)) ? processor : false)),
     );
 
-    const ProcessorClass = processors.find(p => p !== false);
+    const ProcessorClass = processors.find((p) => p !== false);
 
     if (ProcessorClass) {
       return new ProcessorClass(applicationInstance);
@@ -224,7 +231,8 @@ export default class Application {
 
     await Promise.all(
       allIncluded.map((resource: Resource) => {
-        return new Promise<void>(async resolve => {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<void>(async (resolve) => {
           const result = await canAccessResource(resource, "get", appInstance);
 
           if (result) {
@@ -233,7 +241,7 @@ export default class Application {
 
           resolve();
         });
-      })
+      }),
     );
 
     const { data, links } = await this.serializeResources(result, params);

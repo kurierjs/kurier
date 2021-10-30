@@ -33,9 +33,9 @@ export default class ApplicationInstance {
       op: "identify",
       ref: {
         type: "user",
-        id: tokenPayload["id"]
+        id: tokenPayload["id"],
       },
-      params: {}
+      params: {},
     } as Operation;
 
     let user: OperationResponse;

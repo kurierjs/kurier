@@ -29,7 +29,7 @@ const defaults: UserManagementAddonOptions = {
   userLoginCallback: async () => {
     console.warn(
       "WARNING: You're using the default login callback with UserManagementAddon." +
-        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration."
+        "ANY LOGIN REQUEST WILL PASS. Implement this callback in your addon configuration.",
     );
     return true;
   },
@@ -37,17 +37,20 @@ const defaults: UserManagementAddonOptions = {
   userEncryptPasswordCallback: async (op: Operation) => {
     console.warn(
       "WARNING: You're using the default encryptPassword callback with UserManagementAddon." +
-        "Your password is NOT being encrypted. Implement this callback in your addon configuration."
+        "Your password is NOT being encrypted. Implement this callback in your addon configuration.",
     );
 
     return { password: op.data?.attributes.password.toString() } as ResourceAttributes;
   },
   usernameRequestParameter: "username",
-  passwordRequestParameter: "password"
+  passwordRequestParameter: "password",
 };
 
 export default class UserManagementAddon extends Addon {
-  constructor(public readonly app: Application, public readonly options: UserManagementAddonOptions = {} as UserManagementAddonOptions) {
+  constructor(
+    public readonly app: Application,
+    public readonly options: UserManagementAddonOptions = {} as UserManagementAddonOptions,
+  ) {
     super(app);
     this.options = { ...defaults, ...options };
   }
@@ -59,7 +62,10 @@ export default class UserManagementAddon extends Addon {
     this.app.services.permissions = this.options.userPermissionsProvider;
 
     this.app.types.push(this.options.userResource, sessionResourceType);
-    this.app.processors.push((this.createUserProcessor() as unknown) as typeof JsonApiUserProcessor, this.createSessionProcessor(sessionResourceType));
+    this.app.processors.push(
+      this.createUserProcessor() as unknown as typeof JsonApiUserProcessor,
+      this.createSessionProcessor(sessionResourceType),
+    );
   }
 
   private createUserProcessor() {
@@ -73,10 +79,12 @@ export default class UserManagementAddon extends Addon {
       encryptPasswordCallback = userEncryptPasswordCallback as (op: Operation) => Promise<ResourceAttributes>;
     } else {
       generateIdCallback = userProcessor?.prototype["generateId"] as () => Promise<string>;
-      encryptPasswordCallback = userProcessor?.prototype["encryptPassword"] as (op: Operation) => Promise<ResourceAttributes>;
+      encryptPasswordCallback = userProcessor?.prototype["encryptPassword"] as (
+        op: Operation,
+      ) => Promise<ResourceAttributes>;
     }
 
-    return (options =>
+    return ((options) =>
       class UserProcessor<T extends User> extends (options.userProcessor || JsonApiUserProcessor)<T> {
         public static resourceClass = options.userResource;
 
@@ -95,7 +103,7 @@ export default class UserManagementAddon extends Addon {
   }
 
   private createSessionProcessor(sessionResourceType: typeof Resource) {
-    return (options =>
+    return ((options) =>
       class SessionProcessor<T extends Session> extends JsonApiSessionProcessor<T> {
         public static resourceClass = sessionResourceType as typeof Session;
 
@@ -106,7 +114,7 @@ export default class UserManagementAddon extends Addon {
   }
 
   private createSessionResource() {
-    return (options =>
+    return ((options) =>
       class Session extends Resource {
         public static get type() {
           return "session";
@@ -116,14 +124,14 @@ export default class UserManagementAddon extends Addon {
           attributes: {
             token: String,
             [options.usernameRequestParameter as string]: String,
-            [options.passwordRequestParameter as string]: Password
+            [options.passwordRequestParameter as string]: Password,
           },
           relationships: {
             user: {
               type: () => options.userResource,
-              belongsTo: true
-            }
-          }
+              belongsTo: true,
+            },
+          },
         };
       })(this.options);
   }

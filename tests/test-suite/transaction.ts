@@ -1,5 +1,5 @@
 import { Knex } from "knex";
 
 export default {
-  transaction: null as Knex.Transaction
-}
+  transaction: null as Knex.Transaction,
+};

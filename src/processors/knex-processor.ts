@@ -1,4 +1,4 @@
-import {Knex} from "knex";
+import { Knex } from "knex";
 import ApplicationInstance from "../application-instance";
 import JsonApiErrors from "../errors/json-api-errors";
 import Resource from "../resource";
@@ -12,7 +12,7 @@ import {
   Operation,
   ResourceSchema,
   ResourceSchemaRelationship,
-  ResourceSchemaRelationships
+  ResourceSchemaRelationships,
 } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
@@ -36,7 +36,7 @@ const getWhereMethod = (value: string, operator: string) => {
 };
 
 const buildSortClause = (sort: string[], resourceClass: typeof Resource, serializer: IJsonApiSerializer) => {
-  return sort.map(criteria => {
+  return sort.map((criteria) => {
     const direction = criteria.startsWith("-") ? "DESC" : "ASC";
     const attributeName = criteria.startsWith("-") ? criteria.substr(1) : criteria;
 
@@ -52,25 +52,28 @@ const buildSortClause = (sort: string[], resourceClass: typeof Resource, seriali
 
 const parseOperationIncludedRelationships = (
   operationIncludes: string[],
-  resourceRelationships: ResourceSchemaRelationships
+  resourceRelationships: ResourceSchemaRelationships,
 ): {
   relationships: ResourceSchemaRelationships;
   nestedRelationships: { [key: string]: ResourceSchemaRelationships };
 } => {
   const includes = operationIncludes.map((relationship: string) => relationship.split("."));
 
-  const relationships = pick<ResourceSchemaRelationships, ResourceSchemaRelationships>(resourceRelationships, includes.map(nestedInclude => nestedInclude[0]));
+  const relationships = pick<ResourceSchemaRelationships, ResourceSchemaRelationships>(
+    resourceRelationships,
+    includes.map((nestedInclude) => nestedInclude[0]),
+  );
 
   const nestedRelationships = includes
-    .filter(include => include.length > 1)
+    .filter((include) => include.length > 1)
     .reduce(
       (acumRelationships, [nestedOrigin, nestedRelationshipName]) => ({
         ...acumRelationships,
         [nestedOrigin]: {
-          [nestedRelationshipName]: relationships[nestedOrigin].type().schema.relationships[nestedRelationshipName]
-        }
+          [nestedRelationshipName]: relationships[nestedOrigin].type().schema.relationships[nestedRelationshipName],
+        },
       }),
-      {}
+      {},
     );
 
   return { relationships, nestedRelationships };
@@ -95,7 +98,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
     const { relationships, nestedRelationships } = parseOperationIncludedRelationships(
       op.params.include,
-      this.resourceClass.schema.relationships
+      this.resourceClass.schema.relationships,
     );
     const directData = await promiseHashMap(relationships, (baseKey: string) => {
       return this.eagerFetchRelationship(baseKey, result, relationships[baseKey], this.resourceClass);
@@ -105,17 +108,17 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       nestedRelationships,
       async (baseKey: string) => {
         return await promiseHashMap(nestedRelationships[baseKey], async (key: string) => {
-          const relationProcessor = (await this.processorFor(relationships[baseKey].type().type)) as KnexProcessor<
-            Resource
-          >;
+          const relationProcessor = (await this.processorFor(
+            relationships[baseKey].type().type,
+          )) as KnexProcessor<Resource>;
           return this.eagerFetchRelationship(
             key,
             directData[baseKey],
             nestedRelationships[baseKey][key],
-            relationProcessor.resourceClass
+            relationProcessor.resourceClass,
           );
         });
-      }
+      },
     );
 
     const eagerlyLoadedData = {};
@@ -137,20 +140,20 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
         const isIncluded = include.includes(relName);
         const isInSparseFieldsets = fields[type]?.includes(relName);
 
-        return isIncluded || isInSparseFieldsets|| value.belongsTo && value.alwaysIncludeLinkageData;
+        return isIncluded || isInSparseFieldsets || (value.belongsTo && value.alwaysIncludeLinkageData);
       })
       .map(
         ([key, value]) =>
-          value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)
+          value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY),
       );
     const typeFields = (fields[type] || []).filter((key: string) => Object.keys(attributes).includes(key));
 
     const attributesKeys: string[] = typeFields.length ? typeFields : Object.keys(attributes);
 
     return [
-      ...attributesKeys.map(key => `${serializer.attributeToColumn(key)} as ${key}`),
+      ...attributesKeys.map((key) => `${serializer.attributeToColumn(key)} as ${key}`),
       ...relationshipsKeys,
-      primaryKeyName || DEFAULT_PRIMARY_KEY
+      primaryKeyName || DEFAULT_PRIMARY_KEY,
     ];
   }
 
@@ -160,17 +163,16 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
-    const recordsQuery = this.getQuery()
-      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters));
+    const recordsQuery = this.getQuery().where((queryBuilder) => this.filtersToKnex(queryBuilder, filters));
 
     // TODO: skip this query if not needed
-    const { recordCount } = await this.getQuery()
-      .count('* as recordCount')
+    const { recordCount } = (await this.getQuery()
+      .count("* as recordCount")
       .from(recordsQuery.clone().offset(0).clearOrder())
-      .first() as { recordCount: number };
+      .first()) as { recordCount: number };
 
     const records: KnexRecord[] = await recordsQuery
-      .modify(queryBuilder => this.optionsBuilder(queryBuilder, params || {}))
+      .modify((queryBuilder) => this.optionsBuilder(queryBuilder, params || {}))
       .select(this.getColumns(this.appInstance.app.serializer, params));
 
     if (!records.length && id) {
@@ -181,12 +183,9 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       return new ResourceOperationResult(records[0]);
     }
 
-    return new ResourceListOperationResult(
-      records,
-      {
-        recordCount,
-      }
-    );
+    return new ResourceListOperationResult(records, {
+      recordCount,
+    });
   }
 
   async remove(op: Operation): Promise<void> {
@@ -196,7 +195,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
     const record = await this.getQuery()
-      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
+      .where((queryBuilder) => this.filtersToKnex(queryBuilder, filters))
       .first();
 
     if (!record) {
@@ -217,13 +216,13 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
     const dataToUpdate = Object.keys(data.attributes)
-      .map(attribute => ({
-        [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute]
+      .map((attribute) => ({
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute],
       }))
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
     const updated = await this.getQuery()
-      .where(queryBuilder => this.filtersToKnex(queryBuilder, filters))
+      .where((queryBuilder) => this.filtersToKnex(queryBuilder, filters))
       .first()
       .update(dataToUpdate);
 
@@ -244,8 +243,8 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const data = op.data as Resource;
 
     const dataToInsert = Object.keys(data.attributes)
-      .map(attribute => ({
-        [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute]
+      .map((attribute) => ({
+        [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute],
       }))
       .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
 
@@ -273,7 +272,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       .filter(([, value]) => value.belongsTo)
       .map(
         ([key, value]) =>
-          value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY)
+          value.foreignKeyName || serializer.relationshipToColumn(key, primaryKeyName || DEFAULT_PRIMARY_KEY),
       );
 
     return Object.keys(attributes)
@@ -282,13 +281,13 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
   }
 
   filtersToKnex(queryBuilder: Knex.QueryBuilder, filters: {}) {
-    const processedFilters: { method: string, column: string, operator: string, value: string }[] = [];
+    const processedFilters: { method: string; column: string; operator: string; value: string }[] = [];
 
-    Object.keys(filters).forEach(key => filters[key] === undefined && delete filters[key]);
+    Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
 
     const validKeys = this.getValidAttributes(this.resourceClass.schema, this.appInstance.app.serializer);
 
-    Object.keys(filters).forEach(key => {
+    Object.keys(filters).forEach((key) => {
       if (key in this.attributes) {
         return;
       }
@@ -300,7 +299,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       const matches = String(filters[key]).split("|");
 
       processedFilters.push(
-        ...matches.map((match: string) => {
+        ...(matches.map((match: string) => {
           let value = "";
           let comparer = "";
 
@@ -320,14 +319,14 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
             column:
               key === this.resourceClass.schema.primaryKeyName
                 ? key
-                : this.appInstance.app.serializer.attributeToColumn(key)
+                : this.appInstance.app.serializer.attributeToColumn(key),
           };
-        }) as { method: string, column: string, operator: string, value: string }[]
+        }) as { method: string; column: string; operator: string; value: string }[]),
       );
     });
 
-    return processedFilters.forEach(filter =>
-      queryBuilder[filter.method](filter.column, filter.operator, filter.value)
+    return processedFilters.forEach((filter) =>
+      queryBuilder[filter.method](filter.column, filter.operator, filter.value),
     );
   }
 
@@ -356,7 +355,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     key: string,
     result: ResourceT | ResourceT[],
     relationship: ResourceSchemaRelationship,
-    baseResource: typeof Resource
+    baseResource: typeof Resource,
   ): Promise<KnexRecord[] | void> {
     const baseTableName = this.appInstance.app.serializer.resourceTypeToTableName(baseResource.type);
     const relationProcessor = (await this.processorFor(relationship.type().type)) as KnexProcessor<Resource>;
@@ -365,7 +364,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const foreignTableName = relationProcessor.tableName;
     const foreignType = relationProcessor.resourceClass.type;
     const sqlOperator = Array.isArray(result) ? "in" : "=";
-    const columns = relationProcessor.getColumns(this.appInstance.app.serializer)
+    const columns = relationProcessor.getColumns(this.appInstance.app.serializer);
 
     const primaryKey = baseResource.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
@@ -382,7 +381,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       return query
         .join(baseTableName, `${belongingTableName}.${belongingPrimaryKey}`, "=", `${baseTableName}.${foreignKey}`)
         .where(`${baseTableName}.${primaryKey}`, sqlOperator, queryIn)
-        .select(columns.map(field=>`${belongingTableName}.${field}`))
+        .select(columns.map((field) => `${belongingTableName}.${field}`))
         .from(`${foreignTableName} as ${belongingTableName}`);
     }
 
@@ -393,7 +392,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       return query
         .join(baseTableName, `${foreignTableName}.${foreignKey}`, "=", `${baseTableName}.${primaryKey}`)
         .where(`${baseTableName}.${primaryKey}`, sqlOperator, queryIn)
-        .select(columns.map(field=>`${foreignTableName}.${field}`));
+        .select(columns.map((field) => `${foreignTableName}.${field}`));
     }
   }
 

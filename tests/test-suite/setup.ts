@@ -1,17 +1,17 @@
-import {Knex, knex} from "knex";
+import { Knex, knex } from "knex";
 import app from "./test-app/app";
 import context from "./transaction";
 import knexfile from "./test-data/knexfile";
 import Serializer from "./test-app/serializers/serializer";
-let knexInstance = knex(knexfile[global["TEST_SUITE"]]);
+const knexInstance = knex(knexfile[global["TEST_SUITE"]]);
 const createTransaction = (connection, callback): Promise<Knex.Transaction> => {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     connection
-      .transaction(t => {
+      .transaction((t) => {
         callback(t);
         return resolve(t);
       })
-      .catch(t => { });
+      .catch((t) => {});
   });
 };
 const serializer = global["TEST_SUITE"] === "test_snake_case" ? app.serializer : new Serializer();
@@ -21,7 +21,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  context.transaction = await createTransaction(knexInstance, transaction => {
+  context.transaction = await createTransaction(knexInstance, (transaction) => {
     transaction.initialize();
     app.services.knex = transaction;
   });

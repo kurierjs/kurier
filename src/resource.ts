@@ -16,7 +16,7 @@ export default class Resource {
   static schema: ResourceSchema = {
     primaryKeyName: "",
     attributes: {},
-    relationships: {}
+    relationships: {},
   };
 
   /**

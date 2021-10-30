@@ -4,7 +4,6 @@ import { JsonApiParams } from "../types";
 const JSON_API_OBJECT_KEYS = ["fields", "filter", "page"];
 const JSON_API_ARRAY_VALUES = ["include", "sort", "fields"];
 
-
 function parseValueForKey(key: string, value = "") {
   if (JSON_API_ARRAY_VALUES.includes(key)) {
     return value.split(",");
@@ -46,17 +45,21 @@ export function parse(url: string): JsonApiParams {
 }
 
 export function format(params: JsonApiParams) {
-  return Object.keys(params).map((paramKey) => {
-    if (JSON_API_OBJECT_KEYS.includes(paramKey)) {
-      const param = params[paramKey];
+  return Object.keys(params)
+    .map((paramKey) => {
+      if (JSON_API_OBJECT_KEYS.includes(paramKey)) {
+        const param = params[paramKey];
 
-      return Object.keys(param).map((objectKey) => {
-        const value = paramKey === 'fields' ? param[objectKey].join(',') : param[objectKey];
+        return Object.keys(param)
+          .map((objectKey) => {
+            const value = paramKey === "fields" ? param[objectKey].join(",") : param[objectKey];
 
-        return `${paramKey}[${objectKey}]=${value}`
-      }).join('&')
-    } else {
-      return `${paramKey}=${params[paramKey].join(',')}`
-    }
-  }).join('&');
+            return `${paramKey}[${objectKey}]=${value}`;
+          })
+          .join("&");
+      } else {
+        return `${paramKey}=${params[paramKey].join(",")}`;
+      }
+    })
+    .join("&");
 }

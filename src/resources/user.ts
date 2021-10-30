@@ -7,6 +7,6 @@ export default class User extends Resource {
 
   public static schema = {
     attributes: {},
-    relationships: {}
+    relationships: {},
   };
 }

@@ -25,7 +25,7 @@ export default class OperationProcessor<TResource extends Resource> {
   protected relationships = {};
   protected meta: ComputedMeta;
 
-  constructor(public appInstance: ApplicationInstance) { }
+  constructor(public appInstance: ApplicationInstance) {}
 
   async execute(op: Operation): Promise<OperationResult> {
     const action: string = op.op;
@@ -44,9 +44,9 @@ export default class OperationProcessor<TResource extends Resource> {
 
     if (result instanceof ResourceListOperationResult) {
       const resources = await Promise.all(
-        result.records.map(record => {
+        result.records.map((record) => {
           return this.convertToResource(op, record, eagerLoadedData);
-        })
+        }),
       );
 
       result.resources = resources;
@@ -54,7 +54,7 @@ export default class OperationProcessor<TResource extends Resource> {
       return result;
     }
 
-    result.resource = await this.convertToResource(op, result.record, eagerLoadedData)
+    result.resource = await this.convertToResource(op, result.record, eagerLoadedData);
 
     return result;
   }
@@ -77,13 +77,13 @@ export default class OperationProcessor<TResource extends Resource> {
       eagerLoadedData[relationship].direct = await this.computeDirectRelationsProps(
         op,
         eagerLoadedData[relationship].direct,
-        relationResourceClass
+        relationResourceClass,
       );
 
       eagerLoadedData[relationship].nested = await this.computeNestedRelationsProps(
         op,
         eagerLoadedData[relationship].nested,
-        relationResourceClass
+        relationResourceClass,
       );
     }
     return eagerLoadedData;
@@ -120,7 +120,7 @@ export default class OperationProcessor<TResource extends Resource> {
           op,
           nestedRelationResourceClass,
           includedRelationElements,
-          {}
+          {},
         );
         nestedRelations[includedNestedRelation][index] = { ...value, ...computed };
       });
@@ -136,12 +136,12 @@ export default class OperationProcessor<TResource extends Resource> {
     op: Operation,
     resourceClass: typeof Resource,
     record: HasId,
-    eagerLoadedData: EagerLoadedData
+    eagerLoadedData: EagerLoadedData,
   ) {
     const typeFields = op.params && op.params.fields && op.params.fields[resourceClass.type];
     const attributes: { [key: string]: Function } = typeFields ? pick(this.attributes, typeFields) : this.attributes;
 
-    return promiseHashMap(attributes, key => attributes[key].call(this, record));
+    return promiseHashMap(attributes, (key) => attributes[key].call(this, record));
   }
 
   async matchesComputedFilters(op: Operation, computedAttributes) {
@@ -196,24 +196,24 @@ export default class OperationProcessor<TResource extends Resource> {
     op: Operation,
     resourceClass: typeof Resource,
     record: HasId,
-    eagerLoadedData: EagerLoadedData
+    eagerLoadedData: EagerLoadedData,
   ) {
     const relationshipKeys = Object.keys(resourceClass.schema.relationships)
-      .filter(relName => resourceClass.schema.relationships[relName].belongsTo)
+      .filter((relName) => resourceClass.schema.relationships[relName].belongsTo)
       .map(
-        relName =>
+        (relName) =>
           resourceClass.schema.relationships[relName].foreignKeyName ||
           this.appInstance.app.serializer.relationshipToColumn(
             relName,
-            resourceClass.schema.relationships[relName].type().schema.primaryKeyName
-          )
+            resourceClass.schema.relationships[relName].type().schema.primaryKeyName,
+          ),
       );
     return pick(record, relationshipKeys);
   }
 
   async getMeta(record: HasId) {
     if (this.meta) {
-      return promiseHashMap(this.meta, key => this.meta[key].call(this, record))
+      return promiseHashMap(this.meta, (key) => this.meta[key].call(this, record));
     }
 
     return undefined;
@@ -222,13 +222,7 @@ export default class OperationProcessor<TResource extends Resource> {
   async convertToResource(op: Operation, record: HasId, eagerLoadedData: EagerLoadedData) {
     const resourceClass = await this.resourceFor(op.ref.type);
 
-    const [
-      attributes,
-      computedAttributes,
-      relationships,
-      relationshipAttributes,
-      meta
-    ] = await Promise.all([
+    const [attributes, computedAttributes, relationships, relationshipAttributes, meta] = await Promise.all([
       this.getAttributes(op, resourceClass, record, eagerLoadedData),
       this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
       this.getRelationships(op, record, eagerLoadedData),
@@ -242,9 +236,9 @@ export default class OperationProcessor<TResource extends Resource> {
       attributes: {
         ...attributes,
         ...relationshipAttributes,
-        ...computedAttributes
+        ...computedAttributes,
       },
-      meta
+      meta,
     });
 
     const passesFilters = await this.matchesComputedFilters(op, computedAttributes);

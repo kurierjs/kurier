@@ -8,7 +8,7 @@ import {
   urlData,
   handleBulkEndpoint,
   handleJsonApiEndpoint,
-  convertErrorToHttpResponse
+  convertErrorToHttpResponse,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
 
@@ -18,8 +18,10 @@ export default function jsonApiExpress(app: Application, ...middlewares: express
       return next();
     }
 
-    if (req.headers["content-type"] !== 'application/vnd.api+json') {
-      res.status(400).json(convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json")));
+    if (req.headers["content-type"] !== "application/vnd.api+json") {
+      res
+        .status(400)
+        .json(convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json")));
     } else {
       return next();
     }
@@ -52,13 +54,11 @@ export default function jsonApiExpress(app: Application, ...middlewares: express
   return compose([
     checkStrictMode,
     express.json({
-      type: app.transportLayerOptions?.httpStrictMode
-        ? 'application/vnd.api+json'
-        : 'application/json',
+      type: app.transportLayerOptions?.httpStrictMode ? "application/vnd.api+json" : "application/json",
       strict: false,
-      limit: app.transportLayerOptions?.httpBodyPayload
+      limit: app.transportLayerOptions?.httpBodyPayload,
     }),
     ...middlewares,
-    jsonApiExpress
+    jsonApiExpress,
   ]);
 }

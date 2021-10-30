@@ -8,5 +8,5 @@ export default {
   RecordNotExists: (detail?: string) => new JsonApiError(HttpStatusCode.NotFound, "not_found", detail),
   InvalidToken: (detail?: string) => new JsonApiError(HttpStatusCode.UnprocessableEntity, "invalid_token", detail),
   InvalidData: (detail?: string) => new JsonApiError(HttpStatusCode.UnprocessableEntity, "invalid_data", detail),
-  BadRequest: (detail?: string) => new JsonApiError(HttpStatusCode.BadRequest, "bad_request", detail)
+  BadRequest: (detail?: string) => new JsonApiError(HttpStatusCode.BadRequest, "bad_request", detail),
 };

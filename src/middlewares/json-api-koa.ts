@@ -8,7 +8,7 @@ import {
   convertErrorToHttpResponse,
   handleBulkEndpoint,
   handleJsonApiEndpoint,
-  urlData
+  urlData,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
 
@@ -18,7 +18,7 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
       return next();
     }
 
-    if (ctx.headers["content-type"] !== 'application/vnd.api+json') {
+    if (ctx.headers["content-type"] !== "application/vnd.api+json") {
       ctx.status = 400;
       ctx.body = convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json"));
     }
@@ -59,7 +59,7 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
 
   const koaBodySettings = {
     json: true,
-    jsonLimit: app.transportLayerOptions?.httpBodyPayload
+    jsonLimit: app.transportLayerOptions?.httpBodyPayload,
   };
 
   return compose([checkStrictMode, koaBody(koaBodySettings), ...middlewares, jsonApiKoa]);
