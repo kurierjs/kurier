@@ -11,11 +11,11 @@ export default class ArticleProcessor<ResourceT extends Article> extends KnexPro
 
       const [result] = await processor
         .getQuery()
-        .where({ [this.appInstance.app.serializer.relationshipToColumn('article')]: article.id })
+        .where({ [this.appInstance.app.serializer.relationshipToColumn("article")]: article.id })
         .count();
 
       return result["count(*)"];
-    }
+    },
   };
 
   // relationships = {

@@ -5,7 +5,7 @@ import Vote from "./vote";
 export default class Article extends Resource {
   static schema = {
     attributes: {
-      body: String
+      body: String,
     },
 
     relationships: {
@@ -13,16 +13,16 @@ export default class Article extends Resource {
         type: () => User,
         belongsTo: true,
         foreignKeyName: "author",
-        excludeLinks: ['self', 'related'],
+        excludeLinks: ["self", "related"],
         alwaysIncludeLinkageData: true,
       },
       votes: {
         type: () => Vote,
         hasMany: true,
-        excludeLinks: ['self', 'related']
-      }
-    }
+        excludeLinks: ["self", "related"],
+      },
+    },
   };
 
-  static excludeLinks = ['self']
+  static excludeLinks = ["self"];
 }

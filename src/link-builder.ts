@@ -1,15 +1,15 @@
-import { join } from 'path';
-import { format } from 'url';
-import { ILinkBuilderConfig } from '.';
+import { join } from "path";
+import { format } from "url";
+import { ILinkBuilderConfig } from ".";
 import { JsonApiParams } from "./types";
-import { format as formatJasonApiParams } from './utils/json-api-params';
+import { format as formatJasonApiParams } from "./utils/json-api-params";
 
 export class LinkBuilder {
   private namespace: string;
 
   public baseUrl?: URL;
 
-  constructor({ namespace = '', baseUrl }: ILinkBuilderConfig) {
+  constructor({ namespace = "", baseUrl }: ILinkBuilderConfig) {
     this.namespace = namespace;
     this.baseUrl = baseUrl;
   }
@@ -36,9 +36,16 @@ export class LinkBuilder {
     });
   }
 
-  public relationshipsRelatedLink(resourceType: string, id: string | undefined, relationshipName: string, params?: JsonApiParams) {
+  public relationshipsRelatedLink(
+    resourceType: string,
+    id: string | undefined,
+    relationshipName: string,
+    params?: JsonApiParams,
+  ) {
     if (!id) {
-      throw new Error(`Related link for ${resourceType} relationship ${relationshipName} could not be generated because resource "id" is undefined!`);
+      throw new Error(
+        `Related link for ${resourceType} relationship ${relationshipName} could not be generated because resource "id" is undefined!`,
+      );
     }
 
     return format({
@@ -46,12 +53,19 @@ export class LinkBuilder {
       host: this.baseUrl?.host,
       pathname: `${this.relativeResourcesUrl(resourceType)}/${id}/${relationshipName}`,
       search: this.queryPramsToURlSearchParams(params),
-    })
+    });
   }
 
-  public relationshipsSelfLink(resourceType: string, id: string | undefined, relationshipName: string, params?: JsonApiParams) {
+  public relationshipsSelfLink(
+    resourceType: string,
+    id: string | undefined,
+    relationshipName: string,
+    params?: JsonApiParams,
+  ) {
     if (!id) {
-      throw new Error(`Self link for ${resourceType} relationship ${relationshipName} could not be generated because resource "id" is undefined!`);
+      throw new Error(
+        `Self link for ${resourceType} relationship ${relationshipName} could not be generated because resource "id" is undefined!`,
+      );
     }
 
     return format({

@@ -6,7 +6,7 @@ interface IResourceConstructorProps {
   attributes?: ResourceAttributes;
   relationships?: ResourceRelationships;
   meta?: Meta;
-};
+}
 
 export default class Resource {
   static get type(): string {
@@ -23,7 +23,7 @@ export default class Resource {
    * By default resources are serialized with a `self` link.
    * Use this option if you don't want clients accessing the resource through the self link.
    */
-   static excludeLinks?: Array<string>;
+  static excludeLinks?: Array<string>;
 
   id?: string;
   type: string;
@@ -34,12 +34,7 @@ export default class Resource {
 
   preventSerialization?: boolean;
 
-  constructor({
-    id,
-    attributes,
-    relationships,
-    meta,
-  }: IResourceConstructorProps) {
+  constructor({ id, attributes, relationships, meta }: IResourceConstructorProps) {
     this.id = id;
     this.type = (this.constructor as typeof Resource).type;
     this.attributes = attributes || {};

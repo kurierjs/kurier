@@ -14,13 +14,13 @@ export default class Book extends Resource {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "author"
+        foreignKeyName: "author",
       },
       tags: {
         type: () => Tag,
         hasMany: true,
         alwaysIncludeLinkageData: true,
-      }
-    }
+      },
+    },
   };
 }

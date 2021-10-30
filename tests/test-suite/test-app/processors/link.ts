@@ -12,10 +12,10 @@ export default class LinkProcessor<ResourceT extends Link> extends KnexProcessor
 
       const [result] = await processor
         .getQuery()
-        .where({ [this.appInstance.app.serializer.relationshipToColumn('article')]: article.id })
+        .where({ [this.appInstance.app.serializer.relationshipToColumn("article")]: article.id })
         .count();
 
       return result["count(*)"];
-    }
+    },
   };
 }

@@ -42,7 +42,6 @@ export {
   JsonApiSerializer,
   ResourceOperationResult,
   ResourceListOperationResult,
-
   // Middlewares
   jsonApiKoa,
   jsonApiExpress,

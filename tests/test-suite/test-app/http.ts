@@ -5,7 +5,7 @@ import { createServer } from "vercel-node-server";
 import { jsonApiKoa, jsonApiExpress, jsonApiVercel } from "./kurier";
 
 const faviconMiddleware = async (req, res, next) => {
-  if (req.url === '/favicon.ico') {
+  if (req.url === "/favicon.ico") {
     res.statusCode = 404;
     res.end();
   } else {

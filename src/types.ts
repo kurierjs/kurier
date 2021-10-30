@@ -57,14 +57,16 @@ export type ResourceRelationshipData = {
 export type Meta = Record<string, AttributeValue>;
 export type ComputedMeta = Record<string, ComputedValue>;
 
-export type Link = string | {
-  href: string;
-  meta?: Meta;
-};
+export type Link =
+  | string
+  | {
+      href: string;
+      meta?: Meta;
+    };
 
 export type Links = {
   [key: string]: Link;
-}
+};
 
 export type DefaultLinks = {
   self?: Link;
@@ -80,7 +82,7 @@ export type PaginationLinks = {
 
 export type ErrorLinks = {
   about?: string;
-}
+};
 
 export type DocumentLinks = DefaultLinks & PaginationLinks & Links;
 
@@ -188,7 +190,7 @@ export interface ResourceSchemaRelationship {
    *  Defaults to true if not set to avoid breaking change.
    */
   alwaysIncludeLinkageData?: boolean;
-};
+}
 
 export interface HasId {
   id: any;
@@ -216,7 +218,7 @@ export type ApplicationSettings = {
   defaultPaginator?: typeof Paginator;
   defaultPageSize?: number;
   maximumPageSize?: number;
-}
+};
 
 export type ApplicationServices = {
   knex?: Knex;
@@ -235,8 +237,12 @@ export interface IJsonApiSerializer {
   foreignResourceToForeignTableName(foreignResourceType: string, prefix?: string): string;
   deserializeResource(op: Operation, resourceClass: typeof Resource): Operation;
   serializeResource(resource: Resource, resourceType: typeof Resource, baseUrl?: URL): Resource;
-  serializeResourceLinks(data:Resource, excludeLinks?: Array<string>): Record<string, Link>;
-  serializeRelationshipLinks(primaryData: Resource, relName: string, excludeLinks?: Array<string>): Record<string, Link>;
+  serializeResourceLinks(data: Resource, excludeLinks?: Array<string>): Record<string, Link>;
+  serializeRelationshipLinks(
+    primaryData: Resource,
+    relName: string,
+    excludeLinks?: Array<string>,
+  ): Record<string, Link>;
   serializeRelationship(
     relationships: Resource | Resource[],
     resourceType: typeof Resource,
@@ -245,7 +251,7 @@ export interface IJsonApiSerializer {
   serializeIncludedResources(
     data: Resource | Resource[] | void,
     resourceType: typeof Resource,
-    baseUrl?: URL
+    baseUrl?: URL,
   ): Resource[] | null;
 }
 
@@ -266,11 +272,11 @@ export type TransportLayerOptions = {
 };
 
 export type LinksPageParams<TPaginatorParams extends string = string> = {
-  first?: Record<TPaginatorParams, number>,
-  prev?: Record<TPaginatorParams, number>,
-  next?: Record<TPaginatorParams, number>,
-  last?: Record<TPaginatorParams, number>,
-}
+  first?: Record<TPaginatorParams, number>;
+  prev?: Record<TPaginatorParams, number>;
+  next?: Record<TPaginatorParams, number>;
+  last?: Record<TPaginatorParams, number>;
+};
 
 export interface ILinkBuilderConfig {
   namespace?: string;

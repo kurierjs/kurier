@@ -1,18 +1,13 @@
-
 exports.up = async (knex) => {
-  await knex.schema.createTable("books", table => {
+  await knex.schema.createTable("books", (table) => {
     table.string("id").primary();
     table.string("title");
     table.dateTime("date_published");
     table.integer("isbn");
-    table
-      .integer("author")
-      .notNullable()
-      .references("id")
-      .inTable("users");
+    table.integer("author").notNullable().references("id").inTable("users");
   });
-}
+};
 
 exports.down = async (knex) => {
   await knex.schema.dropTable("books");
-}
+};

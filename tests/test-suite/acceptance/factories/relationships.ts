@@ -5,44 +5,40 @@ import article from "./article";
 export default {
   get: {
     votesOf1stArticle: {
-      "data": [
-        ...getFactoryObjects(votes)([1, 2])
-      ]
+      data: [...getFactoryObjects(votes)([1, 2])],
     },
     votesOf2ndArticle: {
-      "data": []
+      data: [],
     },
     votesOf3rdArticle: {
-      "data": [
-        getFactoryObject(votes)(3)
-      ]
+      data: [getFactoryObject(votes)(3)],
     },
     articleOf1stVote: {
-      "data": article.toGet.response[0]
+      data: article.toGet.response[0],
     },
     parentCommentOf1stComment: {
-      "data": {
-        "id": 2,
-        "type": "comment",
-        "attributes": {
-          "body": "hello2",
-          "type": "not_spam"
+      data: {
+        id: 2,
+        type: "comment",
+        attributes: {
+          body: "hello2",
+          type: "not_spam",
         },
-        "relationships": {
-          "author": {
-            "data": {
-              "id": 2,
-              "type": "user"
-            }
+        relationships: {
+          author: {
+            data: {
+              id: 2,
+              type: "user",
+            },
           },
-          "parentComment": {
-            "data": {
-              "id": 3,
-              "type": "comment"
-            }
-          }
-        }
-      }
-    }
-  }
+          parentComment: {
+            data: {
+              id: 3,
+              type: "comment",
+            },
+          },
+        },
+      },
+    },
+  },
 };

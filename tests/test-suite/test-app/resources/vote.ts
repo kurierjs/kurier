@@ -10,18 +10,18 @@ export default class Vote extends Resource {
       createdOn: String,
       updatedOn: String,
       updatedBy: Number,
-      createdBy: Number
+      createdBy: Number,
     },
 
     relationships: {
       user: {
         type: () => User,
-        belongsTo: true
+        belongsTo: true,
       },
       article: {
         type: () => Article,
-        belongsTo: true
-      }
-    }
+        belongsTo: true,
+      },
+    },
   };
 }

@@ -7,7 +7,18 @@ import KnexProcessor from "./processors/knex-processor";
 import OperationProcessor from "./processors/operation-processor";
 import Resource from "./resource";
 import JsonApiSerializer from "./serializers/serializer";
-import { AddonOptions, ApplicationAddons, ApplicationServices, IJsonApiSerializer, Operation, OperationResponse, ResourceSchemaRelationship, NoOpTransaction, TransportLayerOptions, JsonApiParams } from "./types";
+import {
+  AddonOptions,
+  ApplicationAddons,
+  ApplicationServices,
+  IJsonApiSerializer,
+  Operation,
+  OperationResponse,
+  ResourceSchemaRelationship,
+  NoOpTransaction,
+  TransportLayerOptions,
+  JsonApiParams,
+} from "./types";
 import flatten from "./utils/flatten";
 import { ApplicationSettings, OperationResult } from ".";
 import { PagedPaginator, Paginator } from "./paginatior";
@@ -220,14 +231,18 @@ export default class Application {
 
     if (result instanceof ResourceListOperationResult) {
       resourceType = result.resources?.[0]?.type;
-      allIncluded = !resourceType ? [] : flatten(
-        this.serializer.serializeIncludedResources(result.resources, await this.resourceFor(resourceType)) || []
-      )
+      allIncluded = !resourceType
+        ? []
+        : flatten(
+            this.serializer.serializeIncludedResources(result.resources, await this.resourceFor(resourceType)) || [],
+          );
     } else if (result instanceof ResourceOperationResult) {
       resourceType = result.resource?.type;
-      allIncluded = !resourceType ? [] : flatten(
-        this.serializer.serializeIncludedResources(result.resource, await this.resourceFor(resourceType)) || []
-      )
+      allIncluded = !resourceType
+        ? []
+        : flatten(
+            this.serializer.serializeIncludedResources(result.resource, await this.resourceFor(resourceType)) || [],
+          );
     } else {
       resourceType = undefined;
     }
@@ -262,30 +277,28 @@ export default class Application {
     if (result instanceof ResourceListOperationResult) {
       if (!result.resources) {
         return {
-          data: []
+          data: [],
         };
       }
 
       const resourceType = result.resources?.[0]?.type;
       const resource = await this.resourceFor(resourceType);
-      console.log(resourceType, resource)
-      const serializedData = result.resources.filter(
-        record => !record.preventSerialization
-      ).map(
-        record => this.serializer.serializeResource(record, resource)
-      );
+      console.log(resourceType, resource);
+      const serializedData = result.resources
+        .filter((record) => !record.preventSerialization)
+        .map((record) => this.serializer.serializeResource(record, resource));
 
-      const paginator = new (this.defaultPaginator)(
-        params,
-        {
-          defaultPageSize: this.defaultPageSize,
-          maximumPageSize: this.maximumPageSize,
-        }
-      );
+      const paginator = new this.defaultPaginator(params, {
+        defaultPageSize: this.defaultPageSize,
+        maximumPageSize: this.maximumPageSize,
+      });
       const paginationParams = paginator.linksPageParams(result.recordCount as number);
 
       const paginationLinks = Object.keys(paginationParams).reduce((prev, current) => {
-        prev[current] = this.serializer.linkBuilder.queryLink(resourceType, { ...params, page: paginationParams[current] });
+        prev[current] = this.serializer.linkBuilder.queryLink(resourceType, {
+          ...params,
+          page: paginationParams[current],
+        });
 
         return prev;
       }, {});
@@ -295,13 +308,13 @@ export default class Application {
         links: {
           self: this.serializer.linkBuilder.queryLink(resourceType, params),
           ...paginationLinks,
-        }
+        },
       };
     }
 
     if (!result.resource) {
       return {
-        data: null
+        data: null,
       };
     }
 

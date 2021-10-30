@@ -5,8 +5,8 @@ export default class Random extends Resource {
     attributes: {
       randomString: String,
       randomNumber: Number,
-      randomDate: String
+      randomDate: String,
     },
-    relationships: {}
+    relationships: {},
   };
 }

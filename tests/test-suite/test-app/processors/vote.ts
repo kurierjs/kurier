@@ -8,8 +8,7 @@ export default class VoteProcessor<ResourceT extends Vote> extends KnexProcessor
   static resourceClass = Vote;
 
   private async signAndTimestamp(op: Operation): Promise<Operation> {
-    return signAndTimestampOperation(op, await this.resourceFor(op.ref.type), (this.appInstance
-      .user as unknown) as User);
+    return signAndTimestampOperation(op, await this.resourceFor(op.ref.type), this.appInstance.user as unknown as User);
   }
 
   @Authorize()

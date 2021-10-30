@@ -1,51 +1,53 @@
-export const articles = [{
-  "id": 1,
-  "type": "article",
-  "attributes": {
-    "body": "this is test 1",
-    "voteCount": 2
+export const articles = [
+  {
+    id: 1,
+    type: "article",
+    attributes: {
+      body: "this is test 1",
+      voteCount: 2,
+    },
+    relationships: {
+      author: {
+        data: {
+          id: 1,
+          type: "user",
+        },
+      },
+    },
   },
-  "relationships": {
-    "author": {
-      "data": {
-        "id": 1,
-        "type": "user"
-      }
-    }
-  }
-},
-{
-  "id": 2,
-  "type": "article",
-  "attributes": {
-    "body": "this is test 2",
-    "voteCount": 0
+  {
+    id: 2,
+    type: "article",
+    attributes: {
+      body: "this is test 2",
+      voteCount: 0,
+    },
+    relationships: {
+      author: {
+        data: {
+          id: 2,
+          type: "user",
+        },
+      },
+    },
   },
-  "relationships": {
-    "author": {
-      "data": {
-        "id": 2,
-        "type": "user"
-      }
-    }
-  }
-},
-{
-  "id": 3,
-  "type": "article",
-  "attributes": {
-    "body": "this is test 3",
-    "voteCount": 1
+  {
+    id: 3,
+    type: "article",
+    attributes: {
+      body: "this is test 3",
+      voteCount: 1,
+    },
+    relationships: {
+      author: {
+        data: {
+          id: 2,
+          type: "user",
+        },
+      },
+    },
   },
-  "relationships": {
-    "author": {
-      "data": {
-        "id": 2,
-        "type": "user"
-      }
-    }
-  }
-}]
+];
 
 export default {
   toGet: {
@@ -54,42 +56,42 @@ export default {
         id: 1,
         attributes: {
           body: "this is test 1",
-          voteCount: 2
+          voteCount: 2,
         },
         type: "article",
         relationships: {
           author: {
-            data: { id: 1, type: "user" }
-          }
-        }
+            data: { id: 1, type: "user" },
+          },
+        },
       },
       {
         id: 2,
         attributes: {
           body: "this is test 2",
-          voteCount: 0
+          voteCount: 0,
         },
         type: "article",
         relationships: {
           author: {
-            data: { id: 2, type: "user" }
-          }
-        }
+            data: { id: 2, type: "user" },
+          },
+        },
       },
       {
         id: 3,
         attributes: {
           body: "this is test 3",
-          voteCount: 1
+          voteCount: 1,
         },
         type: "article",
         relationships: {
           author: {
-            data: { id: 2, type: "user" }
-          }
-        }
-      }
-    ]
+            data: { id: 2, type: "user" },
+          },
+        },
+      },
+    ],
   },
   singleArticleMultipleIncludes: {
     data: {
@@ -97,28 +99,28 @@ export default {
       type: "article",
       attributes: {
         body: "this is test 1",
-        voteCount: 2
+        voteCount: 2,
       },
       relationships: {
         author: {
           data: {
             id: 1,
-            type: "user"
-          }
+            type: "user",
+          },
         },
         votes: {
           data: [
             {
               id: 1,
-              type: "vote"
+              type: "vote",
             },
             {
               id: 2,
-              type: "vote"
-            }
-          ]
-        }
-      }
+              type: "vote",
+            },
+          ],
+        },
+      },
     },
     included: [
       {
@@ -129,20 +131,16 @@ export default {
           email: "me@me.com",
           coolFactor: 3,
           friends: [
-              {
-                "name": "Joel",
-              },
-              {
-                "name": "Ryan",
-              },
-            ],
-          roles: [
-              "user",
-              "author",
-              "voter",
-            ],
+            {
+              name: "Joel",
+            },
+            {
+              name: "Ryan",
+            },
+          ],
+          roles: ["user", "author", "voter"],
         },
-        relationships: {}
+        relationships: {},
       },
       {
         id: 1,
@@ -152,22 +150,22 @@ export default {
           createdOn: null,
           updatedOn: null,
           updatedBy: null,
-          createdBy: null
+          createdBy: null,
         },
         relationships: {
           user: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           article: {
             data: {
               id: 1,
-              type: "article"
-            }
-          }
-        }
+              type: "article",
+            },
+          },
+        },
       },
       {
         id: 2,
@@ -177,23 +175,23 @@ export default {
           createdOn: null,
           updatedOn: null,
           updatedBy: null,
-          createdBy: null
+          createdBy: null,
         },
         relationships: {
           user: {
             data: {
               id: 1,
-              type: "user"
-            }
+              type: "user",
+            },
           },
           article: {
             data: {
               id: 1,
-              type: "article"
-            }
-          }
-        }
-      }
-    ]
-  }
+              type: "article",
+            },
+          },
+        },
+      },
+    ],
+  },
 };

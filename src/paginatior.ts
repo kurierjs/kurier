@@ -1,7 +1,7 @@
-import { IPaginatorSettings, JsonApiSerializer } from '.';
-import { LinksPageParams, JsonApiParams } from './types';
+import { IPaginatorSettings, JsonApiSerializer } from ".";
+import { LinksPageParams, JsonApiParams } from "./types";
 import JsonApiErrors from "./errors/json-api-errors";
-import { Knex } from 'knex';
+import { Knex } from "knex";
 
 export class Paginator {
   public static readonly requiresRecordCount: boolean = false;
@@ -12,10 +12,10 @@ export class Paginator {
 
   public linksPageParams(recordCount: number): LinksPageParams {
     return {};
-  };
+  }
 }
 
-export type PagedPaginatorParams = 'size' | 'number';
+export type PagedPaginatorParams = "size" | "number";
 
 export class PagedPaginator extends Paginator {
   private number: number;
@@ -50,24 +50,24 @@ export class PagedPaginator extends Paginator {
     };
 
     if (this.number > 1) {
-      linksPageParams['prev'] = {
+      linksPageParams["prev"] = {
         number: this.number - 1,
-        size: this.size
+        size: this.size,
       };
     }
 
     if (this.number < pageCount) {
-      linksPageParams['next'] = {
+      linksPageParams["next"] = {
         number: this.number + 1,
         size: this.size,
-      }
+      };
     }
 
     if (recordCount) {
-      linksPageParams['last'] = {
+      linksPageParams["last"] = {
         number: pageCount == 0 ? 1 : pageCount,
         size: this.size,
-      }
+      };
     }
 
     return linksPageParams;
@@ -88,7 +88,7 @@ export class PagedPaginator extends Paginator {
     }
 
     if (this.size > this.settings.maximumPageSize) {
-      throw JsonApiErrors.BadRequest(`Size exceeds maximum page size of ${this.settings.maximumPageSize}.`)
+      throw JsonApiErrors.BadRequest(`Size exceeds maximum page size of ${this.settings.maximumPageSize}.`);
     }
 
     if (this.number < 1) {

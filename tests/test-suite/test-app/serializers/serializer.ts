@@ -14,11 +14,11 @@ export default class Serializer extends JsonApiSerializer {
   }
 
   columnToRelationship(columnName: string, primaryKeyName: string = "Id"): string {
-    return this.columnToAttribute(columnName.replace(`${'Id'}`, ""));
+    return this.columnToAttribute(columnName.replace(`${"Id"}`, ""));
   }
 
   relationshipToColumn(relationshipName: string, primaryKeyName: string = "Id"): string {
-    return `${relationshipName}${'Id'}`;
+    return `${relationshipName}${"Id"}`;
   }
 
   foreignResourceToForeignTableName(foreignResourceType: string, prefix: string = "belonging"): string {

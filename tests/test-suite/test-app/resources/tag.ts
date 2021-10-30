@@ -9,8 +9,8 @@ export default class Tag extends Resource {
     relationships: {
       book: {
         type: () => Book,
-        belongsTo: true
-      }
-    }
+        belongsTo: true,
+      },
+    },
   };
 }

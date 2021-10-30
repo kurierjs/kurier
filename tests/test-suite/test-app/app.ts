@@ -1,10 +1,10 @@
-import {knex} from "knex";
+import { knex } from "knex";
 import {
   Application,
   ApplicationInstance,
   KnexProcessor,
   UserManagementAddon,
-  UserManagementAddonOptions
+  UserManagementAddonOptions,
 } from "./kurier";
 
 import knexfile from "./../test-data/knexfile";
@@ -31,14 +31,16 @@ const app = new Application({
   types: [Article, Comment, Vote, Random, Link, Book, Tag],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor, LinkProcessor],
   defaultProcessor: KnexProcessor,
-  baseUrl: process.env.NODE_ENV === 'test' ? new URL('http://localhost:3000') : undefined,
+  baseUrl: process.env.NODE_ENV === "test" ? new URL("http://localhost:3000") : undefined,
 });
 
 app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: UserProcessor,
   userLoginCallback: login,
-  async userRolesProvider(this: ApplicationInstance, user: User) { return ["Admin"] }
+  async userRolesProvider(this: ApplicationInstance, user: User) {
+    return ["Admin"];
+  },
 } as UserManagementAddonOptions);
 
 app.services.knex = app.services.knex || knex(knexfile["test_snake_case"]);
