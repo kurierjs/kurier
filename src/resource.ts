@@ -9,7 +9,7 @@ interface IResourceConstructorProps {
 };
 
 export default class Resource {
-  static get type() {
+  static get type(): string {
     return camelize(this.name);
   }
 

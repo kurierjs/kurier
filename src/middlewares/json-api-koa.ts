@@ -11,10 +11,16 @@ import {
   urlData,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
+import { TransportLayerOptions } from "../types";
 
-export default function jsonApiKoa(app: Application, ...middlewares: Middleware[]) {
+export default function jsonApiKoa(app: Application, transportLayerOptions: TransportLayerOptions = {
+  httpBodyPayload: '1mb',
+  httpStrictMode: false,
+}, ...middlewares: Middleware[]) {
+  const { httpBodyPayload, httpStrictMode } = transportLayerOptions;
+
   const checkStrictMode = async (ctx: Context, next: () => Promise<any>) => {
-    if (!app.transportLayerOptions.httpStrictMode) {
+    if (!httpStrictMode) {
       return next();
     }
 
@@ -59,7 +65,7 @@ export default function jsonApiKoa(app: Application, ...middlewares: Middleware[
 
   const koaBodySettings = {
     json: true,
-    jsonLimit: app.transportLayerOptions?.httpBodyPayload,
+    jsonLimit: httpBodyPayload,
   };
 
   return compose([checkStrictMode, koaBody(koaBodySettings), ...middlewares, jsonApiKoa]);

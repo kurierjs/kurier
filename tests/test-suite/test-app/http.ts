@@ -15,13 +15,13 @@ const faviconMiddleware = async (req, res, next) => {
 
 const koaApp = new Koa();
 koaApp.use(async (ctx, next) => faviconMiddleware(ctx.req, ctx.res, next));
-koaApp.use(jsonApiKoa(app));
+koaApp.use(jsonApiKoa(app, { httpStrictMode: true }));
 
 const expressApp = express();
 expressApp.use(faviconMiddleware);
-expressApp.use(jsonApiExpress(app));
+expressApp.use(jsonApiExpress(app, { httpStrictMode: true }));
 
-const vercelApp = createServer(jsonApiVercel(app));
+const vercelApp = createServer(jsonApiVercel(app, { httpStrictMode: true }));
 
 export { expressApp, koaApp, vercelApp };
 export default koaApp;

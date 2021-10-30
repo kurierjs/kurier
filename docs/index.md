@@ -525,6 +525,22 @@ Like in the previous example, to pipe the middleware you can simply do:
 api.use(jsonApiExpress(app));
 ```
 
+#### Configuring the HTTP transport layer
+
+Every HTTP transport layer in Kurier supports a `transportLayerOptions` parameter that allows to customize some aspects of the transport layer used by the application:
+
+- `httpBodyPayload`: Describes how big the request's `body` can be, expressed in a string i.e. `10mb`. Defaults to `1mb`.
+- `httpStrictMode`: If enabled, requires all HTTP incoming requests to use `Content-Type: application/vnd.api+json`. Defaults to `false`.
+
+For example, to change the body payload to 10mb, with strict mode, in `jsonApiExpress`:
+
+```ts
+api.use(jsonApiExpress(app, {
+  httpBodyPayload: '10mb',
+  httpStrictMode: true,
+}));
+```
+
 #### Converting operations into HTTP endpoints
 
 Both `jsonApiKoa` and `jsonApiExpress` take care of mapping the fundamental operation types (`get`, `add`, `update`, `remove`) into valid HTTP verbs and endpoints.
@@ -1292,10 +1308,6 @@ const app = new Application({
   namespace: "api",
   types: [Author],
   defaultProcessor: new KnexProcessor(/* knex options */),
-  transportLayerOptions: {
-    httpBodyPayload: '1mb',
-    httpStrictMode: true
-  },
 });
 
 const api = new Koa();
@@ -1311,9 +1323,6 @@ The `Application` object is instantiated with the following settings:
 - `types`: A list of all resource types declared and handled by this app.
 - `processors`: If you define custom processors, they have to be registered here as instances.
 - `defaultProcessor`: All non-bound-to-processor resources will be handled by this processor.
-- `transportLayerOptions`: Allows to customize some aspects of the transport layer used by the application.
-  - `httpBodyPayload`: Describes how big the request's `body` can be, expressed in a string i.e. `10mb`. Defaults to `1mb`.
-  - `httpStrictMode`: If enabled, requires all HTTP incoming requests to use `Content-Type: application/vnd.api+json`. Defaults to `false`.
 
 ### Referencing types and processors
 
