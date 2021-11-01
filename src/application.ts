@@ -247,16 +247,16 @@ export default class Application {
       resourceType = undefined;
     }
 
-    const included: Resource[] = [];
+    let included: Resource[] = [];
 
     await Promise.all(
-      allIncluded.map((resource: Resource) => {
+      allIncluded.map((resource) => {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<void>(async (resolve) => {
           const result = await canAccessResource(resource, "get", appInstance);
 
           if (result) {
-            included.push(resource);
+            included = included.concat(resource);
           }
 
           resolve();
