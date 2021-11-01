@@ -122,6 +122,10 @@ Jump-start your project with these preconfigured, opinionated starter packs. The
 
 Check out our [updated docs at ReadTheDocs](https://kurier.readthedocs.io/en/latest/). There you will find more info and examples.
 
+## Contributing
+
+We have a little contributors guide now! Take a look at it [in here](https://github.com/kurierjs/kurier/blob/main/CONTRIBUTING.md).
+
 ## License
 
 [MIT](./license)
