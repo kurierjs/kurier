@@ -91,7 +91,7 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     return this.knex(this.tableName);
   }
 
-  async eagerLoad(op: Operation, result: ResourceT | ResourceT[]): Promise<EagerLoadedData> {
+  async eagerLoad(op: Operation, result: any): Promise<EagerLoadedData> {
     if (!op.params || !op.params.include) {
       return {};
     }
@@ -353,24 +353,28 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
 
   async eagerFetchRelationship(
     key: string,
-    result: ResourceT | ResourceT[],
+    // TODO - this should be ResourceOperationResult or ResourceListOperationResult, but sometimes it's Array<Resource>
+    result: any,
     relationship: ResourceSchemaRelationship,
     baseResource: typeof Resource,
   ): Promise<KnexRecord[] | void> {
+    // TODO - somehow fix polymorphism
+    const res: Array<Resource> = result.records || result.record || result;
+
     const baseTableName = this.appInstance.app.serializer.resourceTypeToTableName(baseResource.type);
     const relationProcessor = (await this.processorFor(relationship.type().type)) as KnexProcessor<Resource>;
 
     const query = relationProcessor.getQuery();
     const foreignTableName = relationProcessor.tableName;
     const foreignType = relationProcessor.resourceClass.type;
-    const sqlOperator = Array.isArray(result) ? "in" : "=";
+    const sqlOperator = Array.isArray(res) ? "in" : "=";
     const columns = relationProcessor.getColumns(this.appInstance.app.serializer);
 
     const primaryKey = baseResource.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
 
-    const queryIn: string | string[] = Array.isArray(result)
-      ? result.map((resource: Resource) => resource[primaryKey])
-      : result[primaryKey];
+    const queryIn: string | string[] = Array.isArray(res)
+      ? res.map((resource) => resource[primaryKey])
+      : res[primaryKey];
 
     if (relationship.belongsTo) {
       const belongingPrimaryKey = relationship.type().schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
