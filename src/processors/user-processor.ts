@@ -18,10 +18,12 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
   }
 
   async add(op: Operation): Promise<HasId> {
-    const fields = Object.keys(op.data?.attributes as { [key: string]: Function })
-      .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
-      .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] }))
-      .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
+    const fields = Object.assign(
+      {},
+      ...Object.keys(op.data?.attributes as { [key: string]: Function })
+        .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
+        .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] })),
+    );
 
     const id = await this.generateId();
 
