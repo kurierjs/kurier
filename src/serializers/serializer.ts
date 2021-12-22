@@ -49,11 +49,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       .reduce((relationAttributes, relName) => {
         const key = schemaRelationships[relName].foreignKeyName || this.relationshipToColumn(relName, primaryKey);
         const value = (<ResourceRelationshipData>op.data?.relationships[relName].data).id;
-
-        return {
-          ...relationAttributes,
-          [key]: value,
-        };
+        relationAttributes[key] = value;
+        return relationAttributes;
       }, op.data.attributes);
     return op;
   }
@@ -77,22 +74,21 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           this.relationshipToColumn(relName, schemaRelationships[relName].type().schema.primaryKeyName),
       }));
 
-    data.relationships = relationshipsFound.reduce(
-      (relationships, relationship) => ({
-        ...relationships,
-        [relationship.name]: {
-          id: data.attributes[relationship.key],
-          type: schemaRelationships[relationship.name].type().type,
-        },
-      }),
-      Object.entries(data.relationships as EagerLoadedData).reduce(
-        (includedDirectRelationships, [relName, relData]: [string, ResourceRelationshipDescriptor]) => ({
-          ...includedDirectRelationships,
-          [relName]: relData.direct,
-        }),
-        {},
-      ),
+    const eagerlyLoadedRelationships = Object.entries(data.relationships as EagerLoadedData).reduce(
+      (includedDirectRelationships, [relName, relData]: [string, ResourceRelationshipDescriptor]) => {
+        includedDirectRelationships[relName] = relData.direct;
+        return includedDirectRelationships;
+      },
+      {},
     );
+
+    data.relationships = relationshipsFound.reduce((relationships, relationship) => {
+      relationships[relationship.name] = {
+        id: data.attributes[relationship.key],
+        type: schemaRelationships[relationship.name].type().type,
+      };
+      return relationships;
+    }, eagerlyLoadedRelationships);
 
     Object.keys(data.relationships)
       .filter((relName) => data.relationships[relName] && schemaRelationships[relName])
@@ -122,11 +118,12 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         ),
     );
 
-    data.attributes = Object.keys(data.attributes)
-      .map((attribute) => ({
+    data.attributes = Object.assign(
+      {},
+      ...Object.keys(data.attributes).map((attribute) => ({
         [this.columnToAttribute(attribute)]: data.attributes[attribute],
-      }))
-      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+      })),
+    );
 
     return data;
   }
@@ -167,7 +164,7 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     }
 
     const schemaRelationships = resourceType.schema.relationships;
-    const includedData: (Resource | undefined)[] = [];
+    let includedData: (Resource | undefined)[] = [];
 
     Object.keys(data.relationships)
       .filter((relationshipName) => data.relationships[relationshipName])
@@ -180,9 +177,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           const { direct: directResources = [], nested: nestedResources = [] } = resources;
           const relatedResourceClass = schemaRelationships[relationshipName].type();
           const pkName = relatedResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
-
-          includedData.push(
-            ...directResources.map((resource) => {
+          includedData = includedData.concat(
+            directResources.map((resource) => {
               if (resource[pkName]) {
                 return {
                   ...this.serializeResource(
@@ -205,8 +201,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           );
 
           if (nestedResources) {
-            includedData.push(
-              ...Object.entries(nestedResources).map(([subRelationName, nestedRelationData]) => {
+            includedData = includedData.concat(
+              Object.entries(nestedResources).map(([subRelationName, nestedRelationData]) => {
                 const subResourceClass = relatedResourceClass.schema.relationships[subRelationName].type();
                 const subPkName = subResourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
                 return nestedRelationData.map((resource: Resource) => {

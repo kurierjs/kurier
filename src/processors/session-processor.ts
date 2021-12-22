@@ -19,10 +19,12 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
   }
 
   public async add(op: Operation): Promise<HasId> {
-    const fields = Object.keys(op.data?.attributes as { [key: string]: Function })
-      .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
-      .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] }))
-      .reduce((attributes, attribute) => ({ ...attributes, ...attribute }), {});
+    const fields = Object.assign(
+      {},
+      ...Object.keys(op.data?.attributes as { [key: string]: Function })
+        .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
+        .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] })),
+    );
 
     if (Object.keys(fields).length === 0) {
       throw jsonApiErrors.InvalidData();

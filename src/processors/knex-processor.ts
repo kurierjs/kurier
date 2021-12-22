@@ -64,15 +64,12 @@ const parseOperationIncludedRelationships = (
 
   const nestedRelationships = includes
     .filter((include) => include.length > 1)
-    .reduce(
-      (acumRelationships, [nestedOrigin, nestedRelationshipName]) => ({
-        ...acumRelationships,
-        [nestedOrigin]: {
-          [nestedRelationshipName]: relationships[nestedOrigin].type().schema.relationships[nestedRelationshipName],
-        },
-      }),
-      {},
-    );
+    .reduce((acumRelationships, [nestedOrigin, nestedRelationshipName]) => {
+      acumRelationships[nestedOrigin] = {
+        [nestedRelationshipName]: relationships[nestedOrigin].type().schema.relationships[nestedRelationshipName],
+      };
+      return acumRelationships;
+    }, {});
 
   return { relationships, nestedRelationships };
 };
@@ -197,11 +194,12 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const primaryKey = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const filters = params ? { [primaryKey]: id, ...(params.filter || {}) } : { [primaryKey]: id };
 
-    const dataToUpdate = Object.keys(data.attributes)
-      .map((attribute) => ({
+    const dataToUpdate = Object.assign(
+      {},
+      ...Object.keys(data.attributes).map((attribute) => ({
         [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute],
-      }))
-      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+      })),
+    );
 
     const updated = await this.getQuery()
       .where((queryBuilder) => this.filtersToKnex(queryBuilder, filters))
@@ -222,11 +220,12 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const primaryKeyName = this.resourceClass.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const data = op.data as Resource;
 
-    const dataToInsert = Object.keys(data.attributes)
-      .map((attribute) => ({
+    const dataToInsert = Object.assign(
+      {},
+      ...Object.keys(data.attributes).map((attribute) => ({
         [this.appInstance.app.serializer.attributeToColumn(attribute)]: data.attributes[attribute],
-      }))
-      .reduce((keyValues, keyValue) => ({ ...keyValues, ...keyValue }), {});
+      })),
+    );
 
     if (data.id) {
       dataToInsert[primaryKeyName] = data.id;
