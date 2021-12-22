@@ -81,7 +81,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
       }
       const value = directRelations[includedRelationResource];
       const computed = await resourceProcessor.getComputedProperties(op, relationResourceClass, value, {});
-      directRelations[includedRelationResource] = { ...value, ...computed };
+      Object.assign(directRelations[includedRelationResource], computed);
     }
     return directRelations;
   }

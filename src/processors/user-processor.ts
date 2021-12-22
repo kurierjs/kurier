@@ -1,5 +1,5 @@
 import Authorize from "../decorators/authorize";
-import { Operation, HasId, DEFAULT_PRIMARY_KEY } from "../types";
+import { Operation, HasId } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
 import Password from "../attribute-types/password";
