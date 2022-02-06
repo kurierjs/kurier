@@ -25,10 +25,10 @@ Create your project using the [GitHub CLI](https://cli.github.com/) and with one
 
 ```bash
 # Create a TypeScript + Kurier API.
-gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-typescript
+npx gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-typescript
 
 # Create a JavaScript + Kurier API.
-gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-javascript
+npx gh repo create my-api-with-kurier -p kurierjs/kurier-starter-pack-javascript
 ```
 
 ### The DIY way
