@@ -63,13 +63,13 @@
     "prettier": "^2.6.2",
     "sqlite3": "^5.0.2",
     "superagent-defaults": "^0.1.14",
-    "supertest": "6.1.6",
+    "supertest": "^6.2.2",
     "supertest-koa-agent": "^0.3.2",
     "supertest-prefix": "^1.0.2",
     "trace-unhandled": "^2.0.1",
     "ts-jest": "^27.1.4",
     "ts-node-dev": "1.1.8",
-    "typescript": "4.5.4",
+    "typescript": "^4.6.3",
     "vercel-node-server": "^2.2.1"
   }
 }
