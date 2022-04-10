@@ -38,7 +38,7 @@
     "escape-string-regexp": "^4.0.0",
     "express": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^1.0.4",
+    "knex": "^1.0.5",
     "koa": "2.13.4",
     "koa-body": "^4.2.0",
     "koa-compose": "^4.1.0",
