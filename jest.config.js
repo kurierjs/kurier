@@ -1,14 +1,14 @@
 const baseUnitTest = {
   moduleFileExtensions: ["ts", "js"],
   transform: {
-    "^.+\\.(ts)$": "ts-jest"
+    "^.+\\.(ts)$": [
+      "ts-jest",
+      {
+        tsconfig: "tsconfig.test.json"
+      }
+    ]
   },
   displayName: "unit",
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.test.json"
-    }
-  },
   testMatch: ["<rootDir>/tests/test-suite/unit/**/?(*.)+(spec|test).ts"],
 };
 
@@ -23,9 +23,6 @@ module.exports = {
       displayName: "acceptance - camelCase",
       globals: {
         TEST_SUITE: "test_camelCase",
-        "ts-jest": {
-          tsconfig: "tsconfig.test.json"
-        }
       },
       testMatch: ["<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"],
       setupFilesAfterEnv: ["trace-unhandled/register", "<rootDir>/tests/test-suite/setup.ts"]
@@ -35,9 +32,6 @@ module.exports = {
       displayName: "acceptance - snake_case",
       globals: {
         TEST_SUITE: "test_snake_case",
-        "ts-jest": {
-          tsconfig: "tsconfig.test.json"
-        }
       },
       testMatch: ["<rootDir>/tests/test-suite/acceptance/**/?(*.)+(spec|test).ts"],
       setupFilesAfterEnv: ["trace-unhandled/register", "<rootDir>/tests/test-suite/setup.ts"]
