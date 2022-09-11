@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [14.x, 16.x, 18.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -20,8 +20,8 @@ jobs:
         check-latest: true
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
-    - name: npm 7
-      run: npm i -g npm@7 --registry=https://registry.npmjs.org
+    - name: npm 8
+      run: npm i -g npm@8 --registry=https://registry.npmjs.org
     - name: install dependencies
       run: npm ci
     - name: build, and test the package
