@@ -234,7 +234,10 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
     const ids = await this.getQuery().insert(dataToInsert, primaryKeyName);
 
     return await this.getQuery()
-      .whereIn(primaryKeyName, ids)
+      .whereIn(
+        primaryKeyName,
+        ids.map((id) => id[primaryKeyName]),
+      )
       .select(this.getColumns(this.appInstance.app.serializer))
       .first();
   }
