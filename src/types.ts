@@ -42,7 +42,7 @@ export type ResourceRelationships = {
 
 export type ResourceRelationship = {
   meta?: Meta;
-  links?: Links;
+  links?: ResourceLinks;
   data?: ResourceRelationshipData | ResourceRelationshipData[];
 };
 
@@ -62,6 +62,7 @@ export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> 
   meta?: Meta;
   operations?: Operation[];
   included?: RelatedResourcesT[];
+  links?: ResourceLinks;
 };
 
 export type JsonApiErrorsDocument = {
@@ -92,12 +93,12 @@ export type JsonApiParams = {
   fields?: { [key: string]: string[] };
 };
 
-export type Links = {
-  self: string | Link;
-  related?: string | Link;
+export type ResourceLinks = {
+  self: string | ResourceLink;
+  related?: string | ResourceLink;
 };
 
-export type Link = {
+export type ResourceLink = {
   href: string;
   meta?: Meta;
 };
@@ -113,7 +114,7 @@ export type Operation = {
     relationship?: string;
   };
   params?: JsonApiParams;
-  links?: Links;
+  links?: ResourceLinks;
   meta?: Meta;
 };
 

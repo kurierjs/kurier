@@ -1,12 +1,13 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { ApplicationInstanceInterface, JsonApiBulkResponse, VendorRequest } from "../types";
+import { ApplicationInstanceInterface, JsonApiBulkResponse, ResourceLinks, VendorRequest } from "../types";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
 import User from "../resources/user";
 import { JsonApiDocument, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
-import { camelize, singularize } from "../utils/string";
+import { camelize, singularize, pluralize } from "../utils/string";
 import { isEmptyObject } from "./object";
+import Resource from "../resource";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -111,6 +112,58 @@ function convertOperationResponseToHttpResponse(
     }
     return document;
   }
+
+  const data = attachLinksToResources(req, operation);
+  const links = createLinksForDocument(req);
+
+  return { data, included: operation.included, links } as JsonApiDocument;
+}
+
+function buildSelfLinkForResource(req: VendorRequest, resource: Resource): string {
+  const urlSegments: string[] = [];
+
+  urlSegments.push(`https://${req.headers.host}`);
+  urlSegments.push(pluralize(resource.type));
+  urlSegments.push(resource.id as string);
+
+  return urlSegments.join("/");
+}
+
+function buildSelfLinkForDocument(req: VendorRequest): string {
+  const urlSegments: string[] = [];
+
+  urlSegments.push(`https://${req.headers.host}`);
+  urlSegments.push(req.url as string);
+
+  return urlSegments.join("");
+}
+
+function attachLinksToResources(req: VendorRequest, operation: OperationResponse): Resource | Resource[] {
+  let data: Resource | Resource[];
+
+  if (Array.isArray(operation.data)) {
+    data = operation.data.map((resource) => {
+      resource.links = {
+        self: buildSelfLinkForResource(req, resource),
+      };
+      return resource;
+    });
+  } else {
+    data = {
+      ...operation.data,
+      links: {
+        self: buildSelfLinkForResource(req, operation.data as Resource),
+      },
+    } as Resource;
+  }
+
+  return data;
+}
+
+function createLinksForDocument(req: VendorRequest): ResourceLinks {
+  return {
+    self: buildSelfLinkForDocument(req),
+  };
 }
 
 function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument {
