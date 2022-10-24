@@ -42,7 +42,7 @@
     "koa": "2.13.4",
     "koa-body": "^5.0.0",
     "koa-compose": "^4.1.0",
-    "pluralize": "^8.0.0",
+    "inflection": "^1.13.4",
     "ws": "^8.8.1"
   },
   "devDependencies": {
