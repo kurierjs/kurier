@@ -16,8 +16,12 @@ import {
   OperationResponse,
   ResourceSchemaRelationship,
   NoOpTransaction,
+  MaybeMeta,
+  Meta,
 } from "./types";
 import flatten from "./utils/flatten";
+import { classify } from "./utils/string";
+import { isEmptyObject } from "./utils/object";
 
 export default class Application {
   namespace: string;
@@ -145,15 +149,77 @@ export default class Application {
           processor.appInstance,
         )) as OperationProcessor<Resource>;
         const result = await relatedProcessor.execute(deserializedOperation);
-
-        return this.buildOperationResponse(result, processor.appInstance);
+        if (result) {
+          await this.injectResourceMeta(result, processor, op);
+        }
+        return this.buildOperationResponse(result, processor, op);
       }
     }
 
     const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
     const result = await processor.execute(deserializedOperation);
 
-    return this.buildOperationResponse(result, processor.appInstance);
+    if (result) {
+      await this.injectResourceMeta(result, processor, op);
+    }
+
+    return this.buildOperationResponse(result, processor, op);
+  }
+
+  async injectResourceMeta(
+    result: Resource | Resource[],
+    processor: OperationProcessor<Resource>,
+    op: Operation,
+  ): Promise<void> {
+    const resourceMetaHookToCallForOperation = `resourceMetaFor${classify(op.op)}`;
+    if (Array.isArray(result)) {
+      for (const resource of result) {
+        const resourceMeta = await processor.resourceMeta(resource);
+        const resourceMetaFor = await processor.resourceMetaFor(op, resource);
+        const resourceMetaForOp = await processor[resourceMetaHookToCallForOperation](resource);
+        resource.meta = {
+          ...resourceMetaForOp,
+          ...resourceMetaFor,
+          ...resourceMeta,
+        } as Meta;
+        if (isEmptyObject(resource.meta)) {
+          delete resource.meta;
+        }
+      }
+    } else {
+      const resourceMeta = await processor.resourceMeta(result);
+      const resourceMetaFor = await processor.resourceMetaFor(op, result);
+      const resourceMetaForOp = await processor[resourceMetaHookToCallForOperation](result);
+      result.meta = {
+        ...resourceMetaForOp,
+        ...resourceMetaFor,
+        ...resourceMeta,
+      } as Meta;
+      if (isEmptyObject(result.meta)) {
+        delete result.meta;
+      }
+    }
+  }
+
+  async buildDocumentMeta(
+    data: Resource | Resource[] | void,
+    processor: OperationProcessor<Resource>,
+    op: Operation,
+  ): Promise<MaybeMeta> {
+    if (!data) {
+      return;
+    }
+
+    const metaHookToCallForOperation = `metaFor${classify(op.op)}`;
+    const meta = await processor.meta(data);
+    const metaFor = await processor.metaFor(op, data);
+    const metaForOp = await processor[metaHookToCallForOperation](data);
+
+    return {
+      ...metaForOp,
+      ...metaFor,
+      ...meta,
+    };
   }
 
   async createTransaction(): Promise<Knex.Transaction | NoOpTransaction> {
@@ -209,9 +275,11 @@ export default class Application {
 
   async buildOperationResponse(
     data: Resource | Resource[] | void,
-    appInstance: ApplicationInstance,
+    processor: OperationProcessor<Resource>,
+    op: Operation,
   ): Promise<OperationResponse> {
     let resourceType: string | null;
+    const { appInstance } = processor;
 
     if (Array.isArray(data)) {
       resourceType = data[0] ? data[0].type : null;
@@ -243,8 +311,21 @@ export default class Application {
     );
 
     const serializedResources = await this.serializeResources(data);
+    const meta = await this.buildDocumentMeta(data, processor, op);
 
-    return included.length ? { included, data: serializedResources } : { data: serializedResources };
+    const response: OperationResponse = {
+      data: serializedResources,
+    };
+
+    if (included.length) {
+      response.included = included;
+    }
+
+    if (meta) {
+      response.meta = meta;
+    }
+
+    return response;
   }
 
   async serializeResources(data: Resource | Resource[] | void) {
