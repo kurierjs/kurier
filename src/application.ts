@@ -23,6 +23,8 @@ import flatten from "./utils/flatten";
 import { classify } from "./utils/string";
 import { isEmptyObject } from "./utils/object";
 
+const OPERATIONS_INCOMPATIBLE_WITH_META_INJECTION = ["identify"];
+
 export default class Application {
   namespace: string;
   types: typeof Resource[];
@@ -171,6 +173,10 @@ export default class Application {
     processor: OperationProcessor<Resource>,
     op: Operation,
   ): Promise<void> {
+    if (OPERATIONS_INCOMPATIBLE_WITH_META_INJECTION.includes(op.op)) {
+      return;
+    }
+
     const resourceMetaHookToCallForOperation = `resourceMetaFor${classify(op.op)}`;
     if (Array.isArray(result)) {
       for (const resource of result) {
