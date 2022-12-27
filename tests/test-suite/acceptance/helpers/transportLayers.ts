@@ -34,3 +34,15 @@ export default function testTransportLayer(transportLayer?: string) {
 
   return request;
 }
+
+export function testTransportLayerWithStrictError(transportLayer?: string) {
+  const { app, agent } = transportLayerContext[transportLayer];
+  const request = superagentDefaults(agent(app));
+
+  request.use(supertestPrefix(`/${kurierApp.namespace}`));
+  request.use((req: supertest.Request) => {
+    req.set("Content-Type", "application/json");
+  });
+
+  return request;
+}

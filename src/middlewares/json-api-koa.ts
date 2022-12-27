@@ -37,6 +37,9 @@ export default function jsonApiKoa(
   };
 
   const jsonApiKoa = async (ctx: Context, next: () => Promise<any>) => {
+    if (httpStrictMode && ctx.status === 400) {
+      return next();
+    }
     const appInstance = new ApplicationInstance(app);
 
     try {

@@ -44,6 +44,9 @@ export default function jsonApiVercel(
 ) {
   return async (req: VercelRequest, res: VercelResponse) => {
     await checkStrictMode(transportLayerOptions, req, res);
+    if (transportLayerOptions.httpStrictMode && res.statusCode === 400) {
+      return;
+    }
     const appInstance = new ApplicationInstance(app);
 
     try {
