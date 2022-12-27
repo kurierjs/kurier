@@ -216,6 +216,10 @@ export default class Application {
       return;
     }
 
+    if (OPERATIONS_INCOMPATIBLE_WITH_META_INJECTION.includes(op.op)) {
+      return;
+    }
+
     const metaHookToCallForOperation = `metaFor${classify(op.op)}`;
     const meta = await processor.meta(data);
     const metaFor = await processor.metaFor(op, data);
