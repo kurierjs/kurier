@@ -120,11 +120,13 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
 
   const jsonApiError = isJsonApiError ? error : JsonApiErrors.UnhandledError();
   if ((!process.env.NODE_ENV || process.env.NODE_ENV !== "production") && error.stack && !isJsonApiError) {
-    let firstLineErrorStack = error.stack.split("\n")[0];
-    if (firstLineErrorStack.indexOf("Error:") === 0) {
-      firstLineErrorStack = firstLineErrorStack.slice(7);
-    }
-    jsonApiError.detail = firstLineErrorStack;
+    const stackTrace = error.stack.split("\n");
+    const [firstLineErrorStack, secondLineErrorStack] = stackTrace;
+    const detail = firstLineErrorStack.startsWith("Error:") ? firstLineErrorStack.slice(7) : "";
+    jsonApiError.detail = detail;
+    jsonApiError.source = {
+      pointer: secondLineErrorStack,
+    };
   }
 
   return { errors: [jsonApiError] };

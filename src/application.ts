@@ -178,31 +178,36 @@ export default class Application {
     }
 
     const resourceMetaHookToCallForOperation = `resourceMetaFor${classify(op.op)}`;
+
     if (Array.isArray(result)) {
       for (const resource of result) {
         const resourceMeta = await processor.resourceMeta(resource);
         const resourceMetaFor = await processor.resourceMetaFor(op, resource);
         const resourceMetaForOp = await processor[resourceMetaHookToCallForOperation](resource);
+
         resource.meta = {
-          ...resourceMetaForOp,
-          ...resourceMetaFor,
-          ...resourceMeta,
+          ...(resourceMetaForOp || {}),
+          ...(resourceMetaFor || {}),
+          ...(resourceMeta || {}),
         } as Meta;
+
         if (isEmptyObject(resource.meta)) {
-          delete resource.meta;
+          resource.meta = undefined;
         }
       }
     } else {
       const resourceMeta = await processor.resourceMeta(result);
       const resourceMetaFor = await processor.resourceMetaFor(op, result);
       const resourceMetaForOp = await processor[resourceMetaHookToCallForOperation](result);
+
       result.meta = {
-        ...resourceMetaForOp,
-        ...resourceMetaFor,
-        ...resourceMeta,
+        ...(resourceMetaForOp || {}),
+        ...(resourceMetaFor || {}),
+        ...(resourceMeta || {}),
       } as Meta;
+
       if (isEmptyObject(result.meta)) {
-        delete result.meta;
+        result.meta = undefined;
       }
     }
   }
@@ -225,11 +230,17 @@ export default class Application {
     const metaFor = await processor.metaFor(op, data);
     const metaForOp = await processor[metaHookToCallForOperation](data);
 
-    return {
+    const composedMeta = {
       ...metaForOp,
       ...metaFor,
       ...meta,
     };
+
+    if (isEmptyObject(composedMeta)) {
+      return composedMeta;
+    }
+
+    return;
   }
 
   async createTransaction(): Promise<Knex.Transaction | NoOpTransaction> {
@@ -331,8 +342,10 @@ export default class Application {
       response.included = included;
     }
 
-    if (meta) {
-      response.meta = meta;
+    if (!isEmptyObject(meta as {})) {
+      response.meta = meta as Meta;
+    } else {
+      delete response.meta;
     }
 
     return response;
