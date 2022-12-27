@@ -23,8 +23,6 @@ import flatten from "./utils/flatten";
 import { classify } from "./utils/string";
 import { isEmptyObject } from "./utils/object";
 
-const OPERATIONS_INCOMPATIBLE_WITH_META_INJECTION = ["identify"];
-
 export default class Application {
   namespace: string;
   types: typeof Resource[];
@@ -173,17 +171,16 @@ export default class Application {
     processor: OperationProcessor<Resource>,
     op: Operation,
   ): Promise<void> {
-    if (OPERATIONS_INCOMPATIBLE_WITH_META_INJECTION.includes(op.op)) {
-      return;
-    }
-
     const resourceMetaHookToCallForOperation = `resourceMetaFor${classify(op.op)}`;
 
     if (Array.isArray(result)) {
       for (const resource of result) {
         const resourceMeta = await processor.resourceMeta(resource);
         const resourceMetaFor = await processor.resourceMetaFor(op, resource);
-        const resourceMetaForOp = await processor[resourceMetaHookToCallForOperation](resource);
+        const resourceMetaForOp =
+          typeof processor[resourceMetaHookToCallForOperation] === "function"
+            ? await processor[resourceMetaHookToCallForOperation](resource)
+            : undefined;
 
         resource.meta = {
           ...(resourceMetaForOp || {}),
@@ -198,7 +195,10 @@ export default class Application {
     } else {
       const resourceMeta = await processor.resourceMeta(result);
       const resourceMetaFor = await processor.resourceMetaFor(op, result);
-      const resourceMetaForOp = await processor[resourceMetaHookToCallForOperation](result);
+      const resourceMetaForOp =
+        typeof processor[resourceMetaHookToCallForOperation] === "function"
+          ? await processor[resourceMetaHookToCallForOperation](result)
+          : undefined;
 
       result.meta = {
         ...(resourceMetaForOp || {}),
@@ -221,14 +221,13 @@ export default class Application {
       return;
     }
 
-    if (OPERATIONS_INCOMPATIBLE_WITH_META_INJECTION.includes(op.op)) {
-      return;
-    }
-
     const metaHookToCallForOperation = `metaFor${classify(op.op)}`;
     const meta = await processor.meta(data);
     const metaFor = await processor.metaFor(op, data);
-    const metaForOp = await processor[metaHookToCallForOperation](data);
+    const metaForOp =
+      typeof processor[metaHookToCallForOperation] === "function"
+        ? await processor[metaHookToCallForOperation](data)
+        : undefined;
 
     const composedMeta = {
       ...metaForOp,
@@ -331,7 +330,7 @@ export default class Application {
       }),
     );
 
-    const serializedResources = await this.serializeResources(data);
+    const serializedResources = await this.serializeResources(data, op, appInstance);
     const meta = await this.buildDocumentMeta(data, processor, op);
 
     const response: OperationResponse = {
@@ -351,7 +350,7 @@ export default class Application {
     return response;
   }
 
-  async serializeResources(data: Resource | Resource[] | void) {
+  async serializeResources(data: Resource | Resource[] | void, op: Operation, appInstance: ApplicationInstance) {
     if (!data) {
       return null;
     }
@@ -361,14 +360,26 @@ export default class Application {
         return [];
       }
 
-      const resource = await this.resourceFor(data[0].type);
+      const resourceType = data[0].type;
+      const resource = await this.resourceFor(resourceType);
+      const processor = (await this.processorFor(resourceType, appInstance)) as OperationProcessor<Resource>;
 
-      return data
+      const resourceCollection = data
         .filter((record) => !record.preventSerialization)
         .map((record) => this.serializer.serializeResource(record, resource));
+
+      for (const resourceItem of resourceCollection) {
+        await this.injectResourceMeta(resourceItem, processor, op);
+      }
+
+      return resourceCollection;
     }
 
     const resource = await this.resourceFor(data.type);
-    return this.serializer.serializeResource(data, resource);
+    const serializedResource = this.serializer.serializeResource(data, resource);
+    const processor = (await this.processorFor(data.type, appInstance)) as OperationProcessor<Resource>;
+    await this.injectResourceMeta(serializedResource, processor, op);
+
+    return serializedResource;
   }
 }

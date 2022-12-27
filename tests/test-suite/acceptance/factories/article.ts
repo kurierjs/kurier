@@ -64,6 +64,9 @@ export default {
             data: { id: 1, type: "user" },
           },
         },
+        meta: {
+          resourceMetaForGet: "ok",
+        },
       },
       {
         id: 2,
@@ -76,6 +79,9 @@ export default {
           author: {
             data: { id: 2, type: "user" },
           },
+        },
+        meta: {
+          resourceMetaForGet: "ok",
         },
       },
       {
@@ -90,6 +96,9 @@ export default {
             data: { id: 2, type: "user" },
           },
         },
+        meta: {
+          resourceMetaForGet: "ok",
+        },
       },
     ],
   },
@@ -100,6 +109,9 @@ export default {
       attributes: {
         body: "this is test 1",
         voteCount: 2,
+      },
+      meta: {
+        resourceMetaForGet: "ok",
       },
       relationships: {
         author: {

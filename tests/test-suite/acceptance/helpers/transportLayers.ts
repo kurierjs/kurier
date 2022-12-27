@@ -23,7 +23,7 @@ const transportLayerContext = {
 
 export const transportLayers = Object.keys(transportLayerContext).map((layer) => [layer]);
 
-export default function testTransportLayer(transportLayer?: string) {
+export default function testTransportLayer(transportLayer: string) {
   const { app, agent } = transportLayerContext[transportLayer];
   const request = superagentDefaults(agent(app));
 
@@ -35,7 +35,7 @@ export default function testTransportLayer(transportLayer?: string) {
   return request;
 }
 
-export function testTransportLayerWithStrictError(transportLayer?: string) {
+export function testTransportLayerWithStrictError(transportLayer: string) {
   const { app, agent } = transportLayerContext[transportLayer];
   const request = superagentDefaults(agent(app));
 

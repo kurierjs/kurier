@@ -58,13 +58,6 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
         const result = await request.get("/articles");
         expect(result.body.data[0].meta).toEqual({
           resourceMetaForGet: "ok",
-          resourceMetaFor: "get",
-          resourceMeta: "ok",
-        });
-        expect(result.body.meta).toEqual({
-          metaForGet: "ok",
-          metaFor: "get",
-          meta: "ok",
         });
       });
 
@@ -72,27 +65,13 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
         const result = await request.get("/articles");
         expect(result.body.data[0].meta).toEqual({
           resourceMetaForGet: "ok",
-          resourceMetaFor: "get",
-          resourceMeta: "ok",
-        });
-        expect(result.body.meta).toEqual({
-          metaForGet: "ok",
-          metaFor: "get",
-          meta: "ok",
         });
       });
 
       it("Meta - meta hooks response in GET by ID", async () => {
         const result = await request.get("/articles/1");
-        expect(result.body.data[0].meta).toEqual({
+        expect(result.body.data.meta).toEqual({
           resourceMetaForGet: "ok",
-          resourceMetaFor: "get",
-          resourceMeta: "ok",
-        });
-        expect(result.body.meta).toEqual({
-          metaForGet: "ok",
-          metaFor: "get",
-          meta: "ok",
         });
       });
     });

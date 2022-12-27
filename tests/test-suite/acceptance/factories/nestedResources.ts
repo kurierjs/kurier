@@ -12,6 +12,9 @@ export default {
         relationships: {
           ...getExtraRelationships(users, "author")([1], "Object"),
         },
+        meta: {
+          resourceMetaForGet: "ok",
+        },
       },
       included: [getFactoryObject(users)(1), ...getFactoryObjects(votes)([1, 2])],
     },

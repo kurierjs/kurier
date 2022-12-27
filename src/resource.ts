@@ -34,6 +34,9 @@ export default class Resource {
     this.type = (this.constructor as typeof Resource).type;
     this.attributes = attributes || {};
     this.relationships = relationships || {};
-    this.meta = meta || {};
+
+    if (meta) {
+      this.meta = meta;
+    }
   }
 }
