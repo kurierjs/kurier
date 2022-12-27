@@ -1,3 +1,4 @@
+import { MaybeMeta, Operation } from "../../../src";
 import { KnexProcessor, HasId } from "../kurier";
 import Article from "../resources/article";
 import Vote from "../resources/vote";

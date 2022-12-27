@@ -1,5 +1,5 @@
 import Resource from "../resource";
-import { HasId, Operation, EagerLoadedData } from "../types";
+import { HasId, Operation, EagerLoadedData, MaybeMeta } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
 import ApplicationInstance from "../application-instance";
@@ -255,4 +255,16 @@ export default class OperationProcessor<ResourceT extends Resource> {
   async add(op: Operation): Promise<HasId> {
     return Promise.reject();
   }
+
+  async meta(resourceOrResources: ResourceT | ResourceT[]): Promise<MaybeMeta> {}
+  async metaFor(op: Operation, resourceOrResources: ResourceT | ResourceT[]): Promise<MaybeMeta> {}
+  async metaForGet(resourceOrResources: ResourceT | ResourceT[]): Promise<MaybeMeta> {}
+  async metaForAdd(resourceOrResources: ResourceT | ResourceT[]): Promise<MaybeMeta> {}
+  async metaForUpdate(resourceOrResources: ResourceT | ResourceT[]): Promise<MaybeMeta> {}
+
+  async resourceMeta(resource: ResourceT): Promise<MaybeMeta> {}
+  async resourceMetaFor(op: Operation, resource: ResourceT): Promise<MaybeMeta> {}
+  async resourceMetaForGet(resource: ResourceT): Promise<MaybeMeta> {}
+  async resourceMetaForAdd(resource: ResourceT): Promise<MaybeMeta> {}
+  async resourceMetaForUpdate(resource: ResourceT): Promise<MaybeMeta> {}
 }

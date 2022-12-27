@@ -53,6 +53,8 @@ export type Meta = {
   [key: string]: AttributeValue;
 };
 
+export type MaybeMeta = Meta | void;
+
 export type JsonApiDocument<ResourceT = Resource, RelatedResourcesT = Resource> = {
   data: ResourceT | ResourceT[];
   meta?: Meta;
@@ -116,6 +118,7 @@ export type Operation = {
 export type OperationResponse = {
   data: Resource | Resource[] | null;
   included?: Resource[];
+  meta?: Meta;
 };
 
 export type KnexRecord = {

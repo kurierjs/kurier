@@ -16,8 +16,12 @@ import {
   OperationResponse,
   ResourceSchemaRelationship,
   NoOpTransaction,
+  MaybeMeta,
+  Meta,
 } from "./types";
 import flatten from "./utils/flatten";
+import { classify } from "./utils/string";
+import { isEmptyObject } from "./utils/object";
 
 export default class Application {
   namespace: string;
@@ -145,15 +149,97 @@ export default class Application {
           processor.appInstance,
         )) as OperationProcessor<Resource>;
         const result = await relatedProcessor.execute(deserializedOperation);
-
-        return this.buildOperationResponse(result, processor.appInstance);
+        if (result) {
+          await this.injectResourceMeta(result, processor, op);
+        }
+        return this.buildOperationResponse(result, processor, op);
       }
     }
 
     const deserializedOperation = await this.serializer.deserializeResource(op, resourceClass);
     const result = await processor.execute(deserializedOperation);
 
-    return this.buildOperationResponse(result, processor.appInstance);
+    if (result) {
+      await this.injectResourceMeta(result, processor, op);
+    }
+
+    return this.buildOperationResponse(result, processor, op);
+  }
+
+  async injectResourceMeta(
+    result: Resource | Resource[],
+    processor: OperationProcessor<Resource>,
+    op: Operation,
+  ): Promise<void> {
+    const resourceMetaHookToCallForOperation = `resourceMetaFor${classify(op.op)}`;
+
+    if (Array.isArray(result)) {
+      for (const resource of result) {
+        const resourceMeta = await processor.resourceMeta(resource);
+        const resourceMetaFor = await processor.resourceMetaFor(op, resource);
+        const resourceMetaForOp =
+          typeof processor[resourceMetaHookToCallForOperation] === "function"
+            ? await processor[resourceMetaHookToCallForOperation](resource)
+            : undefined;
+
+        resource.meta = {
+          ...(resourceMetaForOp || {}),
+          ...(resourceMetaFor || {}),
+          ...(resourceMeta || {}),
+        } as Meta;
+
+        if (isEmptyObject(resource.meta)) {
+          resource.meta = undefined;
+        }
+      }
+    } else {
+      const resourceMeta = await processor.resourceMeta(result);
+      const resourceMetaFor = await processor.resourceMetaFor(op, result);
+      const resourceMetaForOp =
+        typeof processor[resourceMetaHookToCallForOperation] === "function"
+          ? await processor[resourceMetaHookToCallForOperation](result)
+          : undefined;
+
+      result.meta = {
+        ...(resourceMetaForOp || {}),
+        ...(resourceMetaFor || {}),
+        ...(resourceMeta || {}),
+      } as Meta;
+
+      if (isEmptyObject(result.meta)) {
+        result.meta = undefined;
+      }
+    }
+  }
+
+  async buildDocumentMeta(
+    data: Resource | Resource[] | void,
+    processor: OperationProcessor<Resource>,
+    op: Operation,
+  ): Promise<MaybeMeta> {
+    if (!data) {
+      return;
+    }
+
+    const metaHookToCallForOperation = `metaFor${classify(op.op)}`;
+    const meta = await processor.meta(data);
+    const metaFor = await processor.metaFor(op, data);
+    const metaForOp =
+      typeof processor[metaHookToCallForOperation] === "function"
+        ? await processor[metaHookToCallForOperation](data)
+        : undefined;
+
+    const composedMeta = {
+      ...metaForOp,
+      ...metaFor,
+      ...meta,
+    };
+
+    if (isEmptyObject(composedMeta)) {
+      return composedMeta;
+    }
+
+    return;
   }
 
   async createTransaction(): Promise<Knex.Transaction | NoOpTransaction> {
@@ -209,9 +295,11 @@ export default class Application {
 
   async buildOperationResponse(
     data: Resource | Resource[] | void,
-    appInstance: ApplicationInstance,
+    processor: OperationProcessor<Resource>,
+    op: Operation,
   ): Promise<OperationResponse> {
     let resourceType: string | null;
+    const { appInstance } = processor;
 
     if (Array.isArray(data)) {
       resourceType = data[0] ? data[0].type : null;
@@ -242,12 +330,27 @@ export default class Application {
       }),
     );
 
-    const serializedResources = await this.serializeResources(data);
+    const serializedResources = await this.serializeResources(data, op, appInstance);
+    const meta = await this.buildDocumentMeta(data, processor, op);
 
-    return included.length ? { included, data: serializedResources } : { data: serializedResources };
+    const response: OperationResponse = {
+      data: serializedResources,
+    };
+
+    if (included.length) {
+      response.included = included;
+    }
+
+    if (!isEmptyObject(meta as {})) {
+      response.meta = meta as Meta;
+    } else {
+      delete response.meta;
+    }
+
+    return response;
   }
 
-  async serializeResources(data: Resource | Resource[] | void) {
+  async serializeResources(data: Resource | Resource[] | void, op: Operation, appInstance: ApplicationInstance) {
     if (!data) {
       return null;
     }
@@ -257,14 +360,26 @@ export default class Application {
         return [];
       }
 
-      const resource = await this.resourceFor(data[0].type);
+      const resourceType = data[0].type;
+      const resource = await this.resourceFor(resourceType);
+      const processor = (await this.processorFor(resourceType, appInstance)) as OperationProcessor<Resource>;
 
-      return data
+      const resourceCollection = data
         .filter((record) => !record.preventSerialization)
         .map((record) => this.serializer.serializeResource(record, resource));
+
+      for (const resourceItem of resourceCollection) {
+        await this.injectResourceMeta(resourceItem, processor, op);
+      }
+
+      return resourceCollection;
     }
 
     const resource = await this.resourceFor(data.type);
-    return this.serializer.serializeResource(data, resource);
+    const serializedResource = this.serializer.serializeResource(data, resource);
+    const processor = (await this.processorFor(data.type, appInstance)) as OperationProcessor<Resource>;
+    await this.injectResourceMeta(serializedResource, processor, op);
+
+    return serializedResource;
   }
 }

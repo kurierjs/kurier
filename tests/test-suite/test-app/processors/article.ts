@@ -1,9 +1,15 @@
-import { KnexProcessor, HasId } from "../kurier";
+import { KnexProcessor, HasId, MaybeMeta, Operation } from "../kurier";
 import Article from "../resources/article";
 import Vote from "../resources/vote";
 
 export default class ArticleProcessor<ResourceT extends Article> extends KnexProcessor<ResourceT> {
   static resourceClass = Article;
+
+  async resourceMetaForGet(resource: ResourceT): Promise<MaybeMeta> {
+    return {
+      resourceMetaForGet: "ok",
+    };
+  }
 
   attributes = {
     async voteCount(this: ArticleProcessor<Article>, article: HasId) {

@@ -7,6 +7,7 @@ import User from "../resources/user";
 import { JsonApiDocument, JsonApiErrorsDocument, Operation, OperationResponse } from "../types";
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
+import { isEmptyObject } from "./object";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -100,7 +101,16 @@ function convertOperationResponseToHttpResponse(
   const responseMethods = ["GET", "POST", "PATCH", "PUT"];
 
   if (responseMethods.includes(req.method as string)) {
-    return { data: operation.data, included: operation.included } as JsonApiDocument;
+    const document = {
+      data: operation.data,
+    } as JsonApiDocument;
+    if (operation.included) {
+      document.included = operation.included;
+    }
+    if (!isEmptyObject(operation.meta!)) {
+      document.meta = operation.meta;
+    }
+    return document;
   }
 }
 
@@ -110,11 +120,13 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
 
   const jsonApiError = isJsonApiError ? error : JsonApiErrors.UnhandledError();
   if ((!process.env.NODE_ENV || process.env.NODE_ENV !== "production") && error.stack && !isJsonApiError) {
-    let firstLineErrorStack = error.stack.split("\n")[0];
-    if (firstLineErrorStack.indexOf("Error:") === 0) {
-      firstLineErrorStack = firstLineErrorStack.slice(7);
-    }
-    jsonApiError.detail = firstLineErrorStack;
+    const stackTrace = error.stack.split("\n");
+    const [firstLineErrorStack, secondLineErrorStack] = stackTrace;
+    const detail = firstLineErrorStack.startsWith("Error:") ? firstLineErrorStack.slice(7) : "";
+    jsonApiError.detail = detail;
+    jsonApiError.source = {
+      pointer: secondLineErrorStack,
+    };
   }
 
   return { errors: [jsonApiError] };
