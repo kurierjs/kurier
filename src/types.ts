@@ -1,4 +1,4 @@
-import { IncomingMessage, ServerResponse } from "http";
+import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
 import { Knex } from "knex";
 import { Request as ExpressRequest } from "express";
 import { Request as KoaRequest } from "koa";
@@ -212,6 +212,11 @@ export type NoOpTransaction = {
 export type TransportLayerOptions = {
   httpBodyPayload?: string;
   httpStrictMode?: boolean;
+};
+
+export type TransportLayerContext = {
+  ip?: string;
+  headers?: IncomingHttpHeaders;
 };
 
 export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
