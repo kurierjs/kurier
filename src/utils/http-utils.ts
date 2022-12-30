@@ -51,7 +51,7 @@ async function handleBulkEndpoint(
   appInstance: ApplicationInstance,
   operations: Operation[],
 ): Promise<JsonApiBulkResponse> {
-  return { operations: await appInstance.app.executeOperations(operations || []) };
+  return { operations: await appInstance.app.executeOperations(operations || [], appInstance) };
 }
 
 async function handleJsonApiEndpoint(
