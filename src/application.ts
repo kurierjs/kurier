@@ -235,7 +235,7 @@ export default class Application {
       ...meta,
     };
 
-    if (isEmptyObject(composedMeta)) {
+    if (!isEmptyObject(composedMeta)) {
       return composedMeta;
     }
 
