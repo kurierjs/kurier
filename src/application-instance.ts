@@ -4,13 +4,14 @@ import { Knex } from "knex";
 import Application from "./application";
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
-import { Operation, OperationResponse, NoOpTransaction } from "./types";
+import { Operation, OperationResponse, NoOpTransaction, TransportLayerContext } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
 
 export default class ApplicationInstance {
   public user: User | undefined;
   public transaction: Knex.Transaction | NoOpTransaction;
+  public transportLayerContext: TransportLayerContext | undefined;
 
   constructor(public app: Application) {}
 
@@ -37,7 +38,7 @@ export default class ApplicationInstance {
     let user: OperationResponse;
 
     try {
-      [user] = await this.app.executeOperations([op]);
+      [user] = await this.app.executeOperations([op], this);
     } catch (error) {
       if (error.code === "not_found") {
         throw jsonApiErrors.InvalidToken();

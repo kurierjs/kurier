@@ -7,7 +7,7 @@ export default class ArticleProcessor<ResourceT extends Article> extends KnexPro
 
   async resourceMetaForGet(resource: ResourceT): Promise<MaybeMeta> {
     return {
-      resourceMetaForGet: "ok",
+      ip: this.appInstance.transportLayerContext?.ip as string,
     };
   }
 

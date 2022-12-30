@@ -40,6 +40,11 @@ export default function jsonApiExpress(
   const jsonApiExpress = async (req: express.Request, res: express.Response, next: () => any) => {
     const appInstance = new ApplicationInstance(app);
 
+    appInstance.transportLayerContext = {
+      ip: req.ip || req.headers["x-forwarded-for"]?.toString().split(",")[0].trim(),
+      headers: req.headers,
+    };
+
     try {
       await authenticate(appInstance, req);
     } catch (error) {

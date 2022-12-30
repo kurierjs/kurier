@@ -49,6 +49,11 @@ export default function jsonApiVercel(
     }
     const appInstance = new ApplicationInstance(app);
 
+    appInstance.transportLayerContext = {
+      ip: req.headers["x-forwarded-for"]?.toString().split(",")[0].trim(),
+      headers: req.headers,
+    };
+
     try {
       await authenticate(appInstance, req);
     } catch (error) {

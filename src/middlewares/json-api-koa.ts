@@ -42,6 +42,11 @@ export default function jsonApiKoa(
     }
     const appInstance = new ApplicationInstance(app);
 
+    appInstance.transportLayerContext = {
+      ip: ctx.ip,
+      headers: ctx.headers,
+    };
+
     try {
       await authenticate(appInstance, ctx.request);
     } catch (error) {

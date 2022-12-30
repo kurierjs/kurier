@@ -5,10 +5,15 @@ import { JsonApiDocument, Operation } from "../types";
 import ApplicationInstance from "../application-instance";
 
 export default function jsonApiWebSocket(websocketServer: Server, app: Application) {
-  websocketServer.on("connection", (connection) => {
+  websocketServer.on("connection", (connection, req) => {
     connection.on("message", async (message: Buffer) => {
       try {
         const appInstance = new ApplicationInstance(app);
+
+        appInstance.transportLayerContext = {
+          ip: req.socket.remoteAddress || req.headers["x-forwarded-for"]?.toString().split(",")[0].trim(),
+          headers: req.headers,
+        };
 
         if (!message) {
           return;

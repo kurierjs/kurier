@@ -13,7 +13,7 @@ export default {
           ...getExtraRelationships(users, "author")([1], "Object"),
         },
         meta: {
-          resourceMetaForGet: "ok",
+          ip: "::ffff:127.0.0.1",
         },
       },
       included: [getFactoryObject(users)(1), ...getFactoryObjects(votes)([1, 2])],

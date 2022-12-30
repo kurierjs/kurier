@@ -7,54 +7,55 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 - [Getting started](#getting-started)
 - [Data flow](#data-flow)
 - [Resources](#resources)
-    - [What is a resource?](#what-is-a-resource)
-    - [Declaring a resource](#declaring-a-resource)
-    - [Accepted attribute types](#accepted-attribute-types)
+  - [What is a resource?](#what-is-a-resource)
+  - [Declaring a resource](#declaring-a-resource)
+  - [Accepted attribute types](#accepted-attribute-types)
 - [Operations](#operations)
-    - [What is an operation?](#what-is-an-operation)
-    - [The `get` operation](#the-get-operation)
-    - [The `add` operation](#the-add-operation)
-    - [The `update` operation](#the-update-operation)
-    - [The `remove` operation](#the-remove-operation)
-    - [Running multiple operations](#running-multiple-operations)
+  - [What is an operation?](#what-is-an-operation)
+  - [The `get` operation](#the-get-operation)
+  - [The `add` operation](#the-add-operation)
+  - [The `update` operation](#the-update-operation)
+  - [The `remove` operation](#the-remove-operation)
+  - [Running multiple operations](#running-multiple-operations)
 - [Transport layers](#transport-layers)
-    - [HTTP Protocol](#http-protocol)
-        - [Using jsonApiKoa](#using-jsonapikoa)
-        - [Using jsonApiExpress](#using-jsonapiexpress)
-        - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
-        - [Request/response mapping](#requestresponse-mapping)
-        - [Bulk operations in HTTP](#bulk-operations-in-http)
-    - [WebSocket Protocol](#websocket-protocol)
-        - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
-        - [Executing operations over sockets](#executing-operations-over-sockets)
-    - [Serverless Functions](#serverless-functions)
-        - [Using Vercel Functions](#using-vercel-functions)
+  - [HTTP Protocol](#http-protocol)
+    - [Using jsonApiKoa](#using-jsonapikoa)
+    - [Using jsonApiExpress](#using-jsonapiexpress)
+    - [Converting operations into HTTP endpoints](#converting-operations-into-http-endpoints)
+    - [Request/response mapping](#requestresponse-mapping)
+    - [Bulk operations in HTTP](#bulk-operations-in-http)
+  - [WebSocket Protocol](#websocket-protocol)
+    - [Using jsonApiWebSocket](#using-jsonapiwebsocket)
+    - [Executing operations over sockets](#executing-operations-over-sockets)
+  - [Serverless Functions](#serverless-functions)
+    - [Using Vercel Functions](#using-vercel-functions)
 - [Processors](#processors)
-    - [What is a processor?](#what-is-a-processor)
-    - [The `OperationProcessor` class](#the-operationprocessor-class)
-    - [How does an operation gets executed?](#how-does-an-operation-gets-executed)
-    - [Controlling errors while executing an operation](#controlling-errors-while-executing-an-operation)
-    - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
-    - [The `KnexProcessor` class](#the-knexprocessor-class)
-    - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
-    - [Using computed properties in a processor](#using-computed-properties-in-a-processor)
+  - [What is a processor?](#what-is-a-processor)
+  - [The `OperationProcessor` class](#the-operationprocessor-class)
+  - [How does an operation gets executed?](#how-does-an-operation-gets-executed)
+  - [Controlling errors while executing an operation](#controlling-errors-while-executing-an-operation)
+  - [Extending the `OperationProcessor` class](#extending-the-operationprocessor-class)
+  - [The `KnexProcessor` class](#the-knexprocessor-class)
+  - [Extending the `KnexProcessor` class](#extending-the-knexprocessor-class)
+  - [Using computed properties in a processor](#using-computed-properties-in-a-processor)
+  - [The transport layer context](#the-transport-layer-context)
 - [Serialization](#serialization)
-    - [The JsonApiSerializer class](#the-jsonapiserializer-class)
-    - [Extending the serializer](#extending-the-serializer)
+  - [The JsonApiSerializer class](#the-jsonapiserializer-class)
+  - [Extending the serializer](#extending-the-serializer)
 - [Authentication and authorization](#authorization)
-    - [Defining an `User` resource](#defining-an-user-resource)
-    - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
-    - [Using the `UserManagement` addon](#using-the-usermanagement-addon)
-    - [Configuring roles and permissions](#configuring-roles-and-permissions)
-    - [Using the `IfUser-*` helpers](#using-the-ifuser--helpers)
-    - [Front-end requirements](#front-end-requirements)
+  - [Defining an `User` resource](#defining-an-user-resource)
+  - [Using the `@Authorize` decorator](#using-the-authorize-decorator)
+  - [Using the `UserManagement` addon](#using-the-usermanagement-addon)
+  - [Configuring roles and permissions](#configuring-roles-and-permissions)
+  - [Using the `IfUser-*` helpers](#using-the-ifuser--helpers)
+  - [Front-end requirements](#front-end-requirements)
 - [The JSONAPI application](#the-jsonapi-application)
-    - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
-    - [Referencing types and processors](#referencing-types-and-processors)
-    - [Using a default processor](#using-a-default-processor)
+  - [What is a JSONAPI application?](#what-is-a-jsonapi-application)
+  - [Referencing types and processors](#referencing-types-and-processors)
+  - [Using a default processor](#using-a-default-processor)
 - [Extending the framework](#extending-the-framework)
-    - [What is an addon?](#what-is-an-addon)
-    - [Using an addon](#using-an-addon)
+  - [What is an addon?](#what-is-an-addon)
+  - [Using an addon](#using-an-addon)
 
 ## Getting started
 
@@ -67,64 +68,64 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 2. Create a Resource:
 
 ```ts
-   // resources/author.ts
-   import { Resource } from "kurier";
+// resources/author.ts
+import { Resource } from "kurier";
 
-   export default class Author extends Resource {
-     static schema = {
-       attributes: {
-         firstName: String,
-         lastName: String,
-       },
-     };
-   }
+export default class Author extends Resource {
+  static schema = {
+    attributes: {
+      firstName: String,
+      lastName: String,
+    },
+  };
+}
 ```
 
 3. Create an Application and inject it into your server. For example, let's say you've installed Koa in your Node application and want to expose JSONAPI via HTTP:
 
 ```ts
-   import { Application, jsonApiKoa, KnexProcessor } from "kurier";
-   import Koa from "koa";
-   import Author from "./resources/author";
+import { Application, jsonApiKoa, KnexProcessor } from "kurier";
+import Koa from "koa";
+import Author from "./resources/author";
 
-   const app = new Application({
-     namespace: "api",
-     types: [Author],
-     defaultProcessor: new KnexProcessor(/* your knex DB connection settings */)
-   });
+const app = new Application({
+  namespace: "api",
+  types: [Author],
+  defaultProcessor: new KnexProcessor(/* your knex DB connection settings */),
+});
 
-   const api = new Koa();
+const api = new Koa();
 
-   api.use(jsonApiKoa(app));
+api.use(jsonApiKoa(app));
 
-   api.listen(3000);
+api.listen(3000);
 ```
 
 4. Run the Node app, open a browser and navigate to `http://localhost:3000/api/authors`. You should get an empty response like this:
 
 ```json
-   {
-     "data": [],
-     "included": []
-   }
+{
+  "data": [],
+  "included": []
+}
 ```
 
 5. Add some data to the "authors" table and go back to the previous URL. You'll start seeing your data!
 
 ```json
-   {
-     "data": [
-       {
-         "id": 1,
-         "type": "author",
-         "attributes": {
-           "firstName": "John",
-           "lastName": "Katzenbach"
-         }
-       }
-     ],
-     "included": []
-   }
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "author",
+      "attributes": {
+        "firstName": "John",
+        "lastName": "Katzenbach"
+      }
+    }
+  ],
+  "included": []
+}
 ```
 
 ## Data flow
@@ -189,22 +190,22 @@ export default class Book extends Resource {
       // Accepted types are String, Number and Boolean.
       title: String,
       yearOfPublication: Number,
-      price: Number
+      price: Number,
     },
     relationships: {
       author: {
         type: () => User,
         belongsTo: true,
-        foreignKeyName: "authorId"
+        foreignKeyName: "authorId",
       },
       comments: {
         type: () => Comment,
-        hasMany: true
+        hasMany: true,
         // for hasMany relationships declarations, the FK is in the related object, so it's
         // recommendable to assign a custom FK. In this case, assuming that we use the default serializer,
         // the fk name would be "book_id". Read more below this example.
-      }
-    }
+      },
+    },
   };
 }
 ```
@@ -275,46 +276,46 @@ A `get` operation can retrieve:
 - all resources of a given type:
 
 ```json
-  // Get all books.
+// Get all books.
 
-  {
-    "op": "get",
-    "ref": {
-      "type": "book"
-    }
+{
+  "op": "get",
+  "ref": {
+    "type": "book"
   }
+}
 ```
 
 - a subset of resources of given type which satisfy a certain criteria:
 
 ```json
-  // Get all books with a price greater than 100.
+// Get all books with a price greater than 100.
 
-  {
-    "op": "get",
-    "ref": {
-      "type": "book"
-    },
-    "params": {
-      "filter": {
-        "price": "gt:100"
-      }
+{
+  "op": "get",
+  "ref": {
+    "type": "book"
+  },
+  "params": {
+    "filter": {
+      "price": "gt:100"
     }
   }
+}
 ```
 
 - a single, uniquely identified resource of a given type:
 
 ```json
-  // Get a single book.
+// Get a single book.
 
-  {
-    "op": "get",
-    "ref": {
-      "type": "book",
-      "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
-    }
+{
+  "op": "get",
+  "ref": {
+    "type": "book",
+    "id": "ef70e4a4-5016-467b-958d-449ead0ce08e"
   }
+}
 ```
 
 The following filter operations are supported:
@@ -535,10 +536,12 @@ Every HTTP transport layer in Kurier supports a `transportLayerOptions` paramete
 For example, to change the body payload to 10mb, with strict mode, in `jsonApiExpress`:
 
 ```ts
-api.use(jsonApiExpress(app, {
-  httpBodyPayload: '10mb',
-  httpStrictMode: true,
-}));
+api.use(
+  jsonApiExpress(app, {
+    httpBodyPayload: "10mb",
+    httpStrictMode: true,
+  }),
+);
 ```
 
 #### Converting operations into HTTP endpoints
@@ -683,17 +686,19 @@ In case you don't want all of your endpoints to go through Kurier, you can names
 In the `[...kurier].js` file, you can import the `jsonApiVercel` middleware to handle the resource endpoints automatically, just like `jsonApiKoa` and `jsonApiExpress` do:
 
 ```js
-import { Application, jsonApiVercel } from 'kurier';
-import { knex } from 'knex';
+import { Application, jsonApiVercel } from "kurier";
+import { knex } from "knex";
 
 const app = new Application({
   // The `namespace` property must match your directory structure under `pages/api`.
-  namespace: 'api/kurier',
+  namespace: "api/kurier",
   // ...the rest of the Application properties (types, processors, etc.).
 });
 
 // You can also add a database connection with Knex.
-app.services.knex = knex({ /* Your DB configuration */ });
+app.services.knex = knex({
+  /* Your DB configuration */
+});
 
 // Export the middleware result so Next.js can handle Kurier endpoints.
 export default jsonApiVercel(app);
@@ -779,7 +784,7 @@ import { resolve as resolvePath, basename } from "path";
 export default class ReadOnlyProcessor extends OperationProcessor<Resource> {
   async get(op: Operation): Promise<Resource[]> {
     const files = readdirSync(resolvePath(__dirname, `data/${op.ref.type}`));
-    return files.map(file => ({
+    return files.map((file) => ({
       type: op.ref.type,
       id: basename(file),
       attributes: JSON.parse(readFileSync(file).toString()),
@@ -827,7 +832,7 @@ You can also create an error by using the `JsonApiError` type:
 throw {
   // At the very least, you must declare a status and a code.
   status: HttpStatusCode.UnprocessableEntity,
-  code: "invalid_json_in_record"
+  code: "invalid_json_in_record",
 } as JsonApiError;
 ```
 
@@ -875,10 +880,7 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
     const now = new Date();
     const id = now.valueOf().toString();
     const [date] = now.toJSON().split("T");
-    const [, time] = now
-      .toJSON()
-      .replace(/Z/g, "")
-      .split("T");
+    const [, time] = now.toJSON().replace(/Z/g, "").split("T");
 
     return [
       {
@@ -886,9 +888,9 @@ export default class MomentProcessor extends OperationProcessor<Moment> {
         id,
         attributes: {
           date,
-          time
+          time,
         },
-      }
+      },
     ];
   }
 }
@@ -943,6 +945,20 @@ class CommentProcessor<T extends Comment> extends KnexProcessor<T> {
 
 Any computed properties you define will be included in the resource on any operation. **Do not** declare these computed properties in the resource's schema, as Kurier will interpret them as columns in a table and fail due to non-existing columns.
 
+### The transport layer context
+
+As you may have noticed, Kurier takes separation of concerns quite seriously, and allows no interactions between say, the HTTP transport layer and a processor. However, there are a _few_ use cases where you might need, for instance, the client's IP address, such as geocoding. Since launch, all processors in Kurier holds an `appInstance` property, a reference to the current instance of the application, where an operation is taking place. Starting from version 1.3.0, we've added a `transportLayerContext` with two properties, available depending on what you're using (Express, Koa, Vercel or WebSockets):
+
+- `ip`: a `string` containing the remote client's IP address (it could be IPv4, IPv6, it could come from `remoteAddress` or from the `X-Forwarded-For` header, it really depends on the transport middleware you're using).
+- `headers`: a `dictionary` containing all available headers from the original request (it works both for HTTP and WebSockets, information available may vary according to the protocol you're using).
+
+You can access this information at any given point in your processor like this:
+
+```ts
+const { ip, headers } = this.appInsstance.transportLayerContext;
+// Do stuff with ip and/or headers...
+```
+
 ## The `KnexProcessor` class
 
 This processor is a fully-implemented, database-driven extension of the `OperationProcessor` class seen before. It takes care of creating the necessary SQL queries to resolve any given operation.
@@ -965,7 +981,7 @@ In addition to the operation handlers, this processor has some other methods tha
 | `getQuery`  | Returns an instance of [Knex.QueryBuilder](https://knexjs.org/#Builder), scoped to the table specified by `tableName` (the processor resource's data source) |
 | `tableName` | Returns the table name for the resource handled by the processor                                                                                             |
 
-Using these two methods and the standard [Knex functions](https://knexjs.org/#Builder-wheres), you can extend a processor anyway you want to.
+Using these two methods and the standard [Knex functions](https://knexjs.org/#Builder-wheres), you can extend a processor any way you want to.
 
 ### Extending the `KnexProcessor` class
 
@@ -980,7 +996,7 @@ export default class BookProcessor extends KnexProcessor<Book> {
     return {
       type: "bookCount",
       attributes: {
-        count: (await super.get(op)).length
+        count: (await super.get(op)).length,
       },
     };
   }
@@ -1037,7 +1053,7 @@ import MySerializer from "./serializer";
 
 const app = new Application({
   // ...other settings...
-  serializer: MySerializer // Pass the serializer here.
+  serializer: MySerializer, // Pass the serializer here.
 });
 ```
 
@@ -1076,7 +1092,7 @@ export default class User extends JsonApiUser {
     attributes: {
       username: String,
       emailAddress: String,
-      passphrase: Password
+      passphrase: Password,
     },
   };
 }
@@ -1115,26 +1131,26 @@ You'll need to define at least two functions:
 - **A `login` callback which allows a user to identify itself with their credentials.** Internally, it receives an `add` operation for the `session` resource and an attribute hash containing user data. This callback must return a boolean and somehow compare if the user and password (or whatever identification means you need) are a match:
 
 ```ts
-  // Assume `hash` is a function that takes care of hashing a plain-text
-  // password with a given salt.
-  export default async function login(op: Operation, user: ResourceAttributes) {
-    return (
-      op.data.attributes.email === user.email &&
-      hash(op.data.attributes.password, process.env.SESSION_KEY) === user.password
-    );
-  }
+// Assume `hash` is a function that takes care of hashing a plain-text
+// password with a given salt.
+export default async function login(op: Operation, user: ResourceAttributes) {
+  return (
+    op.data.attributes.email === user.email &&
+    hash(op.data.attributes.password, process.env.SESSION_KEY) === user.password
+  );
+}
 ```
 
 - **An `encryptPassword` callback which takes care of transforming the plain-text password when the API receives a request to create a new user.** Internally, it receives an `add` operation for the `user` resource. This callback must return an object containing a key with the column name for your password field, with a value of an encrypted version of your password, using a cryptographic algorithm of your choice:
 
 ```ts
-  // Assume `hash` is a function that takes care of hashing a plain-text
-  // password with a given salt.
-  export default async function encryptPassword(op: Operation) {
-    return {
-      password: hash(op.data.attributes.password, process.env.SESSION_KEY)
-    };
-  }
+// Assume `hash` is a function that takes care of hashing a plain-text
+// password with a given salt.
+export default async function encryptPassword(op: Operation) {
+  return {
+    password: hash(op.data.attributes.password, process.env.SESSION_KEY),
+  };
+}
 ```
 
 Optionally, you can define a `generateId` callback, which must return a string with a unique ID, used when a new user is being registered. An example of it could be:
@@ -1159,7 +1175,7 @@ app.use(UserManagementAddon, {
   userResource: User,
   userLoginCallback: login,
   userEncryptPasswordCallback: encryptPassword,
-  userGenerateIdCallback: generateId // optional
+  userGenerateIdCallback: generateId, // optional
 } as UserManagementAddonOptions);
 ```
 
@@ -1179,7 +1195,7 @@ export default class MyVeryOwnUserProcessor<T extends User> extends UserProcesso
     // Assume `hash` is a function that takes care of hashing a plain-text
     // password with a given salt.
     return {
-      password: hash(op.data.attributes.password, process.env.SESSION_KEY)
+      password: hash(op.data.attributes.password, process.env.SESSION_KEY),
     };
   }
 
@@ -1193,7 +1209,7 @@ Then, you can simply do:
 app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: MyVeryOwnUserProcessor,
-  userLoginCallback: login
+  userLoginCallback: login,
 } as UserManagementAddonOptions);
 ```
 
@@ -1215,10 +1231,9 @@ import { ApplicationInstance, User } from "kurier";
 export default async function roleProvider(this: ApplicationInstance, user: User): Promise<string[]> {
   const userRoleProcessor = this.processorFor("userRole");
 
-  return (await roleProcessor
-    .getQuery()
-    .where({ user_id: user.id })
-    .select("role_name")).map(record => record["role_name"]);
+  return (await roleProcessor.getQuery().where({ user_id: user.id }).select("role_name")).map(
+    (record) => record["role_name"],
+  );
 }
 ```
 
@@ -1232,7 +1247,7 @@ app.use(UserManagementAddon, {
   userProcessor: MyVeryOwnUserProcessor,
   userLoginCallback: login,
   userRolesProvider: roleProvider,
-  userPermissionsProvider: permissionsProvider
+  userPermissionsProvider: permissionsProvider,
 } as UserManagementAddonOptions);
 ```
 
@@ -1279,12 +1294,14 @@ Authorization: Bearer JWT_HASH_GOES_HERE
 
 For authorization with websockets, the token should be provided inside a _meta_ object property, like this:
 
-```json
+```jsonc
 {
-  "meta":{
-    "token":"JWT_HASH_GOES_HERE"
+  "meta": {
+    "token": "JWT_HASH_GOES_HERE"
   },
-  "operations":[...]
+  "operations": [
+    // ...
+  ]
 }
 ```
 
@@ -1347,7 +1364,7 @@ If you do not need custom processors, you can simply declare your resources and 
 const app = new Application({
   namespace: "api",
   types: [Author, Book, BookCount],
-  defaultProcessor: new KnexProcessor(/* db settings */)
+  defaultProcessor: new KnexProcessor(/* db settings */),
 });
 ```
 
@@ -1387,7 +1404,7 @@ import { MyAddon, MyAddonOptions } from "./my-addon";
 // Assume `app` is a JSONAPI {Application} object.
 app.use(MyAddon, {
   // Addon options.
-  foo: 3
+  foo: 3,
 } as MyAddonOptions);
 ```
 

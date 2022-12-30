@@ -65,7 +65,7 @@ export default {
           },
         },
         meta: {
-          resourceMetaForGet: "ok",
+          ip: "::ffff:127.0.0.1",
         },
       },
       {
@@ -81,7 +81,7 @@ export default {
           },
         },
         meta: {
-          resourceMetaForGet: "ok",
+          ip: "::ffff:127.0.0.1",
         },
       },
       {
@@ -97,7 +97,7 @@ export default {
           },
         },
         meta: {
-          resourceMetaForGet: "ok",
+          ip: "::ffff:127.0.0.1",
         },
       },
     ],
@@ -111,7 +111,7 @@ export default {
         voteCount: 2,
       },
       meta: {
-        resourceMetaForGet: "ok",
+        ip: "::ffff:127.0.0.1",
       },
       relationships: {
         author: {
