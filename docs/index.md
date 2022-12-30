@@ -955,7 +955,7 @@ As you may have noticed, Kurier takes separation of concerns quite seriously, an
 You can access this information at any given point in your processor like this:
 
 ```ts
-const { ip, headers } = this.appInsstance.transportLayerContext;
+const { ip, headers } = this.appInstance.transportLayerContext;
 // Do stuff with ip and/or headers...
 ```
 
