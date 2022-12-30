@@ -6,7 +6,12 @@ import * as supertestKoa from "supertest-koa-agent";
 import * as superagentDefaults from "superagent-defaults";
 import supertestPrefix from "supertest-prefix";
 
-const transportLayerContext = {
+type TransportLayerTestingConfiguration = {
+  app: object;
+  agent: Function;
+};
+
+const transportLayerContext: Record<string, TransportLayerTestingConfiguration> = {
   vercel: {
     app: vercelApp,
     agent: supertest,
@@ -29,6 +34,9 @@ export default function testTransportLayer(transportLayer: string) {
 
   request.use(supertestPrefix(`/${kurierApp.namespace}`));
   request.use((req: supertest.Request) => {
+    if (transportLayer === "vercel") {
+      req.set("X-Forwarded-For", "::ffff:127.0.0.1");
+    }
     req.set("Content-Type", "application/vnd.api+json");
   });
 
