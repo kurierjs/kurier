@@ -66,7 +66,7 @@ _Note: This example assumes a TypeScript environment with several dependencies p
    const app = new Application({
      namespace: "api",
      types: [Author],
-     defaultProcessor: new KnexProcessor(/* your knex DB connection settings */)
+     defaultProcessor: new KnexProcessor(/* your knex DB connection settings */),
    });
 
    const api = new Koa();
@@ -110,6 +110,11 @@ Extend Kurier's features with these addons:
 - [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many) creates intermediate resource types for many-to-many relationships.
 - [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include) alters GET operations to automatically include relationships.
 - [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0) integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+- [`@kurier/addon-transport-layer-context`](https://github.com/kurierjs/kurier-addon-transport-layer-context) allows Kurier processors to know the client's IP address and request headers via ApplicationInstance.
+
+## Build your own addon!
+
+We've created a template repository for developers who want to build their own addons. Check it out [here](https://github.com/kurierjs/kurier-addon-starter)!
 
 ## Starter packs
 
