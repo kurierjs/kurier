@@ -58,6 +58,7 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
   - [Using an addon](#using-an-addon)
   - [Official addons](#official-addons)
   - [Build your own addon](#build-your-own-addon)
+  - [Using hooks][#using-hooks]
 
 ## Getting started
 
@@ -1408,6 +1409,38 @@ Extend Kurier's features with these addons:
 ### Build your own addon!
 
 We've created a template repository for developers who want to build their own addons. Check it out [here](https://github.com/kurierjs/kurier-addon-starter)!
+
+### Using hooks
+
+Hooks are a basic way for addons to extend behavior in the request-response pipeline, at the middleware layer.
+
+The following hooks are supported:
+
+- `beforeAuthentication` - triggered before calling the `authenticate()` method on any transport layer.
+- `beforeRequestHandling` - triggered before calling the `handleBulkEndpoint()` or `handleJsonApiEndpoint()` methods on any transport layer.
+
+A hook can be registered from the `app` object, which receives two parameters: the `appInstance` and a hash containing a variety of properties. For example:
+
+```ts
+app.hook("beforeAuthentication", async (appInstance: ApplicationInstanceInterface, parameters: Record<string, any>) => {
+  // Do your magic here.
+});
+
+app.hook(
+  "beforeRequestHandling",
+  async (appInstance: ApplicationInstanceInterface, parameters: Record<string, any>) => {
+    // Do your magic here.
+  },
+);
+```
+
+At the moment, `parameters` is comprised of:
+
+- `headers` - a collection of all the headers provided by the request.
+- `connection` - a legacy object used to obtain information about the client's connection.
+- `socket` - a built-in property of the `http` module, which refers to the underlying socket supporting the connection.
+
+You can register as many hook functions as you need by calling `app.hook` for each hook function you define.
 
 ## License
 
