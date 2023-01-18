@@ -1,19 +1,14 @@
 import { Server } from "ws";
 
-import Application from "../application";
-import { JsonApiDocument, Operation } from "../types";
+import { ApplicationInterface, JsonApiDocument, Operation } from "../types";
 import ApplicationInstance from "../application-instance";
+import { runHookFunctions } from "../utils/hooks";
 
-export default function jsonApiWebSocket(websocketServer: Server, app: Application) {
+export default function jsonApiWebSocket(websocketServer: Server, app: ApplicationInterface) {
   websocketServer.on("connection", (connection, req) => {
     connection.on("message", async (message: Buffer) => {
       try {
         const appInstance = new ApplicationInstance(app);
-
-        appInstance.transportLayerContext = {
-          ip: req.socket.remoteAddress || req.headers["x-forwarded-for"]?.toString().split(",")[0].trim(),
-          headers: req.headers,
-        };
 
         if (!message) {
           return;
@@ -21,10 +16,20 @@ export default function jsonApiWebSocket(websocketServer: Server, app: Applicati
 
         const { meta, operations } = JSON.parse(message.toString()) as JsonApiDocument;
 
+        const hookParameters = {
+          headers: req.headers,
+          connection: req.connection,
+          socket: req.socket,
+        };
+
+        await runHookFunctions(appInstance, "beforeAuthentication", hookParameters);
+
         // Get user.
         if (meta && meta.token) {
           appInstance.user = await appInstance.getUserFromToken(meta.token as string);
         }
+
+        await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
         // Execute and reply.
         const response = await appInstance.app.executeOperations(operations as Operation[], appInstance);

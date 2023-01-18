@@ -1,8 +1,7 @@
 import { URL } from "url";
 
-import { Operation, VercelRequest, VercelResponse } from "../types";
+import { ApplicationInterface, Operation, VercelRequest, VercelResponse } from "../types";
 
-import Application from "../application";
 import ApplicationInstance from "../application-instance";
 
 import {
@@ -15,6 +14,7 @@ import {
 
 import jsonApiErrors from "../errors/json-api-errors";
 import { TransportLayerOptions } from "../types";
+import { runHookFunctions } from "../utils/hooks";
 
 const checkStrictMode = async (
   transportLayerOptions: TransportLayerOptions,
@@ -37,22 +37,27 @@ const checkStrictMode = async (
 };
 
 export default function jsonApiVercel(
-  app: Application,
+  app: ApplicationInterface,
   transportLayerOptions: TransportLayerOptions = {
     httpStrictMode: false,
   },
 ) {
   return async (req: VercelRequest, res: VercelResponse) => {
     await checkStrictMode(transportLayerOptions, req, res);
+
     if (transportLayerOptions.httpStrictMode && res.statusCode === 400) {
       return;
     }
+
     const appInstance = new ApplicationInstance(app);
 
-    appInstance.transportLayerContext = {
-      ip: req.headers["x-forwarded-for"]?.toString().split(",")[0].trim(),
+    const hookParameters = {
       headers: req.headers,
+      connection: req.connection,
+      socket: req.socket,
     };
+
+    await runHookFunctions(appInstance, "beforeAuthentication", hookParameters);
 
     try {
       await authenticate(appInstance, req);
@@ -67,6 +72,8 @@ export default function jsonApiVercel(
 
     const urlObject = new URL(req["href"]);
     req["urlData"] = urlData(appInstance, urlObject.pathname);
+
+    await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
     if (req.method === "PATCH" && req["urlData"].resource === "bulk") {
       const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[]);
