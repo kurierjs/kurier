@@ -18,6 +18,10 @@ import {
   NoOpTransaction,
   MaybeMeta,
   Meta,
+  ApplicationInterface,
+  HookFunction,
+  ApplicationHooks,
+  ApplicationInstanceInterface,
 } from "./types";
 import flatten from "./utils/flatten";
 import { classify } from "./utils/string";
@@ -31,6 +35,7 @@ export default class Application {
   serializer: IJsonApiSerializer;
   services: ApplicationServices;
   addons: ApplicationAddons;
+  hooks: ApplicationHooks;
 
   constructor(settings: {
     namespace?: string;
@@ -47,6 +52,14 @@ export default class Application {
     this.defaultProcessor = settings.defaultProcessor || KnexProcessor;
     this.addons = [];
     this.serializer = new (settings.serializer || JsonApiSerializer)();
+    this.hooks = {
+      beforeAuthentication: [],
+      beforeRequestHandling: [],
+    };
+  }
+
+  hook(type: keyof ApplicationHooks, callback: HookFunction) {
+    this.hooks[type].push(callback);
   }
 
   use(addon: typeof Addon, options: AddonOptions = {}) {
@@ -54,14 +67,14 @@ export default class Application {
       return;
     }
 
-    new addon(this, options).install().then(() => {
+    new addon(this as ApplicationInterface, options).install().then(() => {
       this.addons.push({ addon, options });
     });
   }
 
   async executeOperations(
     ops: Operation[],
-    applicationInstance = new ApplicationInstance(this),
+    applicationInstance: ApplicationInstanceInterface = new ApplicationInstance(this),
   ): Promise<OperationResponse[]> {
     applicationInstance.transaction = await this.createTransaction();
 
@@ -257,7 +270,7 @@ export default class Application {
 
   async processorFor(
     resourceType: string,
-    applicationInstance: ApplicationInstance,
+    applicationInstance: ApplicationInstanceInterface,
     processorType = this.defaultProcessor,
   ): Promise<OperationProcessor<Resource> | undefined> {
     const resourceClass = await this.resourceFor(resourceType);
@@ -350,7 +363,11 @@ export default class Application {
     return response;
   }
 
-  async serializeResources(data: Resource | Resource[] | void, op: Operation, appInstance: ApplicationInstance) {
+  async serializeResources(
+    data: Resource | Resource[] | void,
+    op: Operation,
+    appInstance: ApplicationInstanceInterface,
+  ) {
     if (!data) {
       return null;
     }

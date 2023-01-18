@@ -1,19 +1,17 @@
 import { decode } from "jsonwebtoken";
 import { Knex } from "knex";
 
-import Application from "./application";
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
-import { Operation, OperationResponse, NoOpTransaction, TransportLayerContext } from "./types";
+import { Operation, OperationResponse, NoOpTransaction, ApplicationInterface } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
 
 export default class ApplicationInstance {
   public user: User | undefined;
   public transaction: Knex.Transaction | NoOpTransaction;
-  public transportLayerContext: TransportLayerContext | undefined;
 
-  constructor(public app: Application) {}
+  constructor(public app: ApplicationInterface) {}
 
   async processorFor(resourceType: string): Promise<OperationProcessor<Resource> | undefined> {
     return this.app.processorFor(resourceType, this);

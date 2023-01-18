@@ -1,8 +1,7 @@
 import Resource from "../resource";
-import { HasId, Operation, EagerLoadedData, MaybeMeta } from "../types";
+import { HasId, Operation, EagerLoadedData, MaybeMeta, ApplicationInstanceInterface } from "../types";
 import pick from "../utils/pick";
 import promiseHashMap from "../utils/promise-hash-map";
-import ApplicationInstance from "../application-instance";
 import JsonApiErrors from "../errors/json-api-errors";
 import { FunctionalOperators as operators, OperatorName } from "../utils/operators";
 
@@ -22,7 +21,7 @@ export default class OperationProcessor<ResourceT extends Resource> {
   protected attributes = {};
   protected relationships = {};
 
-  constructor(public appInstance: ApplicationInstance) {}
+  constructor(public appInstance: ApplicationInstanceInterface) {}
 
   async execute(op: Operation): Promise<ResourceT | ResourceT[] | void> {
     const action: string = op.op;

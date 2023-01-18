@@ -1,6 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { JsonApiBulkResponse, VendorRequest } from "../types";
-import ApplicationInstance from "../application-instance";
+import { ApplicationInstanceInterface, JsonApiBulkResponse, VendorRequest } from "../types";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
 import User from "../resources/user";
@@ -17,7 +16,7 @@ const STATUS_MAPPING = {
   DELETE: 204,
 };
 
-async function authenticate(appInstance: ApplicationInstance, request: VendorRequest) {
+async function authenticate(appInstance: ApplicationInstanceInterface, request: VendorRequest) {
   const authHeader = request.headers.authorization;
   let currentUser: User | undefined;
 
@@ -29,7 +28,7 @@ async function authenticate(appInstance: ApplicationInstance, request: VendorReq
   appInstance.user = currentUser;
 }
 
-function urlData(appInstance: ApplicationInstance, path: string) {
+function urlData(appInstance: ApplicationInstanceInterface, path: string) {
   const urlRegexp = new RegExp(
     `^(\/+)?((?<namespace>${escapeStringRegexp(
       appInstance.app.namespace,
@@ -48,14 +47,14 @@ function urlData(appInstance: ApplicationInstance, path: string) {
 }
 
 async function handleBulkEndpoint(
-  appInstance: ApplicationInstance,
+  appInstance: ApplicationInstanceInterface,
   operations: Operation[],
 ): Promise<JsonApiBulkResponse> {
   return { operations: await appInstance.app.executeOperations(operations || [], appInstance) };
 }
 
 async function handleJsonApiEndpoint(
-  appInstance: ApplicationInstance,
+  appInstance: ApplicationInstanceInterface,
   request: VendorRequest,
 ): Promise<{ body: JsonApiDocument | JsonApiErrorsDocument; status: number }> {
   const op: Operation = convertHttpRequestToOperation(request);

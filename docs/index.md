@@ -56,6 +56,9 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
 - [Extending the framework](#extending-the-framework)
   - [What is an addon?](#what-is-an-addon)
   - [Using an addon](#using-an-addon)
+  - [Official addons](#official-addons)
+  - [Build your own addon](#build-your-own-addon)
+  - [Using hooks][#using-hooks]
 
 ## Getting started
 
@@ -945,20 +948,6 @@ class CommentProcessor<T extends Comment> extends KnexProcessor<T> {
 
 Any computed properties you define will be included in the resource on any operation. **Do not** declare these computed properties in the resource's schema, as Kurier will interpret them as columns in a table and fail due to non-existing columns.
 
-### The transport layer context
-
-As you may have noticed, Kurier takes separation of concerns quite seriously, and allows no interactions between say, the HTTP transport layer and a processor. However, there are a _few_ use cases where you might need, for instance, the client's IP address, such as geocoding. Since launch, all processors in Kurier holds an `appInstance` property, a reference to the current instance of the application, where an operation is taking place. Starting from version 1.3.0, we've added a `transportLayerContext` with two properties, available depending on what you're using (Express, Koa, Vercel or WebSockets):
-
-- `ip`: a `string` containing the remote client's IP address (it could be IPv4, IPv6, it could come from `remoteAddress` or from the `X-Forwarded-For` header, it really depends on the transport middleware you're using).
-- `headers`: a `dictionary` containing all available headers from the original request (it works both for HTTP and WebSockets, information available may vary according to the protocol you're using).
-
-You can access this information at any given point in your processor like this:
-
-```ts
-const { ip, headers } = this.appInstance.transportLayerContext;
-// Do stuff with ip and/or headers...
-```
-
 ## The `KnexProcessor` class
 
 This processor is a fully-implemented, database-driven extension of the `OperationProcessor` class seen before. It takes care of creating the necessary SQL queries to resolve any given operation.
@@ -1228,7 +1217,7 @@ For example, a role provider could look like this:
 ```ts
 import { ApplicationInstance, User } from "kurier";
 
-export default async function roleProvider(this: ApplicationInstance, user: User): Promise<string[]> {
+export default async function roleProvider(this: ApplicationInstanceInterface, user: User): Promise<string[]> {
   const userRoleProcessor = this.processorFor("userRole");
 
   return (await roleProcessor.getQuery().where({ user_id: user.id }).select("role_name")).map(
@@ -1380,7 +1369,7 @@ You can build an addon by deriving a new class extending from the `Addon` primit
 
 ```ts
 export default class MyAddon extends Addon {
-  constructor(public readonly app: Application, public readonly options?: MyAddonOptions) {
+  constructor(public readonly app: ApplicationInterface, public readonly options?: MyAddonOptions) {
     super(app, options);
   }
 
@@ -1407,6 +1396,51 @@ app.use(MyAddon, {
   foo: 3,
 } as MyAddonOptions);
 ```
+
+### Official addons
+
+Extend Kurier's features with these addons:
+
+- [`@kurier/addon-many-to-many`](https://github.com/kurierjs/kurier-addon-many-to-many) creates intermediate resource types for many-to-many relationships.
+- [`@kurier/addon-auto-include`](https://github.com/kurierjs/kurier-addon-auto-include) alters GET operations to automatically include relationships.
+- [`@kurier/addon-nextjs-auth0`](https://github.com/kurierjs/kurier-addon-nextjs-auth0) integrates authorization mechanisms provided by [`nextjs-auth0`](https://github.com/auth0/nextjs-auth0) into Kurier.
+- [`@kurier/addon-transport-layer-context`](https://github.com/kurierjs/kurier-addon-transport-layer-context) allows Kurier processors to know the client's IP address and request headers via ApplicationInstance.
+
+### Build your own addon!
+
+We've created a template repository for developers who want to build their own addons. Check it out [here](https://github.com/kurierjs/kurier-addon-starter)!
+
+### Using hooks
+
+Hooks are a basic way for addons to extend behavior in the request-response pipeline, at the middleware layer.
+
+The following hooks are supported:
+
+- `beforeAuthentication` - triggered before calling the `authenticate()` method on any transport layer.
+- `beforeRequestHandling` - triggered before calling the `handleBulkEndpoint()` or `handleJsonApiEndpoint()` methods on any transport layer.
+
+A hook can be registered from the `app` object, which receives two parameters: the `appInstance` and a hash containing a variety of properties. For example:
+
+```ts
+app.hook("beforeAuthentication", async (appInstance: ApplicationInstanceInterface, parameters: Record<string, any>) => {
+  // Do your magic here.
+});
+
+app.hook(
+  "beforeRequestHandling",
+  async (appInstance: ApplicationInstanceInterface, parameters: Record<string, any>) => {
+    // Do your magic here.
+  },
+);
+```
+
+At the moment, `parameters` is comprised of:
+
+- `headers` - a collection of all the headers provided by the request.
+- `connection` - a legacy object used to obtain information about the client's connection.
+- `socket` - a built-in property of the `http` module, which refers to the underlying socket supporting the connection.
+
+You can register as many hook functions as you need by calling `app.hook` for each hook function you define.
 
 ## License
 

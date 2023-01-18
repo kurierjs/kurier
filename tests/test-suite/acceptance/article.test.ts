@@ -57,21 +57,21 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
       it("Meta - Get meta hooks response", async () => {
         const result = await request.get("/articles");
         expect(result.body.data[0].meta).toEqual({
-          ip: "::ffff:127.0.0.1",
+          hello: "world",
         });
       });
 
       it("Meta - meta hooks response in GET ALL", async () => {
         const result = await request.get("/articles");
         expect(result.body.data[0].meta).toEqual({
-          ip: "::ffff:127.0.0.1",
+          hello: "world",
         });
       });
 
       it("Meta - meta hooks response in GET by ID", async () => {
         const result = await request.get("/articles/1");
         expect(result.body.data.meta).toEqual({
-          ip: "::ffff:127.0.0.1",
+          hello: "world",
         });
       });
     });

@@ -1,6 +1,5 @@
 import * as express from "express";
 import { compose } from "compose-middleware";
-import Application from "../application";
 import ApplicationInstance from "../application-instance";
 
 import {
@@ -11,10 +10,11 @@ import {
   convertErrorToHttpResponse,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
-import { TransportLayerOptions } from "../types";
+import { ApplicationInterface, TransportLayerOptions } from "../types";
+import { runHookFunctions } from "../utils/hooks";
 
 export default function jsonApiExpress(
-  app: Application,
+  app: ApplicationInterface,
   transportLayerOptions: TransportLayerOptions = {
     httpBodyPayload: "1mb",
     httpStrictMode: false,
@@ -40,10 +40,13 @@ export default function jsonApiExpress(
   const jsonApiExpress = async (req: express.Request, res: express.Response, next: () => any) => {
     const appInstance = new ApplicationInstance(app);
 
-    appInstance.transportLayerContext = {
-      ip: req.ip || req.headers["x-forwarded-for"]?.toString().split(",")[0].trim(),
+    const hookParameters = {
       headers: req.headers,
+      connection: req.connection,
+      socket: req.socket,
     };
+
+    await runHookFunctions(appInstance, "beforeAuthentication", hookParameters);
 
     try {
       await authenticate(appInstance, req);
@@ -54,6 +57,8 @@ export default function jsonApiExpress(
 
     req["href"] = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
     req["urlData"] = urlData(appInstance, req.path);
+
+    await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
     if (req.method === "PATCH" && req["urlData"].resource === "bulk") {
       res.send(await handleBulkEndpoint(appInstance, req.body.operations));

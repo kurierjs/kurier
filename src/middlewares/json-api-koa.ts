@@ -1,7 +1,6 @@
 import { Context, Middleware } from "koa";
 import * as koaBody from "koa-body";
 import * as compose from "koa-compose";
-import Application from "../application";
 import ApplicationInstance from "../application-instance";
 import {
   authenticate,
@@ -11,10 +10,11 @@ import {
   urlData,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
-import { TransportLayerOptions } from "../types";
+import { ApplicationInterface, TransportLayerOptions } from "../types";
+import { runHookFunctions } from "../utils/hooks";
 
 export default function jsonApiKoa(
-  app: Application,
+  app: ApplicationInterface,
   transportLayerOptions: TransportLayerOptions = {
     httpBodyPayload: "1mb",
     httpStrictMode: false,
@@ -42,10 +42,13 @@ export default function jsonApiKoa(
     }
     const appInstance = new ApplicationInstance(app);
 
-    appInstance.transportLayerContext = {
-      ip: ctx.ip,
+    const hookParameters = {
       headers: ctx.headers,
+      connection: ctx.req.connection,
+      socket: ctx.socket,
     };
+
+    await runHookFunctions(appInstance, "beforeAuthentication", hookParameters);
 
     try {
       await authenticate(appInstance, ctx.request);
@@ -56,6 +59,8 @@ export default function jsonApiKoa(
     }
 
     ctx.request["urlData"] = urlData(appInstance, ctx.path);
+
+    await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
     if (ctx.method === "PATCH" && ctx.request["urlData"].resource === "bulk") {
       ctx.body = await handleBulkEndpoint(appInstance, ctx.request.body.operations);

@@ -1,7 +1,7 @@
 import { knex } from "knex";
 import {
   Application,
-  ApplicationInstance,
+  ApplicationInstanceInterface,
   KnexProcessor,
   UserManagementAddon,
   UserManagementAddonOptions,
@@ -33,7 +33,7 @@ app.use(UserManagementAddon, {
   userResource: User,
   userProcessor: UserProcessor,
   userLoginCallback: login,
-  async userRolesProvider(this: ApplicationInstance, user: User) {
+  async userRolesProvider(this: ApplicationInstanceInterface, user: User) {
     return ["Admin"];
   },
 } as UserManagementAddonOptions);

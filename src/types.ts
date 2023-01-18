@@ -7,6 +7,8 @@ import ApplicationInstance from "./application-instance";
 import Password from "./attribute-types/password";
 import Resource from "./resource";
 import User from "./resources/user";
+import OperationProcessor from "./processors/operation-processor";
+import Application from "./application";
 
 export enum HttpStatusCode {
   OK = 200,
@@ -214,11 +216,6 @@ export type TransportLayerOptions = {
   httpStrictMode?: boolean;
 };
 
-export type TransportLayerContext = {
-  ip?: string;
-  headers?: IncomingHttpHeaders;
-};
-
 export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
   query: Record<string, string | string[]>;
   cookies: Record<string, string>;
@@ -235,3 +232,16 @@ export type VercelResponse = ServerResponse & {
 export type JsonApiBulkResponse = { operations: OperationResponse[] };
 
 export type VendorRequest = ExpressRequest | KoaRequest | VercelRequest;
+
+export type HookFunction = (appInstance: ApplicationInstance, parameters?: Record<string, any>) => Promise<void>;
+
+export interface ApplicationHooks {
+  beforeAuthentication: HookFunction[];
+  beforeRequestHandling: HookFunction[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApplicationInterface extends Application {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ApplicationInstanceInterface extends ApplicationInstance {}
