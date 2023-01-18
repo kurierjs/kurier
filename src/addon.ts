@@ -1,8 +1,7 @@
-import Application from "./application";
-import { IAddon, AddonOptions } from "./types";
+import { IAddon, AddonOptions, ApplicationInterface } from "./types";
 
 export default class Addon implements IAddon {
-  constructor(public readonly app: Application, public readonly options?: AddonOptions) {
+  constructor(public readonly app: ApplicationInterface, public readonly options?: AddonOptions) {
     this.app = app;
     this.options = options;
   }

@@ -1,5 +1,11 @@
 import Addon from "../addon";
-import { AddonOptions, Operation, ResourceAttributes } from "../types";
+import {
+  AddonOptions,
+  ApplicationInstanceInterface,
+  ApplicationInterface,
+  Operation,
+  ResourceAttributes,
+} from "../types";
 import User from "../resources/user";
 import Application from "../application";
 import Password from "../attribute-types/password";
@@ -7,7 +13,6 @@ import Resource from "../resource";
 import JsonApiUserProcessor from "../processors/user-processor";
 import JsonApiSessionProcessor from "../processors/session-processor";
 import Session from "../resources/session";
-import ApplicationInstance from "../application-instance";
 
 export type UserManagementAddonOptions = AddonOptions & {
   userResource: typeof User;
@@ -15,8 +20,8 @@ export type UserManagementAddonOptions = AddonOptions & {
   userEncryptPasswordCallback?: (op: Operation) => Promise<ResourceAttributes>;
   userLoginCallback?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
   userGenerateIdCallback?: () => Promise<string>;
-  userRolesProvider?: (this: ApplicationInstance, user: User) => Promise<string[]>;
-  userPermissionsProvider?: (this: ApplicationInstance, user: User) => Promise<string[]>;
+  userRolesProvider?: (this: ApplicationInstanceInterface, user: User) => Promise<string[]>;
+  userPermissionsProvider?: (this: ApplicationInstanceInterface, user: User) => Promise<string[]>;
   usernameRequestParameter?: string;
   passwordRequestParameter?: string;
 };
@@ -48,7 +53,7 @@ const defaults: UserManagementAddonOptions = {
 
 export default class UserManagementAddon extends Addon {
   constructor(
-    public readonly app: Application,
+    public readonly app: ApplicationInterface,
     public readonly options: UserManagementAddonOptions = {} as UserManagementAddonOptions,
   ) {
     super(app);

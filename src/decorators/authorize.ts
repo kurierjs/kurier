@@ -1,10 +1,9 @@
 import JsonApiErrors from "../errors/json-api-errors";
-import { AttributeValueMatch, AttributeValue } from "../types";
+import { AttributeValueMatch, AttributeValue, ApplicationInstanceInterface } from "../types";
 
 import decorateWith from "./decorator";
 import OperationProcessor from "../processors/operation-processor";
 import Resource from "../resource";
-import ApplicationInstance from "../application-instance";
 
 type PrimitiveValue = string | number | boolean | object;
 
@@ -25,7 +24,7 @@ const every = (expected: AttributeValue[], actual: AttributeValue) => {
 };
 
 function conditionsPass(
-  appInstance: ApplicationInstance,
+  appInstance: ApplicationInstanceInterface,
   { attribute, value, operator = "some" }: AttributeValueMatch,
 ) {
   const actual: AttributeValue = appInstance.user?.attributes[attribute] as AttributeValue;
@@ -94,7 +93,7 @@ export default function authorize(...conditions: AttributeValueMatch[]) {
 export async function canAccessResource(
   resource: Resource | Resource[],
   operationName: string,
-  appInstance: ApplicationInstance,
+  appInstance: ApplicationInstanceInterface,
 ) {
   const type = Array.isArray(resource) && resource.length ? resource[0].type : (resource as Resource).type;
   const processor = (await appInstance.processorFor(type)) as OperationProcessor<Resource>;

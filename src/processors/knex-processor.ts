@@ -1,8 +1,8 @@
 import { Knex } from "knex";
-import ApplicationInstance from "../application-instance";
 import JsonApiErrors from "../errors/json-api-errors";
 import Resource from "../resource";
 import {
+  ApplicationInstanceInterface,
   DEFAULT_PRIMARY_KEY,
   EagerLoadedData,
   HasId,
@@ -77,7 +77,7 @@ const parseOperationIncludedRelationships = (
 export default class KnexProcessor<ResourceT extends Resource> extends OperationProcessor<ResourceT> {
   protected knex: Knex.Transaction;
 
-  constructor(appInstance: ApplicationInstance) {
+  constructor(appInstance: ApplicationInstanceInterface) {
     super(appInstance);
     this.knex = appInstance.transaction as Knex.Transaction;
   }
