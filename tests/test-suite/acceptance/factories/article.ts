@@ -65,7 +65,7 @@ export default {
           },
         },
         meta: {
-          ip: "::ffff:127.0.0.1",
+          hello: "world",
         },
       },
       {
@@ -81,7 +81,7 @@ export default {
           },
         },
         meta: {
-          ip: "::ffff:127.0.0.1",
+          hello: "world",
         },
       },
       {
@@ -97,7 +97,7 @@ export default {
           },
         },
         meta: {
-          ip: "::ffff:127.0.0.1",
+          hello: "world",
         },
       },
     ],
@@ -111,7 +111,7 @@ export default {
         voteCount: 2,
       },
       meta: {
-        ip: "::ffff:127.0.0.1",
+        hello: "world",
       },
       relationships: {
         author: {
