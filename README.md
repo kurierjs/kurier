@@ -38,7 +38,7 @@ _Note: This example assumes a TypeScript environment with several dependencies p
 1. Install the package with `npm` or `yarn`:
 
    ```bash
-   $ npm run add kurier
+   $ npm i kurier # or yarn add kurier
    ```
 
 2. Create a Resource:
