@@ -98,25 +98,21 @@ function convertOperationResponseToHttpResponse(
   req: VendorRequest,
   operation: OperationResponse,
 ): JsonApiDocument | undefined {
-  const responseMethods = ["GET", "POST", "PATCH", "PUT"];
+  const document: JsonApiDocument = {
+    data: attachLinksToResources(req, operation)
+  };
 
-  if (responseMethods.includes(req.method as string)) {
-    const document = {
-      data: operation.data,
-    } as JsonApiDocument;
-    if (operation.included) {
-      document.included = operation.included;
-    }
-    if (!isEmptyObject(operation.meta!)) {
-      document.meta = operation.meta;
-    }
-    return document;
+  if (operation.included) {
+    document.included = operation.included;
+  }
+  
+  if (!isEmptyObject(operation.meta!)) {
+    document.meta = operation.meta;
   }
 
-  const data = attachLinksToResources(req, operation);
-  const links = createLinksForDocument(req);
+  document.links = createLinksForDocument(req);
 
-  return { data, included: operation.included, links } as JsonApiDocument;
+  return document
 }
 
 function buildSelfLinkForResource(req: VendorRequest, resource: Resource): string {
