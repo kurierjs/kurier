@@ -5,6 +5,10 @@ export const users = [
     attributes: {
       username: "me",
       email: "me@me.com",
+      location: {
+        lat: -10.24,
+        lng: -10.25,
+      },
       friends: [
         {
           name: "Joel",
@@ -24,6 +28,10 @@ export const users = [
     attributes: {
       username: "username2",
       email: "me2@me.com",
+      location: {
+        lat: -10.26,
+        lng: -10.27,
+      },
       friends: [
         {
           name: "Joel",
@@ -43,6 +51,10 @@ export const users = [
     attributes: {
       username: "username3",
       email: "me3@me.com",
+      location: {
+        lat: -10.28,
+        lng: -10.29,
+      },
       friends: [
         {
           name: "Joel",
@@ -66,6 +78,10 @@ export default {
           email: "creationtest@test.com",
           password: "test",
           username: "creationtest",
+          location: {
+            lat: -20.24,
+            lng: -20.25,
+          },
         },
         type: "user",
         relationships: {},
@@ -78,6 +94,10 @@ export default {
         attributes: {
           username: "creationtest",
           email: "creationtest@test.com",
+          location: {
+            lat: -20.24,
+            lng: -20.25,
+          },
           friends: [{ name: "Joel" }, { name: "Ryan" }],
           coolFactor: 3,
           roles: ["user", "author", "voter"],
@@ -102,6 +122,10 @@ export default {
         attributes: {
           username: "username2",
           email: "updatetest@test.com",
+          location: {
+            lat: -10.26,
+            lng: -10.27,
+          },
           friends: [{ name: "Joel" }, { name: "Ryan" }],
           coolFactor: 3,
           roles: ["user", "author", "voter"],
@@ -147,6 +171,10 @@ export default {
       attributes: {
         email: "me@me.com",
         username: "me",
+        location: {
+          lat: -10.24,
+          lng: -10.25,
+        },
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
         roles: ["user", "author", "voter"],
@@ -159,6 +187,10 @@ export default {
       attributes: {
         email: "me2@me.com",
         username: "username2",
+        location: {
+          lat: -10.26,
+          lng: -10.27,
+        },
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
         roles: ["user", "author", "voter"],
@@ -171,6 +203,10 @@ export default {
       attributes: {
         email: "me3@me.com",
         username: "username3",
+        location: {
+          lat: -10.28,
+          lng: -10.29,
+        },
         friends: [{ name: "Joel" }, { name: "Ryan" }],
         coolFactor: 3,
         roles: ["user", "author", "voter"],
@@ -185,6 +221,10 @@ export default {
       attributes: {
         username: "me",
         email: "me@me.com",
+        location: {
+          lat: -10.24,
+          lng: -10.25,
+        },
         friends: [
           {
             name: "Joel",

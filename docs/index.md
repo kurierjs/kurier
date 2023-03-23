@@ -238,6 +238,30 @@ For a GET request to `users?include=books` to include the books related to each 
 
 > Declaring a relationship is necessary to parse each resource and return a JSONAPI-compliant response. Also, it gives the API the necessary information so that the `include` clause works correctly.
 
+You can also use relationship helpers to write your relationships easier:
+
+```ts
+// resources/book.ts
+import { Resource, ResourceSchema, BelongsTo, HasMany } from "kurier";
+import User from "./user";
+import Comment from "./comment";
+
+export default class Book extends Resource {
+  static schema: ResourceSchema = {
+    attributes: { /* ... */ },
+    relationships: {
+      author: BelongsTo(Author, { foreignKeyName: "authorId" }),
+      comments: HasMany(Comments),
+    },
+  };
+}
+```
+
+Both `BelongsTo` and `HasMany` receive two parameters:
+
+- The `Resource` type to relate;
+- An optional object with relationships settings (usually `foreignKeyName`).
+
 ### Accepted attribute types
 
 The JSONAPI spec restricts any attribute value to "any valid JSON value".
@@ -247,6 +271,77 @@ Kurier supports the following primitive types: `String`, `Number`, `Boolean`, `A
 Dates are supported in the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format (`YYYY-MM-DDTHH:MM:SS.sss` + the time zone).
 
 > ⚠️ While we support arrays and objects, you might want to reconsider and think of those array/object items as different resources of the same type and relate them to the parent resource.
+
+### Defining custom attribute types
+
+There are some instances when you want the ability to store data as a string in your database, but when it's requested via JSON:API, to present it like a simple object. An example of this would be to store geopositioning data. Let's assume a `MapPin` resource defined like this:
+
+```ts
+// resources/map-pin.ts
+import { Resource, ResourceSchema } from "kurier";
+
+export default class MapPin extends Resource {
+  static schema: ResourceSchema = {
+    attributes: {
+      title: String,
+      latitude: Number,
+      longitude: Number
+    },
+    relationships: {}
+  }
+}
+```
+
+What if we could represent latitude and longitude as a single `LatitudeLongitude` field like this:
+
+```ts
+  attributes: {
+    // ...
+    location: LatitudeLongitude
+  }
+```
+
+We can define a custom attribute type using the `AttributeType` factory function.
+
+A definition for such an attribute would look like this:
+
+```ts
+// attribute-types/latitude-longitude.ts
+import { AttributeType } from "kurier";
+
+type LatitudeLongitudeAttribute = { lat: number; lng: number };
+
+const LatitudeLongitude = AttributeType<
+  string, // The data type used to store the data in the database
+  LatitudeLongitudeAttribute // The JSON:API representation we want to use
+>("LatitudeLongitude", {
+  // Here we set the native JavaScript type use to present our data in JSON:API.
+  // For example, a Password field has a jsonType of "string".
+  jsonType: Object,
+
+  // This flag determines whether we want to expose this attribute type to the API or not.
+  isSensitive: false,
+
+  // This function converts the data from the database format to the JSON:API output we want.
+  serialize(value) {
+    const [lat, lng] = value.split(",");
+    return { lat: Number(lat), lng: Number(lng) };
+  },
+
+  // This function converts from our JSON:API format to the data representation for the database.
+  deserialize({ lat, lng }) {
+    return `${lat},${lng}`;
+  },
+});
+
+export default LatitudeLongitude;
+```
+
+Finally, we can use it in our app:
+
+```ts
+app.registerAttributeType(LatitudeLongitude);
+```
 
 ## Operations
 

@@ -2,7 +2,6 @@ import Authorize from "../decorators/authorize";
 import { Operation, HasId } from "../types";
 import User from "../resources/user";
 import KnexProcessor from "./knex-processor";
-import Password from "../attribute-types/password";
 import Resource from "../resource";
 
 export default class UserProcessor<T extends User> extends KnexProcessor<T> {
@@ -21,7 +20,9 @@ export default class UserProcessor<T extends User> extends KnexProcessor<T> {
     const fields = Object.assign(
       {},
       ...Object.keys(op.data?.attributes as { [key: string]: Function })
-        .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
+        .filter(
+          (attribute) => !this.appInstance.app.serializer.isSensitiveAttribute(this.resourceClass.schema, attribute),
+        )
         .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] })),
     );
 

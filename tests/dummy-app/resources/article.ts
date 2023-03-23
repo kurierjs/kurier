@@ -1,4 +1,4 @@
-import { Resource } from "../kurier";
+import { BelongsTo, HasMany, Resource } from "../kurier";
 import User from "./user";
 import Vote from "./vote";
 
@@ -9,16 +9,8 @@ export default class Article extends Resource {
     },
 
     relationships: {
-      author: {
-        type: () => User,
-        belongsTo: true,
-        foreignKeyName: "author",
-      },
-      votes: {
-        type: () => Vote,
-        hasMany: true,
-        foreignKeyName: "article_id",
-      },
+      author: BelongsTo(User, { foreignKeyName: "author" }),
+      votes: HasMany(Vote, { foreignKeyName: "article_id" }),
     },
   };
 }

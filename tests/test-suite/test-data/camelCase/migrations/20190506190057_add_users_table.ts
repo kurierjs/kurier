@@ -4,6 +4,7 @@ exports.up = async (knex) => {
     table.string("username");
     table.string("email");
     table.string("password");
+    table.string("location");
     table.dateTime("createdAt");
     table.dateTime("updatedAt");
   });

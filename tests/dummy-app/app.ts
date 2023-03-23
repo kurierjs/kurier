@@ -20,6 +20,7 @@ import UserProcessor from "./processors/user";
 import ArticleProcessor from "./processors/article";
 import VoteProcessor from "./processors/vote";
 import RandomProcessor from "./processors/random";
+import LatitudeLongitude from "./attribute-types/latitude-longitude";
 
 const app = new Application({
   namespace: "api",
@@ -27,6 +28,8 @@ const app = new Application({
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor,
 });
+
+app.registerAttributeType(LatitudeLongitude);
 
 app.use(UserManagementAddon, {
   userResource: User,

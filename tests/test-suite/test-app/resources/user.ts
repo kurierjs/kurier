@@ -1,3 +1,4 @@
+import LatitudeLongitude from "../attribute-types/latitude-longitude";
 import { User as JsonApiUser, Password } from "../kurier";
 import Article from "./article";
 import Comment from "./comment";
@@ -9,6 +10,7 @@ export default class User extends JsonApiUser {
       username: String,
       email: String,
       password: Password,
+      location: LatitudeLongitude,
     },
 
     relationships: {
