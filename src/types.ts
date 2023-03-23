@@ -142,14 +142,15 @@ export interface ResourceSchema {
 
 export type PasswordConstructor = typeof Password;
 
+export type NativeConstructorType =
+  | StringConstructor
+  | NumberConstructor
+  | BooleanConstructor
+  | ArrayConstructor
+  | ObjectConstructor;
+
 export interface ResourceSchemaAttributes {
-  [key: string]:
-    | StringConstructor
-    | NumberConstructor
-    | BooleanConstructor
-    | ArrayConstructor
-    | ObjectConstructor
-    | PasswordConstructor;
+  [key: string]: NativeConstructorType | PasswordConstructor;
 }
 
 export type ResourceSchemaRelationships = {
@@ -162,6 +163,16 @@ export interface ResourceSchemaRelationship {
   belongsTo?: boolean;
   foreignKeyName?: string;
 }
+
+export type HasManyResourceSchemaRelationship = ResourceSchemaRelationship & {
+  hasMany: true;
+};
+
+export type BelongsToResourceSchemaRelationship = ResourceSchemaRelationship & {
+  belongsTo: true;
+};
+
+export type ResourceSchemaRelationshipOptions = Omit<ResourceSchemaRelationship, "type" | "hasMany" | "belongsTo">;
 
 export interface HasId {
   id: any;
@@ -184,6 +195,9 @@ export type ApplicationServices = {
 } & { [key: string]: any };
 
 export interface IJsonApiSerializer {
+  attributeTypes: ApplicationAttributeTypes;
+  registerAttributeType(attributeDefinition: ApplicationAttributeTypeFactory): void;
+  isSensitiveAttribute(resourceSchema: ResourceSchema, attributeName: string): boolean;
   resourceTypeToTableName(resourceType: string): string;
   attributeToColumn(attributeName: string): string;
   columnToAttribute(columnName: string): string;
@@ -245,3 +259,22 @@ export interface ApplicationInterface extends Application {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ApplicationInstanceInterface extends ApplicationInstance {}
+
+export type ApplicationAttributeTypeOptions<StoredType, JsonType = StoredType> = {
+  isSensitive?: boolean;
+  jsonType: NativeConstructorType;
+  serialize?(value: StoredType): JsonType;
+  deserialize?(value: JsonType): StoredType;
+};
+
+export type ApplicationAttributeTypeFactory = new () => ApplicationAttributeInstantiatedTypeClass;
+export type ApplicationAttributeInstantiatedTypeClass = Omit<ApplicationAttributeTypeOptions<any>, "jsonType"> & {
+  isSensitive: boolean;
+};
+
+export interface ApplicationAttributeType {
+  name: string;
+  definition: ApplicationAttributeInstantiatedTypeClass;
+}
+
+export type ApplicationAttributeTypes = ApplicationAttributeType[];

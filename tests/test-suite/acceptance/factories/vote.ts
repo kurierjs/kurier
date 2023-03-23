@@ -89,6 +89,10 @@ const results = {
         attributes: {
           username: "me",
           email: "me@me.com",
+          location: {
+            lat: -10.24,
+            lng: -10.25,
+          },
           coolFactor: 3,
           friends: [
             {

@@ -21,12 +21,14 @@ import UserProcessor from "./processors/user";
 import ArticleProcessor from "./processors/article";
 import VoteProcessor from "./processors/vote";
 import RandomProcessor from "./processors/random";
+import LatitudeLongitude from "./attribute-types/latitude-longitude";
 
 const app = new Application({
   namespace: "api",
   types: [Article, Comment, Vote, Random],
   processors: [ArticleProcessor, VoteProcessor, RandomProcessor],
   defaultProcessor: KnexProcessor,
+  attributeTypes: [LatitudeLongitude],
 });
 
 app.use(UserManagementAddon, {

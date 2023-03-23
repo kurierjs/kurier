@@ -1,18 +1,36 @@
 import Password from "../attribute-types/password";
 import Resource from "../resource";
 import {
+  ApplicationAttributeType,
+  ApplicationAttributeTypeFactory,
+  ApplicationAttributeTypes,
   DEFAULT_PRIMARY_KEY,
   EagerLoadedData,
   IJsonApiSerializer,
   Operation,
   ResourceRelationshipData,
   ResourceRelationshipDescriptor,
+  ResourceSchema,
 } from "../types";
 import pick from "../utils/pick";
 import { camelize, classify, pluralize, underscore } from "../utils/string";
 import unpick from "../utils/unpick";
 
 export default class JsonApiSerializer implements IJsonApiSerializer {
+  attributeTypes: ApplicationAttributeTypes = [];
+
+  constructor() {
+    this.registerAttributeType(Password);
+  }
+
+  registerAttributeType(attributeDefinition: ApplicationAttributeTypeFactory) {
+    const attribute = new attributeDefinition();
+    this.attributeTypes.push({
+      name: attributeDefinition.name,
+      definition: attribute,
+    });
+  }
+
   resourceTypeToTableName(resourceType: string): string {
     return underscore(pluralize(resourceType));
   }
@@ -42,6 +60,10 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
       return op;
     }
 
+    for (const [attribute, value] of Object.entries(op.data.attributes)) {
+      op.data.attributes[attribute] = this.deserializeAttribute(resourceType.schema, attribute, value);
+    }
+
     const primaryKey = resourceType.schema.primaryKeyName || DEFAULT_PRIMARY_KEY;
     const schemaRelationships = resourceType.schema.relationships;
     op.data.attributes = Object.keys(schemaRelationships)
@@ -53,6 +75,24 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         return relationAttributes;
       }, op.data.attributes);
     return op;
+  }
+
+  getAttributeDefinition(resourceSchema: ResourceSchema, attributeName: string): ApplicationAttributeType | undefined {
+    const resourceSchemaAttribute = resourceSchema.attributes[attributeName];
+    const attributeDefinition = this.attributeTypes.find(
+      (attribute) => attribute.definition.constructor === resourceSchemaAttribute,
+    );
+    return attributeDefinition;
+  }
+
+  isSensitiveAttribute(resourceSchema: ResourceSchema, attributeName: string): boolean {
+    const attributeDefinition = this.getAttributeDefinition(resourceSchema, attributeName);
+
+    if (!attributeDefinition) {
+      return false;
+    }
+
+    return attributeDefinition.definition.isSensitive;
   }
 
   serializeResource(data: Resource, resourceType: typeof Resource): Resource {
@@ -112,8 +152,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
         .map((relationship) => relationship.key)
         .filter((relationshipKey) => !Object.keys(resourceSchema.attributes).includes(relationshipKey))
         .concat(
-          Object.keys(resourceSchema.attributes).filter(
-            (attributeKey) => resourceSchema.attributes[attributeKey] === Password,
+          Object.keys(resourceSchema.attributes).filter((attributeKey) =>
+            this.isSensitiveAttribute(resourceSchema, attributeKey),
           ),
         ),
     );
@@ -121,11 +161,35 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
     data.attributes = Object.assign(
       {},
       ...Object.keys(data.attributes).map((attribute) => ({
-        [this.columnToAttribute(attribute)]: data.attributes[attribute],
+        [this.columnToAttribute(attribute)]: this.serializeAttribute(
+          resourceSchema,
+          attribute,
+          data.attributes[attribute],
+        ),
       })),
     );
 
     return data;
+  }
+
+  serializeAttribute(resourceSchema: ResourceSchema, attributeName: string, value: unknown) {
+    const attributeDefinition = this.getAttributeDefinition(resourceSchema, attributeName);
+
+    if (!attributeDefinition || !attributeDefinition.definition.serialize) {
+      return value;
+    }
+
+    return attributeDefinition.definition.serialize(value);
+  }
+
+  deserializeAttribute(resourceSchema: ResourceSchema, attributeName: string, value: unknown) {
+    const attributeDefinition = this.getAttributeDefinition(resourceSchema, attributeName);
+
+    if (!attributeDefinition || !attributeDefinition.definition.deserialize) {
+      return value;
+    }
+
+    return attributeDefinition.definition.deserialize(value);
   }
 
   serializeRelationship(
@@ -186,8 +250,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                       id: resource[pkName],
                       attributes: unpick(resource, [
                         pkName,
-                        ...Object.keys(relatedResourceClass.schema.attributes).filter(
-                          (attribute) => relatedResourceClass.schema.attributes[attribute] === Password,
+                        ...Object.keys(relatedResourceClass.schema.attributes).filter((attribute) =>
+                          this.isSensitiveAttribute(relatedResourceClass.schema, attribute),
                         ),
                       ]),
                       relationships: {}, //TODO: this is not responding with the nested relationship relations
@@ -213,8 +277,8 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
                           id: resource[subPkName],
                           attributes: unpick(resource, [
                             subPkName,
-                            ...Object.keys(subResourceClass.schema.attributes).filter(
-                              (attribute) => subResourceClass.schema.attributes[attribute] === Password,
+                            ...Object.keys(subResourceClass.schema.attributes).filter((attribute) =>
+                              this.isSensitiveAttribute(subResourceClass.schema, attribute),
                             ),
                           ]),
                           relationships: {}, // nestedResources.filter

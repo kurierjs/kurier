@@ -3,9 +3,9 @@ exports.seed = (knex) => {
     {
       tableName: "users",
       values: [
-        { id: 1, username: "me", email: "me@me.com", password: "test" },
-        { id: 2, username: "username2", email: "me2@me.com", password: "test" },
-        { id: 3, username: "username3", email: "me3@me.com", password: "test" },
+        { id: 1, username: "me", email: "me@me.com", password: "test", location: "-10.24,-10.25" },
+        { id: 2, username: "username2", email: "me2@me.com", password: "test", location: "-10.26,-10.27" },
+        { id: 3, username: "username3", email: "me3@me.com", password: "test", location: "-10.28,-10.29" },
       ],
     },
     {

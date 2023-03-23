@@ -22,6 +22,7 @@ import {
   HookFunction,
   ApplicationHooks,
   ApplicationInstanceInterface,
+  ApplicationAttributeTypeFactory,
 } from "./types";
 import flatten from "./utils/flatten";
 import { classify } from "./utils/string";
@@ -43,6 +44,7 @@ export default class Application {
     processors?: typeof OperationProcessor[];
     defaultProcessor?: typeof OperationProcessor;
     serializer?: typeof JsonApiSerializer;
+    attributeTypes?: ApplicationAttributeTypeFactory[];
     services?: {};
   }) {
     this.namespace = settings.namespace || "";
@@ -56,6 +58,12 @@ export default class Application {
       beforeAuthentication: [],
       beforeRequestHandling: [],
     };
+
+    if (settings.attributeTypes) {
+      for (const attributeType of settings.attributeTypes) {
+        this.serializer.registerAttributeType(attributeType);
+      }
+    }
   }
 
   hook(type: keyof ApplicationHooks, callback: HookFunction) {
@@ -70,6 +78,10 @@ export default class Application {
     new addon(this as ApplicationInterface, options).install().then(() => {
       this.addons.push({ addon, options });
     });
+  }
+
+  registerAttributeType(attributeDefinition: ApplicationAttributeTypeFactory) {
+    this.serializer.registerAttributeType(attributeDefinition);
   }
 
   async executeOperations(

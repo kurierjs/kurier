@@ -1,6 +1,12 @@
+import LatitudeLongitude from "../attribute-types/latitude-longitude";
 import { JsonApiSerializer, pluralize } from "./../kurier";
 
 export default class Serializer extends JsonApiSerializer {
+  constructor() {
+    super();
+    this.registerAttributeType(LatitudeLongitude);
+  }
+
   resourceTypeToTableName(resourceType: string): string {
     return pluralize(resourceType);
   }

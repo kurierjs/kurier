@@ -4,7 +4,6 @@ import { Operation, HasId, DEFAULT_PRIMARY_KEY, ResourceAttributes } from "../ty
 import jsonApiErrors from "../errors/json-api-errors";
 import { randomBytes } from "crypto";
 import { sign } from "jsonwebtoken";
-import Password from "../attribute-types/password";
 import pick from "../utils/pick";
 
 export default class SessionProcessor<T extends Session> extends KnexProcessor<T> {
@@ -22,7 +21,9 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     const fields = Object.assign(
       {},
       ...Object.keys(op.data?.attributes as { [key: string]: Function })
-        .filter((attribute) => this.resourceClass.schema.attributes[attribute] !== Password)
+        .filter(
+          (attribute) => !this.appInstance.app.serializer.isSensitiveAttribute(this.resourceClass.schema, attribute),
+        )
         .map((attribute) => ({ [attribute]: op.data?.attributes[attribute] })),
     );
 
@@ -50,7 +51,7 @@ export default class SessionProcessor<T extends Session> extends KnexProcessor<T
     const userAttributes = pick(
       user,
       Object.keys(userType.schema.attributes)
-        .filter((attribute) => userType.schema.attributes[attribute] !== Password)
+        .filter((attribute) => !this.appInstance.app.serializer.isSensitiveAttribute(userType.schema, attribute))
         .map((attribute) => this.appInstance.app.serializer.attributeToColumn(attribute)),
     );
 
