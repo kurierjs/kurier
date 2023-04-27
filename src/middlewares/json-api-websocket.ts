@@ -42,7 +42,12 @@ export default function jsonApiWebSocket(websocketServer: Server, app: Applicati
       } catch (e) {
         connection.send(
           JSON.stringify({
-            errors: [e],
+            errors: [
+              {
+                message: e.message,
+                ...(process.env.NODE_ENV === "development" ? { stack: e.stack } : {}),
+              },
+            ],
           }),
         );
       }
