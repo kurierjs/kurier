@@ -231,13 +231,17 @@ export default class KnexProcessor<ResourceT extends Resource> extends Operation
       dataToInsert[primaryKeyName] = data.id;
     }
 
-    const ids = await this.getQuery().insert(dataToInsert, primaryKeyName);
+    const [insertedId] = (await this.getQuery().insert(dataToInsert, primaryKeyName)) as HasId[];
+
+    // If ID was supplied client-side, use that as a ID for the .whereIn()
+    // query afterwards. This partially handles the problem of not having
+    // SQL RETURNING support on some engines.
+    if (!insertedId[primaryKeyName]) {
+      insertedId[primaryKeyName] = data.id;
+    }
 
     return await this.getQuery()
-      .whereIn(
-        primaryKeyName,
-        ids.map((id) => id[primaryKeyName]),
-      )
+      .where(primaryKeyName, insertedId[primaryKeyName])
       .select(this.getColumns(this.appInstance.app.serializer))
       .first();
   }
