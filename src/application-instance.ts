@@ -3,10 +3,11 @@ import { Knex } from "knex";
 
 import Resource from "./resource";
 import OperationProcessor from "./processors/operation-processor";
-import { Operation, OperationResponse, NoOpTransaction, ApplicationInterface } from "./types";
+import { Operation, OperationResponse, NoOpTransaction, ApplicationInterface, VendorRequest } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
 import UserManagementAddon, { UserManagementAddonOptions } from "./addons/user-management";
+import { runHookFunctions } from "./utils/hooks";
 
 export default class ApplicationInstance {
   public user: User | undefined;
@@ -18,11 +19,11 @@ export default class ApplicationInstance {
     return this.app.processorFor(resourceType, this);
   }
 
-  async getUserFromToken(token: string): Promise<User | undefined> {
+  async getUserFromToken(token: string, request?: VendorRequest): Promise<User | undefined> {
     const tokenPayload = decode(token);
     let userIdSourceKey = "";
 
-    const userManagementAddonOptions = this.app.getAddonOptions<UserManagementAddonOptions>(UserManagementAddon);
+    const userManagementAddonOptions = this.app.getAddonOptions(UserManagementAddon) as UserManagementAddonOptions;
 
     if (userManagementAddonOptions) {
       userIdSourceKey = userManagementAddonOptions.jwtClaimForUserID as string;
@@ -40,7 +41,7 @@ export default class ApplicationInstance {
       throw jsonApiErrors.InvalidToken();
     }
 
-    const op = {
+    let op = {
       op: "identify",
       ref: {
         type: "user",
@@ -48,6 +49,22 @@ export default class ApplicationInstance {
       },
       params: {},
     } as Operation;
+
+    if (userManagementAddonOptions.includeTokenInIdentifyOpDataPayload) {
+      op.data = {
+        type: "user",
+        attributes: {
+          token,
+        },
+        relationships: {},
+      };
+    }
+
+    const updateOperation = (updatedOperation: Operation) => {
+      op = updatedOperation;
+    };
+
+    runHookFunctions(this, "beforeExecutingIdentifyOperation", { op, request, updateOperation });
 
     let user: OperationResponse;
 

@@ -22,7 +22,7 @@ async function authenticate(appInstance: ApplicationInstanceInterface, request: 
 
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const [, token] = authHeader.split(" ");
-    currentUser = await appInstance.getUserFromToken(token);
+    currentUser = await appInstance.getUserFromToken(token, request);
   }
 
   appInstance.user = currentUser;
