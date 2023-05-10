@@ -6,6 +6,7 @@ import OperationProcessor from "./processors/operation-processor";
 import { Operation, OperationResponse, NoOpTransaction, ApplicationInterface } from "./types";
 import jsonApiErrors from "./errors/json-api-errors";
 import User from "./resources/user";
+import UserManagementAddon, { UserManagementAddonOptions } from "./addons/user-management";
 
 export default class ApplicationInstance {
   public user: User | undefined;
@@ -19,8 +20,24 @@ export default class ApplicationInstance {
 
   async getUserFromToken(token: string): Promise<User | undefined> {
     const tokenPayload = decode(token);
+    let userIdSourceKey = "";
 
-    if (!tokenPayload || !tokenPayload["id"]) {
+    const userManagementAddon = this.app.addons.find(({ addon }) => addon === UserManagementAddon);
+
+    if (userManagementAddon) {
+      const options = userManagementAddon.options as UserManagementAddonOptions;
+      userIdSourceKey = options.jwtClaimForUserID as string;
+    } else {
+      userIdSourceKey = "id";
+    }
+
+    if (!tokenPayload) {
+      throw jsonApiErrors.InvalidToken();
+    }
+
+    const id = tokenPayload[userIdSourceKey];
+
+    if (!id) {
       throw jsonApiErrors.InvalidToken();
     }
 
@@ -28,7 +45,7 @@ export default class ApplicationInstance {
       op: "identify",
       ref: {
         type: "user",
-        id: tokenPayload["id"],
+        id,
       },
       params: {},
     } as Operation;
