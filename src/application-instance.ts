@@ -64,7 +64,7 @@ export default class ApplicationInstance {
       op = updatedOperation;
     };
 
-    runHookFunctions(this, "beforeExecutingIdentifyOperation", { op, request, updateOperation });
+    await runHookFunctions(this, "beforeExecutingIdentifyOperation", { op, request, updateOperation });
 
     let user: OperationResponse;
 
