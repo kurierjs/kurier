@@ -17,6 +17,7 @@ import Session from "../resources/session";
 export type UserManagementAddonOptions = AddonOptions & {
   userResource: typeof User;
   userProcessor?: typeof JsonApiUserProcessor;
+  sessionProcessor?: typeof JsonApiSessionProcessor;
   userEncryptPasswordCallback?: (op: Operation) => Promise<ResourceAttributes>;
   userLoginCallback?: (op: Operation, userDataSource: ResourceAttributes) => Promise<boolean>;
   userGenerateIdCallback?: () => Promise<string>;
@@ -24,11 +25,13 @@ export type UserManagementAddonOptions = AddonOptions & {
   userPermissionsProvider?: (this: ApplicationInstanceInterface, user: User) => Promise<string[]>;
   usernameRequestParameter?: string;
   passwordRequestParameter?: string;
+  jwtClaimForUserID?: string;
 };
 
 const defaults: UserManagementAddonOptions = {
   userResource: User,
   userProcessor: JsonApiUserProcessor,
+  sessionProcessor: JsonApiSessionProcessor,
   userRolesProvider: async () => [],
   userPermissionsProvider: async () => [],
   userLoginCallback: async () => {
@@ -49,6 +52,7 @@ const defaults: UserManagementAddonOptions = {
   },
   usernameRequestParameter: "username",
   passwordRequestParameter: "password",
+  jwtClaimForUserID: "id",
 };
 
 export default class UserManagementAddon extends Addon {
@@ -69,7 +73,7 @@ export default class UserManagementAddon extends Addon {
     this.app.types.push(this.options.userResource, sessionResourceType);
     this.app.processors.push(
       this.createUserProcessor() as unknown as typeof JsonApiUserProcessor,
-      this.createSessionProcessor(sessionResourceType),
+      this.createSessionProcessor(sessionResourceType) as typeof JsonApiSessionProcessor,
     );
   }
 
@@ -108,14 +112,25 @@ export default class UserManagementAddon extends Addon {
   }
 
   private createSessionProcessor(sessionResourceType: typeof Resource) {
-    return ((options) =>
-      class SessionProcessor<T extends Session> extends JsonApiSessionProcessor<T> {
-        public static resourceClass = sessionResourceType as typeof Session;
+    const { sessionProcessor } = this.options;
 
-        protected async login(op: Operation, userDataSource: ResourceAttributes): Promise<boolean> {
-          return (options.userLoginCallback || ((_, __) => true))(op, userDataSource);
-        }
-      })(this.options);
+    if (sessionProcessor === JsonApiSessionProcessor) {
+      return ((options) =>
+        class SessionProcessor<T extends Session> extends JsonApiSessionProcessor<T> {
+          public static resourceClass = sessionResourceType as typeof Session;
+
+          protected async login(op: Operation, userDataSource: ResourceAttributes): Promise<boolean> {
+            return (options.userLoginCallback || ((_, __) => true))(op, userDataSource);
+          }
+        })(this.options);
+    }
+
+    if (sessionProcessor !== undefined) {
+      return ((options) =>
+        class SessionProcessor<T extends Session> extends (options.sessionProcessor!)<T> {
+          public static resourceClass = sessionResourceType as typeof Session;
+        })(this.options);
+    }
   }
 
   private createSessionResource() {

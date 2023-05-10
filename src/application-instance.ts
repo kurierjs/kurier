@@ -22,11 +22,10 @@ export default class ApplicationInstance {
     const tokenPayload = decode(token);
     let userIdSourceKey = "";
 
-    const userManagementAddon = this.app.addons.find(({ addon }) => addon === UserManagementAddon);
+    const userManagementAddonOptions = this.app.getAddonOptions<UserManagementAddonOptions>(UserManagementAddon);
 
-    if (userManagementAddon) {
-      const options = userManagementAddon.options as UserManagementAddonOptions;
-      userIdSourceKey = options.jwtClaimForUserID as string;
+    if (userManagementAddonOptions) {
+      userIdSourceKey = userManagementAddonOptions.jwtClaimForUserID as string;
     } else {
       userIdSourceKey = "id";
     }

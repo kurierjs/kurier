@@ -75,9 +75,16 @@ export default class Application {
       return;
     }
 
-    new addon(this as ApplicationInterface, options).install().then(() => {
-      this.addons.push({ addon, options });
+    const addonToInstall = new addon(this as ApplicationInterface, options);
+
+    addonToInstall.install().then(() => {
+      this.addons.push({ addon, options: addonToInstall.options as AddonOptions });
     });
+  }
+
+  getAddonOptions<T extends AddonOptions = AddonOptions>(addon: typeof Addon) {
+    const installedAddon = this.addons.find((installedAddon) => installedAddon.addon === addon);
+    return installedAddon?.options;
   }
 
   registerAttributeType(attributeDefinition: ApplicationAttributeTypeFactory) {
