@@ -26,6 +26,7 @@ export type UserManagementAddonOptions = AddonOptions & {
   usernameRequestParameter?: string;
   passwordRequestParameter?: string;
   jwtClaimForUserID?: string;
+  includeTokenInIdentifyOpDataPayload?: boolean;
 };
 
 const defaults: UserManagementAddonOptions = {
@@ -53,6 +54,7 @@ const defaults: UserManagementAddonOptions = {
   usernameRequestParameter: "username",
   passwordRequestParameter: "password",
   jwtClaimForUserID: "id",
+  includeTokenInIdentifyOpDataPayload: false,
 };
 
 export default class UserManagementAddon extends Addon {

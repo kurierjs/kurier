@@ -57,6 +57,7 @@ export default class Application {
     this.hooks = {
       beforeAuthentication: [],
       beforeRequestHandling: [],
+      beforeExecutingIdentifyOperation: [],
     };
 
     if (settings.attributeTypes) {
