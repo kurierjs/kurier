@@ -31,11 +31,19 @@ export default class OperationProcessor<ResourceT extends Resource> {
     }
 
     const result = this[action] && (await this[action].call(this, op));
-    let eagerLoadedData = {};
+    let eagerLoadedData: EagerLoadedData[] = [];
 
-    if (result !== undefined) {
-      eagerLoadedData = await this.eagerLoad(op, result);
-      eagerLoadedData = await this.computeRelationshipProperties(op, eagerLoadedData);
+    if (Array.isArray(result)) {
+      eagerLoadedData = await Promise.all(
+        result.map(async (element) => {
+          let eagerLoad = await this.eagerLoad(op, element);
+          eagerLoad = await this.computeRelationshipProperties(op, eagerLoad);
+          return eagerLoad;
+        }),
+      );
+    } else if (result !== undefined) {
+      const eagerLoad = await this.eagerLoad(op, result);
+      eagerLoadedData.push(await this.computeRelationshipProperties(op, eagerLoad));
     }
 
     return this.convertToResources(op, result, eagerLoadedData);
@@ -193,23 +201,32 @@ export default class OperationProcessor<ResourceT extends Resource> {
     return pick(record, relationshipKeys);
   }
 
-  async convertToResources(op: Operation, records: HasId[] | HasId, eagerLoadedData: EagerLoadedData) {
+  async convertToResources(op: Operation, records: HasId[] | HasId, eagerLoadedData: EagerLoadedData[]) {
     if (Array.isArray(records)) {
-      return Promise.all(
-        records.map((record) => {
-          return this.convertToResources(op, record, eagerLoadedData);
-        }),
-      );
+      if (records.length === eagerLoadedData.length) {
+        return Promise.all(
+          records.map((record, index) => {
+            return this.convertToResources(op, record, [eagerLoadedData[index]]);
+          }),
+        );
+      } else {
+        return Promise.all(
+          records.map((record) => {
+            return this.convertToResources(op, record, eagerLoadedData);
+          }),
+        );
+      }
     }
 
     const record = { ...records };
     const resourceClass = await this.resourceFor(op.ref.type);
+    const eagerLoad = eagerLoadedData[0];
 
     const [attributes, computedAttributes, relationships, relationshipAttributes] = await Promise.all([
-      this.getAttributes(op, resourceClass, record, eagerLoadedData),
-      this.getComputedProperties(op, resourceClass, record, eagerLoadedData),
-      this.getRelationships(op, record, eagerLoadedData),
-      this.getRelationshipAttributes(op, resourceClass, record, eagerLoadedData),
+      this.getAttributes(op, resourceClass, record, eagerLoad),
+      this.getComputedProperties(op, resourceClass, record, eagerLoad),
+      this.getRelationships(op, record, eagerLoad),
+      this.getRelationshipAttributes(op, resourceClass, record, eagerLoad),
     ]);
 
     const resource = new resourceClass({

@@ -1,3 +1,4 @@
+import { EagerLoadedData } from './../../../dist/types.d';
 import articles from "./factories/article";
 import getAuthenticationData from "./helpers/authenticateUser";
 import testTransportLayer, { transportLayers } from "./helpers/transportLayers";
@@ -73,6 +74,11 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
         expect(result.body.data.meta).toEqual({
           hello: "world",
         });
+      });
+
+      it("Get articles with included votes", async () => {
+        const result = await request.get("/articles?include=votes");
+        expect(result.body).toEqual(articles.multipleArticlesIncludedVotes);
       });
     });
   });
