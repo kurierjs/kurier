@@ -1,4 +1,3 @@
-import { EagerLoadedData } from './../../../dist/types.d';
 import articles from "./factories/article";
 import getAuthenticationData from "./helpers/authenticateUser";
 import testTransportLayer, { transportLayers } from "./helpers/transportLayers";
