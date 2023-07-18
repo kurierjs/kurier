@@ -209,13 +209,12 @@ export default class OperationProcessor<ResourceT extends Resource> {
             return this.convertToResources(op, record, [eagerLoadedData[index]]);
           }),
         );
-      } else {
-        return Promise.all(
-          records.map((record) => {
-            return this.convertToResources(op, record, eagerLoadedData);
-          }),
-        );
       }
+      return Promise.all(
+        records.map((record) => {
+          return this.convertToResources(op, record, eagerLoadedData);
+        }),
+      );
     }
 
     const record = { ...records };
