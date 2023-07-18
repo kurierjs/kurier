@@ -74,6 +74,11 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
           hello: "world",
         });
       });
+
+      it("Get articles with included votes", async () => {
+        const result = await request.get("/articles?include=votes");
+        expect(result.body).toEqual(articles.multipleArticlesIncludedVotes);
+      });
     });
   });
 });

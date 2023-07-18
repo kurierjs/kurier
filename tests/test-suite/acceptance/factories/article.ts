@@ -210,4 +210,166 @@ export default {
       },
     ],
   },
+  multipleArticlesIncludedVotes: {
+    data: [
+      {
+        id: 1,
+        type: "article",
+        attributes: {
+          body: "this is test 1",
+          voteCount: 2,
+        },
+        relationships: {
+          votes: {
+            data: [
+              {
+                id: 1,
+                type: "vote",
+              },
+              {
+                id: 2,
+                type: "vote",
+              },
+            ],
+          },
+          author: {
+            data: {
+              id: 1,
+              type: "user",
+            },
+          },
+        },
+        meta: {
+          hello: "world",
+        },
+      },
+      {
+        id: 2,
+        type: "article",
+        attributes: {
+          body: "this is test 2",
+          voteCount: 0,
+        },
+        relationships: {
+          votes: {
+            data: [],
+          },
+          author: {
+            data: {
+              id: 2,
+              type: "user",
+            },
+          },
+        },
+        meta: {
+          hello: "world",
+        },
+      },
+      {
+        id: 3,
+        type: "article",
+        attributes: {
+          body: "this is test 3",
+          voteCount: 1,
+        },
+
+        relationships: {
+          votes: {
+            data: [
+              {
+                id: 3,
+                type: "vote",
+              },
+            ],
+          },
+          author: {
+            data: {
+              id: 2,
+              type: "user",
+            },
+          },
+        },
+        meta: {
+          hello: "world",
+        },
+      },
+    ],
+    included: [
+      {
+        id: 1,
+        type: "vote",
+        attributes: {
+          points: 10,
+          createdOn: null,
+          updatedOn: null,
+          updatedBy: null,
+          createdBy: null,
+        },
+        relationships: {
+          user: {
+            data: {
+              id: 1,
+              type: "user",
+            },
+          },
+          article: {
+            data: {
+              id: 1,
+              type: "article",
+            },
+          },
+        },
+      },
+      {
+        id: 2,
+        type: "vote",
+        attributes: {
+          points: 2,
+          createdOn: null,
+          updatedOn: null,
+          updatedBy: null,
+          createdBy: null,
+        },
+        relationships: {
+          user: {
+            data: {
+              id: 1,
+              type: "user",
+            },
+          },
+          article: {
+            data: {
+              id: 1,
+              type: "article",
+            },
+          },
+        },
+      },
+      {
+        id: 3,
+        type: "vote",
+        attributes: {
+          points: 8,
+          createdOn: null,
+          updatedOn: null,
+          updatedBy: null,
+          createdBy: null,
+        },
+        relationships: {
+          user: {
+            data: {
+              id: 3,
+              type: "user",
+            },
+          },
+          article: {
+            data: {
+              id: 3,
+              type: "article",
+            },
+          },
+        },
+      },
+    ],
+  },
 };
