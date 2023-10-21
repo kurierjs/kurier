@@ -1,5 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { ApplicationInstanceInterface, JsonApiBulkResponse, VendorRequest } from "../types";
+import { ApplicationInstanceInterface, JsonApiBulkResponse, UrlData, VendorRequest } from "../types";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
 import User from "../resources/user";
@@ -28,7 +28,7 @@ async function authenticate(appInstance: ApplicationInstanceInterface, request: 
   appInstance.user = currentUser;
 }
 
-function urlData(appInstance: ApplicationInstanceInterface, path: string) {
+function urlData(appInstance: ApplicationInstanceInterface, path: string): UrlData {
   const urlRegexp = new RegExp(
     `^(\/+)?((?<namespace>${escapeStringRegexp(
       appInstance.app.namespace,

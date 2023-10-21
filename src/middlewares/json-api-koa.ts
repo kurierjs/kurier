@@ -58,11 +58,11 @@ export default function jsonApiKoa(
       return next();
     }
 
-    ctx.request["urlData"] = urlData(appInstance, ctx.path);
+    ctx.request.urlData = urlData(appInstance, ctx.path);
 
     await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
-    if (ctx.method === "PATCH" && ctx.request["urlData"].resource === "bulk") {
+    if (ctx.method === "PATCH" && ctx.request.urlData.resource === "bulk") {
       ctx.body = await handleBulkEndpoint(appInstance, ctx.request.body.operations);
       return next();
     }
