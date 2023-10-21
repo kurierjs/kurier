@@ -6,7 +6,7 @@ export default function AttributeType<StoredDataType = string, JsonDataType = St
   options: ApplicationAttributeTypeOptions<StoredDataType, JsonDataType>,
 ) {
   const { jsonType, serialize, deserialize } = options;
-  let attributeClass;
+  let attributeClass: NewableFunction;
 
   if (jsonType === Object) {
     attributeClass = class ThisAttributeTypeDefinition implements ApplicationAttributeInstantiatedTypeClass {
