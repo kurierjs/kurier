@@ -55,12 +55,12 @@ export default function jsonApiExpress(
       return next();
     }
 
-    req["href"] = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
-    req["urlData"] = urlData(appInstance, req.path);
+    req.href = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
+    req.urlData = urlData(appInstance, req.path);
 
     await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
-    if (req.method === "PATCH" && req["urlData"].resource === "bulk") {
+    if (req.method === "PATCH" && req.urlData.resource === "bulk") {
       res.send(await handleBulkEndpoint(appInstance, req.body.operations));
       return next();
     }

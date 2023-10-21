@@ -1,5 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { ApplicationInstanceInterface, JsonApiBulkResponse, VendorRequest } from "../types";
+import { ApplicationInstanceInterface, JsonApiBulkResponse, UrlData, VendorRequest } from "../types";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
 import User from "../resources/user";
@@ -28,7 +28,7 @@ async function authenticate(appInstance: ApplicationInstanceInterface, request: 
   appInstance.user = currentUser;
 }
 
-function urlData(appInstance: ApplicationInstanceInterface, path: string) {
+function urlData(appInstance: ApplicationInstanceInterface, path: string): UrlData {
   const urlRegexp = new RegExp(
     `^(\/+)?((?<namespace>${escapeStringRegexp(
       appInstance.app.namespace,
@@ -36,7 +36,8 @@ function urlData(appInstance: ApplicationInstanceInterface, path: string) {
       "(?<relationship>[^\\s/?]+)?(/+)?$",
   );
 
-  const { resource, id, relationships, relationship } = (path.match(urlRegexp) || {})["groups"] || ({} as any);
+  const { resource, id, relationships, relationship } =
+    (path.match(urlRegexp) || ({} as UrlData))["groups"] || ({} as UrlData);
 
   return {
     id,
@@ -74,7 +75,7 @@ async function handleJsonApiEndpoint(
 }
 
 function convertHttpRequestToOperation(req: VendorRequest): Operation {
-  const { id, resource, relationship } = req["urlData"];
+  const { id, resource, relationship } = req.urlData;
   const type = camelize(singularize(resource));
 
   const opMap = {
@@ -87,7 +88,7 @@ function convertHttpRequestToOperation(req: VendorRequest): Operation {
 
   return {
     op: opMap[req.method as string],
-    params: parse(req["href"]),
+    params: parse(req.href),
     ref: { id, type, relationship },
     data: (req.body || {}).data,
   } as Operation;

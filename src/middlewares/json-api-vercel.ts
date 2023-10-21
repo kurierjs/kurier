@@ -68,14 +68,14 @@ export default function jsonApiVercel(
 
     // This `href` property is used later in the parsing process to extract query parameters.
     // Protocol is there just to make a valid URL. It has no behavioural signifance.
-    req["href"] = `https://${req.headers.host}${req.url!}`;
+    req.href = `https://${req.headers.host}${req.url!}`;
 
-    const urlObject = new URL(req["href"]);
-    req["urlData"] = urlData(appInstance, urlObject.pathname);
+    const urlObject = new URL(req.href);
+    req.urlData = urlData(appInstance, urlObject.pathname);
 
     await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
-    if (req.method === "PATCH" && req["urlData"].resource === "bulk") {
+    if (req.method === "PATCH" && req.urlData.resource === "bulk") {
       const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[]);
       res.json(bulkResponse);
       return;

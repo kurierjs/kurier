@@ -4,7 +4,7 @@ import { ApplicationHooks, ApplicationInstanceInterface } from "../types";
 export const runHookFunctions = async (
   appInstance: ApplicationInstanceInterface,
   hookType: keyof ApplicationHooks,
-  parameters: Record<string, any> = {},
+  parameters: Record<string, unknown> = {},
 ) => {
   for (const hook of appInstance.app.hooks[hookType]) {
     try {

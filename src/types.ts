@@ -1,4 +1,4 @@
-import { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "http";
+import { IncomingMessage, ServerResponse } from "http";
 import { Knex } from "knex";
 import { Request as ExpressRequest } from "express";
 import { Request as KoaRequest } from "koa";
@@ -7,8 +7,27 @@ import ApplicationInstance from "./application-instance";
 import Password from "./attribute-types/password";
 import Resource from "./resource";
 import User from "./resources/user";
-import OperationProcessor from "./processors/operation-processor";
 import Application from "./application";
+
+declare module "express" {
+  interface Request {
+    href: string;
+    urlData: UrlData;
+  }
+}
+
+declare module "koa" {
+  interface Request {
+    urlData: UrlData;
+  }
+}
+
+export type UrlData = {
+  id: string;
+  resource: string;
+  relationship: string;
+  isRelationships: boolean;
+};
 
 export enum HttpStatusCode {
   OK = 200,
@@ -234,6 +253,10 @@ export type VercelRequest<BodyType = JsonApiDocument> = IncomingMessage & {
   query: Record<string, string | string[]>;
   cookies: Record<string, string>;
   body: BodyType;
+
+  // Custom extensions made by Kurier.
+  href: string;
+  urlData: UrlData;
 };
 
 export type VercelResponse = ServerResponse & {

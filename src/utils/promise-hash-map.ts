@@ -1,4 +1,4 @@
-const promiseHashMap = async (hash, callback) => {
+const promiseHashMap = async (hash: Record<string, unknown>, callback: (key: string | number) => Promise<unknown>) => {
   const keys = Object.keys(hash);
   const result = {};
 
