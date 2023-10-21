@@ -75,7 +75,7 @@ async function handleJsonApiEndpoint(
 }
 
 function convertHttpRequestToOperation(req: VendorRequest): Operation {
-  const { id, resource, relationship } = req["urlData"];
+  const { id, resource, relationship } = req.urlData;
   const type = camelize(singularize(resource));
 
   const opMap = {
@@ -88,7 +88,7 @@ function convertHttpRequestToOperation(req: VendorRequest): Operation {
 
   return {
     op: opMap[req.method as string],
-    params: parse(req["href"]),
+    params: parse(req.href),
     ref: { id, type, relationship },
     data: (req.body || {}).data,
   } as Operation;
