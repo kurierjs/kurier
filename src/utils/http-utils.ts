@@ -36,7 +36,8 @@ function urlData(appInstance: ApplicationInstanceInterface, path: string): UrlDa
       "(?<relationship>[^\\s/?]+)?(/+)?$",
   );
 
-  const { resource, id, relationships, relationship } = (path.match(urlRegexp) || {})["groups"] || ({} as any);
+  const { resource, id, relationships, relationship } =
+    (path.match(urlRegexp) || ({} as UrlData))["groups"] || ({} as UrlData);
 
   return {
     id,
