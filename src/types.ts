@@ -107,7 +107,7 @@ export type JsonApiParams = {
   include?: string[];
   sort?: string[];
   filter?: { [key: string]: string };
-  page?: { [key: string]: number };
+  page?: { [key: string]: string };
   fields?: { [key: string]: string[] };
 };
 
