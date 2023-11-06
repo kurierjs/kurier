@@ -14,6 +14,7 @@ import {
   ifUserHasRole as IfUserHasRole,
 } from "./decorators/if-user";
 import JsonApiErrors from "./errors/json-api-errors";
+import JsonApiError from "./errors/error";
 import jsonApiKoa from "./middlewares/json-api-koa";
 import jsonApiExpress from "./middlewares/json-api-express";
 import jsonApiWebSocket from "./middlewares/json-api-websocket";
@@ -38,6 +39,7 @@ export {
   ApplicationInstance,
   KnexProcessor,
   JsonApiErrors,
+  JsonApiError,
   OperationProcessor,
   JsonApiSerializer,
   // Middlewares
