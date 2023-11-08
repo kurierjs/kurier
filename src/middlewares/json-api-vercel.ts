@@ -25,7 +25,7 @@ const checkStrictMode = async (
     return;
   }
 
-  if (req.headers["content-type"] !== "application/vnd.api+json") {
+  if (!req.headers["content-type"] || !req.headers["content-type"].startsWith("application/vnd.api+json")) {
     res.status(400);
     res.send(convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json")));
   } else {
