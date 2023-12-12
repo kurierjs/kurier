@@ -51,7 +51,7 @@ export default function jsonApiExpress(
     try {
       await authenticate(appInstance, req);
     } catch (error) {
-      res.status(+error.status).json(convertErrorToHttpResponse(error));
+      res.status(Number(error.status)).json(convertErrorToHttpResponse(error));
       return next();
     }
 
