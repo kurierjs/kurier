@@ -22,6 +22,18 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
         expect(result.body.data.attributes).toHaveProperty("randomNumber");
         expect(result.body.data.attributes.randomNumber).toBeGreaterThan(0);
       });
+
+      it("Random endpoint with correct content-type with params", async () => {
+        // Add JSON:API media type with params (ext)
+        request.set("Content-Type", 'application/vnd.api+json; ext="https://jsonapi.org/ext/version"');
+        const result = await request.get("/random/number");
+
+        expect(result.status).toEqual(200);
+        expect(result.body.data.attributes).toHaveProperty("randomNumber");
+        expect(result.body.data.attributes.randomNumber).toBeGreaterThan(0);
+      });
+
+      // TODO: Check valid JSON:API media type params (https://jsonapi.org/format/#media-type-parameter-rules)
     });
   });
 });

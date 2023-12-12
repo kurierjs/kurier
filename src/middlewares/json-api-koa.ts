@@ -28,7 +28,7 @@ export default function jsonApiKoa(
       return next();
     }
 
-    if (ctx.headers["content-type"] !== "application/vnd.api+json") {
+    if (!ctx.headers["content-type"] || !ctx.headers["content-type"].startsWith("application/vnd.api+json")) {
       ctx.status = 400;
       ctx.body = convertErrorToHttpResponse(jsonApiErrors.BadRequest("Content-Type must be application/vnd.api+json"));
     }
