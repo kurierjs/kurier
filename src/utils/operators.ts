@@ -1,4 +1,4 @@
-export type OperatorName = "eq" | "ne" | "lt" | "gt" | "le" | "ge" | "like" | "nlike" | "in" | "nin";
+export type OperatorName = "eq" | "ne" | "lt" | "gt" | "le" | "ge" | "like" | "nlike" | "ilike"| "in" | "nin";
 
 export const KnexOperators = {
   eq: "=",
@@ -9,6 +9,7 @@ export const KnexOperators = {
   ge: ">=",
   like: "like",
   nlike: "not like",
+  ilike: "ilike",
   in: "in",
   nin: "not in",
 };
@@ -46,6 +47,21 @@ export const FunctionalOperators: { [T in OperatorName]: (actual: any, expected:
 
     if (expected.endsWith("%")) {
       return !actual.startsWith(expected.replace(/%/g, ""));
+    }
+
+    return false;
+  },
+  ilike: (actual: string, expected: string) => {
+    if (expected.startsWith("%") && expected.endsWith("%")) {
+      return actual.includes(expected.replace(/%/g, ""));
+    }
+
+    if (expected.startsWith("%")) {
+      return actual.endsWith(expected.replace(/%/g, ""));
+    }
+
+    if (expected.endsWith("%")) {
+      return actual.startsWith(expected.replace(/%/g, ""));
     }
 
     return false;
