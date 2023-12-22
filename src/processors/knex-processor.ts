@@ -66,6 +66,7 @@ const parseOperationIncludedRelationships = (
     .filter((include) => include.length > 1)
     .reduce((acumRelationships, [nestedOrigin, nestedRelationshipName]) => {
       acumRelationships[nestedOrigin] = {
+        ...acumRelationships[nestedOrigin],
         [nestedRelationshipName]: relationships[nestedOrigin].type().schema.relationships[nestedRelationshipName],
       };
       return acumRelationships;
