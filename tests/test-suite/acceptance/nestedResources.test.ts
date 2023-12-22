@@ -38,6 +38,13 @@ describe.each(transportLayers)("Transport Layer: %s", (transportLayer) => {
         expect(result.status).toEqual(200);
         expect(result.body).toEqual(nested.get.parentCommentAndParentCommentsParentCommentOf1stComment);
       });
+
+      it("Get the 1st article'Author's Votes and Comments (*-1-*)", async () => {
+        const authData = await getAuthenticationData();
+        const result = await request.get("/articles/1?include=author.votes,author.comments").set("Authorization", authData.token);
+        expect(result.status).toEqual(200);
+        expect(result.body).toEqual(nested.get.authorAndAuthorVotesAndAuthorCommentsOf1stArticle);
+      });
     });
   });
 });

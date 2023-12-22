@@ -35,5 +35,17 @@ export default {
       data: getFactoryObject(comments)(1),
       included: [getFactoryObject(comments)(2), getFactoryObject(comments)(3)],
     },
+    authorAndAuthorVotesAndAuthorCommentsOf1stArticle: {
+      data: {
+        ...getFactoryObject(articles)(1),
+        relationships: {
+          ...getExtraRelationships(users, "author")([1], "Object"),
+        },
+        meta: {
+          hello: "world",
+        },
+      },
+      included: [getFactoryObject(users)(1), ...getFactoryObjects(votes)([1, 2]), ...getFactoryObjects(comments)([1, 3])],
+    },
   },
 };

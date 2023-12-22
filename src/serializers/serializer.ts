@@ -294,8 +294,6 @@ export default class JsonApiSerializer implements IJsonApiSerializer {
           }
         },
       );
-    return [...new Set(includedData.map((item: Resource) => `${item.type}_${item.id}`))].map((typeId) =>
-      includedData.find((item: Resource) => `${item.type}_${item.id}` === typeId),
-    );
+    return includedData
   }
 }
