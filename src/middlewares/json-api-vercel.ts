@@ -76,7 +76,7 @@ export default function jsonApiVercel(
     await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
     if (req.method === "PATCH" && req.urlData.resource === "bulk") {
-      const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[]);
+      const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[], req);
       res.json(bulkResponse);
       return;
     }

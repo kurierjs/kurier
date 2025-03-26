@@ -22,14 +22,20 @@ describe("Application", () => {
     };
 
     app.hook("beforeAuthentication", hook);
+    app.hook("afterOpCreated", hook);
     app.hook("beforeRequestHandling", hook);
+    app.hook("beforeResponse", hook);
     app.hook("beforeExecutingIdentifyOperation", hook);
 
     expect(app.hooks.beforeAuthentication).toHaveLength(1);
+    expect(app.hooks.afterOpCreated).toHaveLength(1);
     expect(app.hooks.beforeRequestHandling).toHaveLength(1);
+    expect(app.hooks.beforeResponse).toHaveLength(1);
     expect(app.hooks.beforeExecutingIdentifyOperation).toHaveLength(1);
     expect(app.hooks.beforeAuthentication[0]).toEqual(hook);
+    expect(app.hooks.afterOpCreated[0]).toEqual(hook);
     expect(app.hooks.beforeRequestHandling[0]).toEqual(hook);
+    expect(app.hooks.beforeResponse[0]).toEqual(hook);
     expect(app.hooks.beforeExecutingIdentifyOperation[0]).toEqual(hook);
   });
 });
