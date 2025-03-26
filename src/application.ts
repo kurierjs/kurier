@@ -58,6 +58,7 @@ export default class Application {
       beforeAuthentication: [],
       afterOpCreated: [],
       beforeRequestHandling: [],
+      afterError: [],
       beforeResponse: [],
       beforeExecutingIdentifyOperation: [],
     };

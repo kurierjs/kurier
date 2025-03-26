@@ -59,6 +59,9 @@ async function handleBulkEndpoint(
       const opHookParams = {
         op,
         headers: request.headers,
+        requestBody: request.body,
+        requestQuery: request.query,
+        requestMethod: request.method,
       };
 
       await runHookFunctions(appInstance, "afterOpCreated", opHookParams);
@@ -76,6 +79,9 @@ async function handleJsonApiEndpoint(
   const opHookParams = {
     op,
     headers: request.headers,
+    requestBody: request.body,
+    requestQuery: request.query,
+    requestMethod: request.method,
   };
 
   await runHookFunctions(appInstance, "afterOpCreated", opHookParams);
@@ -87,6 +93,9 @@ async function handleJsonApiEndpoint(
       status: STATUS_MAPPING[request.method as string],
     } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   } catch (error) {
+    await runHookFunctions(appInstance, "afterError", {
+      error,
+    });
     return {
       body: convertErrorToHttpResponse(error),
       status: error.status || 500,
