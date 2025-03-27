@@ -58,7 +58,7 @@ A TypeScript framework to create APIs following the [1.1 Spec of JSONAPI](https:
   - [Using an addon](#using-an-addon)
   - [Official addons](#official-addons)
   - [Build your own addon](#build-your-own-addon)
-  - [Using hooks][#using-hooks]
+  - [Using hooks](#using-hooks)
 
 ## Getting started
 
