@@ -63,7 +63,7 @@ export default function jsonApiKoa(
     await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
     if (ctx.method === "PATCH" && ctx.request.urlData.resource === "bulk") {
-      ctx.body = await handleBulkEndpoint(appInstance, ctx.request.body.operations);
+      ctx.body = await handleBulkEndpoint(appInstance, ctx.request.body.operations, ctx.request);
       return next();
     }
 
@@ -74,6 +74,17 @@ export default function jsonApiKoa(
     } catch (error) {
       ctx.body = convertErrorToHttpResponse(error);
       ctx.status = error.status;
+    }
+
+    try {
+      const respHookParams = {
+        headers: ctx.response.headers,
+        body: ctx.body,
+        status: ctx.status,
+        socket: ctx.socket,
+      };
+
+      await runHookFunctions(appInstance, "beforeResponse", respHookParams);
     } finally {
       return next();
     }
