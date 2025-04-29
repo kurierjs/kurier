@@ -74,7 +74,7 @@ export default function jsonApiExpress(
 
     const respHookParameters = {
       headers: extractHeaders(res),
-      body,
+      responseBody: body,
       status,
       socket: res.socket,
     };

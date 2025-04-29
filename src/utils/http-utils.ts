@@ -94,6 +94,7 @@ async function handleJsonApiEndpoint(
     } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   } catch (error) {
     await runHookFunctions(appInstance, "afterError", {
+      op,
       error,
     });
     return {
