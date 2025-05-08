@@ -1,5 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { ApplicationInstanceInterface, JsonApiBulkResponse, UrlData, VendorRequest } from "../types";
+import { ApplicationInstanceInterface, JsonApiBulkResponse, UrlData, VendorRequest, VercelResponse } from "../types";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
 import User from "../resources/user";
@@ -8,7 +8,7 @@ import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 import { isEmptyObject } from "./object";
 import { runHookFunctions } from "./hooks";
-import { IncomingHttpHeaders } from "node:http";
+import { ServerResponse } from "node:http";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -162,6 +162,34 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
   return { errors: [jsonApiError] };
 }
 
+function createHttpHeaderProxy(res: ServerResponse) {
+  return new Proxy({}, {
+    get(_, name: string) {
+      return res.getHeader(name?.toLowerCase());
+    },
+    set(_, name: string, value: string | number | string[]) {
+      res.setHeader(name?.toLowerCase(), value);
+      return true;
+    },
+    deleteProperty(_, name: string) {
+      res.removeHeader(name?.toLowerCase());
+      return true;
+    },
+    has(_, name: string) {
+      return res.hasHeader(name);
+    },
+    ownKeys(_) {
+      return Reflect.ownKeys(res.getHeaders());
+    },
+    getOwnPropertyDescriptor(_, p: string) {
+      return {
+        enumerable: true,
+        configurable: true,
+      };
+    },
+  });
+}
+
 export {
   STATUS_MAPPING,
   authenticate,
@@ -171,4 +199,5 @@ export {
   convertHttpRequestToOperation,
   convertOperationResponseToHttpResponse,
   convertErrorToHttpResponse,
+  createHttpHeaderProxy,
 };

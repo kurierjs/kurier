@@ -10,6 +10,7 @@ import {
   handleBulkEndpoint,
   handleJsonApiEndpoint,
   convertErrorToHttpResponse,
+  createHttpHeaderProxy,
 } from "../utils/http-utils";
 
 import jsonApiErrors from "../errors/json-api-errors";
@@ -84,12 +85,8 @@ export default function jsonApiVercel(
 
     const { body, status } = await handleJsonApiEndpoint(appInstance, req);
 
-    // Vercel doesn't let you pass the headers as a manipulable object, so we'll
-    // capture a shallow copy and then set them after the hook executes.
-    const initialHeaders = extractHeaders(res);
-
     const respHookParameters = {
-      headers: extractHeaders(res),
+      headers: createHttpHeaderProxy(res),
       body,
       status,
       socket: res.socket,
@@ -97,25 +94,7 @@ export default function jsonApiVercel(
 
     await runHookFunctions(appInstance, "beforeResponse", respHookParameters);
 
-    if (!isEquivalent(initialHeaders, respHookParameters.headers)) {
-      // Sync up headers that were set in the hook.
-      for (let header of Object.keys(respHookParameters.headers)) {
-        res.setHeader(header, respHookParameters.headers[header]);
-      }
-    }
-
     res.status(status);
     res.json(body);
   };
-}
-
-function extractHeaders(response: VercelResponse): Record<string, number | string | string[]> {
-  const headerKeys = response.getHeaderNames();
-  const result = {};
-
-  for (let key of headerKeys) {
-    result[key] = response.getHeader(key);
-  }
-
-  return result;
 }

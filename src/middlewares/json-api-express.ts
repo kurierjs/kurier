@@ -8,6 +8,7 @@ import {
   handleBulkEndpoint,
   handleJsonApiEndpoint,
   convertErrorToHttpResponse,
+  createHttpHeaderProxy,
 } from "../utils/http-utils";
 import jsonApiErrors from "../errors/json-api-errors";
 import { ApplicationInterface, TransportLayerOptions } from "../types";
@@ -68,25 +69,14 @@ export default function jsonApiExpress(
 
     const { body, status } = await handleJsonApiEndpoint(appInstance, req);
 
-    // Express doesn't let you pass the headers as a manipulable object, so we'll
-    // capture a shallow copy and then set them after the hook executes.
-    const initialHeaders = extractHeaders(res);
-
     const respHookParameters = {
-      headers: extractHeaders(res),
+      headers: createHttpHeaderProxy(res),
       responseBody: body,
       status,
       socket: res.socket,
     };
 
     await runHookFunctions(appInstance, "beforeResponse", respHookParameters);
-
-    if (!isEquivalent(initialHeaders, respHookParameters.headers)) {
-      // Sync up headers that were set in the hook.
-      for (let header of Object.keys(respHookParameters.headers)) {
-        res.setHeader(header, respHookParameters.headers[header]);
-      }
-    }
 
     res.status(status).json(body);
     return next();
