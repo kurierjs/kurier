@@ -56,7 +56,10 @@ export default class Application {
     this.serializer = new (settings.serializer || JsonApiSerializer)();
     this.hooks = {
       beforeAuthentication: [],
+      afterOpCreated: [],
       beforeRequestHandling: [],
+      afterError: [],
+      beforeResponse: [],
       beforeExecutingIdentifyOperation: [],
     };
 
