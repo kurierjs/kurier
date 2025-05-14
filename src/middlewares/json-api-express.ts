@@ -13,7 +13,6 @@ import {
 import jsonApiErrors from "../errors/json-api-errors";
 import { ApplicationInterface, TransportLayerOptions } from "../types";
 import { runHookFunctions } from "../utils/hooks";
-import { isEquivalent } from "../utils/object";
 
 export default function jsonApiExpress(
   app: ApplicationInterface,

@@ -16,7 +16,6 @@ import {
 import jsonApiErrors from "../errors/json-api-errors";
 import { TransportLayerOptions } from "../types";
 import { runHookFunctions } from "../utils/hooks";
-import { isEquivalent } from "../utils/object";
 
 const checkStrictMode = async (
   transportLayerOptions: TransportLayerOptions,

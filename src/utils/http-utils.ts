@@ -1,5 +1,5 @@
 import * as escapeStringRegexp from "escape-string-regexp";
-import { ApplicationInstanceInterface, JsonApiBulkResponse, UrlData, VendorRequest, VercelResponse } from "../types";
+import { ApplicationInstanceInterface, JsonApiBulkResponse, UrlData, VendorRequest } from "../types";
 import JsonApiError from "../errors/error";
 import JsonApiErrors from "../errors/json-api-errors";
 import User from "../resources/user";
