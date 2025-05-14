@@ -7,6 +7,8 @@ import { JsonApiDocument, JsonApiErrorsDocument, Operation, OperationResponse } 
 import { parse } from "../utils/json-api-params";
 import { camelize, singularize } from "../utils/string";
 import { isEmptyObject } from "./object";
+import { runHookFunctions } from "./hooks";
+import { ServerResponse } from "node:http";
 
 const STATUS_MAPPING = {
   GET: 200,
@@ -50,15 +52,39 @@ function urlData(appInstance: ApplicationInstanceInterface, path: string): UrlDa
 async function handleBulkEndpoint(
   appInstance: ApplicationInstanceInterface,
   operations: Operation[],
+  request: VendorRequest,
 ): Promise<JsonApiBulkResponse> {
+  if (appInstance.app.hooks.afterOpCreated?.length > 0) {
+    for (let op of operations) {
+      const opHookParams = {
+        op,
+        headers: request.headers,
+        requestBody: request.body,
+        requestQuery: request.query,
+        requestMethod: request.method,
+      };
+
+      await runHookFunctions(appInstance, "afterOpCreated", opHookParams);
+    }
+  }
   return { operations: await appInstance.app.executeOperations(operations || [], appInstance) };
 }
 
 async function handleJsonApiEndpoint(
   appInstance: ApplicationInstanceInterface,
-  request: VendorRequest,
+  request: VendorRequest
 ): Promise<{ body: JsonApiDocument | JsonApiErrorsDocument; status: number }> {
   const op: Operation = convertHttpRequestToOperation(request);
+
+  const opHookParams = {
+    op,
+    headers: request.headers,
+    requestBody: request.body,
+    requestQuery: request.query,
+    requestMethod: request.method,
+  };
+
+  await runHookFunctions(appInstance, "afterOpCreated", opHookParams);
 
   try {
     const [result]: OperationResponse[] = await appInstance.app.executeOperations([op], appInstance);
@@ -67,6 +93,10 @@ async function handleJsonApiEndpoint(
       status: STATUS_MAPPING[request.method as string],
     } as { body: JsonApiDocument | JsonApiErrorsDocument; status: number };
   } catch (error) {
+    await runHookFunctions(appInstance, "afterError", {
+      op,
+      error,
+    });
     return {
       body: convertErrorToHttpResponse(error),
       status: error.status || 500,
@@ -132,6 +162,34 @@ function convertErrorToHttpResponse(error: JsonApiError): JsonApiErrorsDocument 
   return { errors: [jsonApiError] };
 }
 
+function createHttpHeaderProxy(res: ServerResponse) {
+  return new Proxy({}, {
+    get(_, name: string) {
+      return res.getHeader(name?.toLowerCase());
+    },
+    set(_, name: string, value: string | number | string[]) {
+      res.setHeader(name?.toLowerCase(), value);
+      return true;
+    },
+    deleteProperty(_, name: string) {
+      res.removeHeader(name?.toLowerCase());
+      return true;
+    },
+    has(_, name: string) {
+      return res.hasHeader(name);
+    },
+    ownKeys(_) {
+      return Reflect.ownKeys(res.getHeaders());
+    },
+    getOwnPropertyDescriptor(_, p: string) {
+      return {
+        enumerable: true,
+        configurable: true,
+      };
+    },
+  });
+}
+
 export {
   STATUS_MAPPING,
   authenticate,
@@ -141,4 +199,5 @@ export {
   convertHttpRequestToOperation,
   convertOperationResponseToHttpResponse,
   convertErrorToHttpResponse,
+  createHttpHeaderProxy,
 };

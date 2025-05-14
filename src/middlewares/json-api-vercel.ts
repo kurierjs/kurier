@@ -10,6 +10,7 @@ import {
   handleBulkEndpoint,
   handleJsonApiEndpoint,
   convertErrorToHttpResponse,
+  createHttpHeaderProxy,
 } from "../utils/http-utils";
 
 import jsonApiErrors from "../errors/json-api-errors";
@@ -76,12 +77,22 @@ export default function jsonApiVercel(
     await runHookFunctions(appInstance, "beforeRequestHandling", hookParameters);
 
     if (req.method === "PATCH" && req.urlData.resource === "bulk") {
-      const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[]);
+      const bulkResponse = await handleBulkEndpoint(appInstance, req.body.operations as Operation[], req);
       res.json(bulkResponse);
       return;
     }
 
     const { body, status } = await handleJsonApiEndpoint(appInstance, req);
+
+    const respHookParameters = {
+      headers: createHttpHeaderProxy(res),
+      body,
+      status,
+      socket: res.socket,
+    };
+
+    await runHookFunctions(appInstance, "beforeResponse", respHookParameters);
+
     res.status(status);
     res.json(body);
   };

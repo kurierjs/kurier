@@ -274,7 +274,10 @@ export type HookFunction = (appInstance: ApplicationInstance, parameters?: Recor
 
 export interface ApplicationHooks {
   beforeAuthentication: HookFunction[];
+  afterOpCreated: HookFunction[];
   beforeRequestHandling: HookFunction[];
+  afterError: HookFunction[];
+  beforeResponse: HookFunction[];
   beforeExecutingIdentifyOperation: HookFunction[];
 }
 
